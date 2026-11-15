@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="pond">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#05201f">
+  <meta name="description" content="Timur Kherlenbayar is a data analyst finishing a master's in Information Systems at BYU. This is a small collection of data and AI projects you can open and try.">
+  <meta property="og:title" content="Timur Kherlenbayar — data and AI work">
+  <meta property="og:description" content="Data and AI projects you can open and try, by a data analyst finishing a master's in Information Systems at BYU.">
+  <meta property="og:type" content="website">
+  <title>Timur Kherlenbayar — data and AI work</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="assets/fonts/type-home.css">
+  <link rel="stylesheet" href="style.css">
+  <script>
+    document.documentElement.classList.add('js');
+    try { var t = localStorage.getItem('tk-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+  </script>
+  <script src="backdrop.js" defer></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+  <canvas id="field" aria-hidden="true"></canvas>
+  <div class="glow glow-a" aria-hidden="true"></div>
+  <div class="glow glow-b" aria-hidden="true"></div>
+
+  <a class="skip" href="#work">Skip to the projects</a>
+
+  <header class="nav">
+    <a class="brand" href="#top" aria-label="Timur Kherlenbayar, back to top"><span class="brand-mark" aria-hidden="true">&gt;</span>timur kherlenbayar<span class="caret" aria-hidden="true"></span></a>
+    <nav aria-label="Main">
+      <a href="#work">work</a>
+      <a href="#experience">experience</a>
+      <a href="#about">about</a>
+      <a class="nav-cta" href="#contact">contact</a>
+    </nav>
+  </header>
+
+  <main id="top">
+    <!-- Hero -->
+    <section class="hero wrap" aria-labelledby="hero-title">
+      <div class="hero-copy">
+        <p class="eyebrow"><span class="pulse" aria-hidden="true"></span>Timur Kherlenbayar · data analyst and AI builder</p>
+        <h1 id="hero-title">Welcome. I’m Timur, and this is where I show what I build with <span class="shimmer">data and AI</span>.</h1>
+        <p class="lede">This site is my portfolio. I’m a data analyst finishing a master’s in Information Systems at BYU, and every project here is a working page that you can open and try for yourself. Each one tells you the question I started with, what I found, and where the approach fell short. Further down you can read where I’ve worked and how to reach me.</p>
+        <div class="hero-actions">
+          <a class="btn primary" href="#work">See the projects <span aria-hidden="true">↓</span></a>
+          <a class="btn ghost" href="#contact">Get in touch</a>
+        </div>
+      </div>
+
+      <div class="term" data-spot>
+        <div class="term-bar">
+          <span>~/timur/portfolio</span>
+          <span class="term-meta">two projects, one person</span>
+        </div>
+        <div class="term-body">
+          <p class="t-cmd" style="--n:12;--d:.5s"><b aria-hidden="true">&gt;</b><span>who is this?</span></p>
+          <p class="t-out" style="--d:1.3s"><i aria-hidden="true">●</i><span>Timur Kherlenbayar, a data analyst who graduates from BYU in December 2026 and is looking for full-time work in data and AI.</span></p>
+
+          <p class="t-cmd" style="--n:18;--d:2.3s"><b aria-hidden="true">&gt;</b><span>what has he built?</span></p>
+          <a class="t-row" style="--d:3.4s" href="projects/who-gets-the-call/">
+            <i aria-hidden="true">●</i>
+            <span><strong>Who Gets the Call?</strong><em>A nurse has time for 20 calls. The model’s list reaches 43% of the patients who come back.</em></span>
+            <u aria-hidden="true">→</u>
+          </a>
+          <a class="t-row" style="--d:3.9s" href="projects/anatomy-of-a-dzud/">
+            <i aria-hidden="true">●</i>
+            <span><strong>Anatomy of a Dzud</strong><em>Three weather conditions take the risk of a mass livestock die-off from 2% to 36%.</em></span>
+            <u aria-hidden="true">→</u>
+          </a>
+
+          <p class="t-cmd t-idle" style="--d:4.8s"><b aria-hidden="true">&gt;</b><span class="caret" aria-hidden="true"></span></p>
+        </div>
+        <div class="term-status"><span><span class="pulse ok" aria-hidden="true"></span>open to full-time roles</span><span>open to relocation</span></div>
+      </div>
+    </section>
+
+    <!-- Work -->
+    <section class="section wrap" id="work" aria-labelledby="work-title">
+      <header class="section-head reveal">
+        <p class="label"><span>01</span>Featured projects</p>
+        <h2 id="work-title">Two projects I’d show you first.</h2>
+        <p>Each one started as a question I couldn’t answer by reading about it, and each one ends as a page you can play with. Both of them try to be as clear about what didn’t work as about what did.</p>
+      </header>
+
+      <article class="project reveal" data-spot>
+        <div class="project-copy">
+          <p class="kicker"><span>01</span>Applied machine learning · Healthcare</p>
+          <h3><a href="projects/who-gets-the-call/">Who Gets the Call?</a></h3>
+          <p>One hundred patients leave the hospital today, and about ten of them will be back within a month. The nurse who follows up has time for twenty calls. I built a tool that picks those twenty, gives a reason for every name on the list, and turns a discharge note into a short guide for the call.</p>
+          <p>The page lets you try the nurse’s job yourself before it shows you what the model would have done. It also shows the part I found most interesting, which is that an experienced nurse’s rule of thumb gets almost as far as the model does.</p>
+          <dl class="stats">
+            <div><dt>43%</dt><dd>of the patients who came back were on the model’s list of twenty</dd></div>
+            <div><dt>20%</dt><dd>is what twenty calls picked at random would have reached</dd></div>
+            <div><dt>101,766</dt><dd>hospital stays from a public research dataset sit behind it</dd></div>
+          </dl>
+          <ul class="tags" aria-label="Built with"><li>Python</li><li>SQL and DuckDB</li><li>XGBoost</li><li>FastAPI</li><li>A local language model</li></ul>
+          <div class="actions"><a class="btn primary" href="projects/who-gets-the-call/">Open the project <span aria-hidden="true">→</span></a></div>
+        </div>
+        <a class="project-vis vis-call" href="projects/who-gets-the-call/" tabindex="-1" aria-hidden="true">
+          <div class="vis-top"><span>100 patients go home</span><span id="call-phase">day 0</span></div>
+          <div class="call-grid" id="call-grid"></div>
+          <p class="vis-caption" id="call-caption">A nurse has time for twenty calls.</p>
+          <div class="legend"><span><i class="k-called"></i>called</span><span><i class="k-back"></i>came back</span><span><i class="k-both"></i>came back, and got a call</span></div>
+        </a>
+      </article>
+
+      <article class="project flip reveal" data-spot>
+        <div class="project-copy">
+          <p class="kicker cool"><span>02</span>Data story · Mongolia</p>
+          <h3><a href="projects/anatomy-of-a-dzud/">Anatomy of a Dzud</a></h3>
+          <p>A dzud is a Mongolian winter harsh enough to kill livestock by the million. I wanted to know why some winters take a quarter of the country’s animals while most take almost none, and how early anyone could tell which kind of winter was coming.</p>
+          <p>Thirty years of records gave a simple answer. A dry summer, long snow cover and a cold winter are each close to harmless alone, and they are dangerous together. The story walks you through it with a map you can explore, and most of the warning is already there by New Year, months before the animals die.</p>
+          <dl class="stats">
+            <div><dt>2% → 36%</dt><dd>is how far the chance of a mass die-off rises when all three conditions meet</dd></div>
+            <div><dt>672</dt><dd>province-winters between 1994 and 2025 went into the analysis</dd></div>
+            <div><dt>3 vs 46</dt><dd>a three-variable formula forecast as well as a model with 46 inputs</dd></div>
+          </dl>
+          <ul class="tags" aria-label="Built with"><li>Python</li><li>LightGBM</li><li>NOAA and NASA climate data</li><li>Scroll-driven storytelling</li></ul>
+          <div class="actions">
+            <a class="btn primary cool" href="projects/anatomy-of-a-dzud/">Step into the story <span aria-hidden="true">→</span></a>
+            <a class="btn ghost" href="https://github.com/RumitOsu/anatomy-of-a-dzud" target="_blank" rel="noopener noreferrer">Code on GitHub <span aria-hidden="true">↗</span></a>
+          </div>
+        </div>
+        <a class="project-vis vis-dzud" href="projects/anatomy-of-a-dzud/" tabindex="-1" aria-hidden="true">
+          <div class="vis-top"><span>three conditions</span><span>one winter</span></div>
+          <svg class="venn" viewBox="0 0 320 280" role="presentation">
+            <defs>
+              <radialGradient id="hot" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#ffd9a8" stop-opacity=".95"/><stop offset=".55" stop-color="#e98757" stop-opacity=".55"/><stop offset="1" stop-color="#d97757" stop-opacity="0"/></radialGradient>
+            </defs>
+            <g class="ring r1"><circle cx="160" cy="104" r="74"/><text x="160" y="52">dry summer</text></g>
+            <g class="ring r2"><circle cx="118" cy="172" r="74"/><text x="78" y="214">long snow</text></g>
+            <g class="ring r3"><circle cx="202" cy="172" r="74"/><text x="242" y="214">cold winter</text></g>
+            <circle class="core" cx="160" cy="150" r="46" fill="url(#hot)"/>
+            <text class="core-num" x="160" y="159">36%</text>
+          </svg>
+          <p class="vis-caption">In an ordinary winter the chance is 2%.<br>When all three meet, it is 36%.</p>
+        </a>
+      </article>
+
+      <div class="all-link reveal">
+        <a class="btn ghost" href="projects/">See all projects <span aria-hidden="true">→</span></a>
+        <p>The full list lives on its own page, and work in progress is on <a href="https://github.com/RumitOsu" target="_blank" rel="noopener noreferrer">my GitHub <span aria-hidden="true">↗</span></a>.</p>
+      </div>
+    </section>
+
+    <!-- Experience -->
+    <section class="section wrap" id="experience" aria-labelledby="exp-title">
+      <header class="section-head reveal">
+        <p class="label"><span>02</span>Experience</p>
+        <h2 id="exp-title">Where I’ve done this for other people.</h2>
+      </header>
+
+      <ol class="timeline">
+        <li class="reveal">
+          <p class="when">Sep 2025 to now</p>
+          <div>
+            <h3>Research Assistant, Data Analytics</h3>
+            <p class="where">Harold B. Lee Library, Brigham Young University</p>
+            <p>I run data projects for several library teams at the same time, from the Digital Imaging Lab to Special Collections. Most of the work is finding out why a number is wrong and then fixing the thing that produced it. I rebuilt a 1.78-million-row dataset from its raw source to track down about 20,000 consultations that had never been counted, and I replaced a monthly report that used to take days with tools the staff now run themselves in under an hour.</p>
+          </div>
+        </li>
+        <li class="reveal">
+          <p class="when">Jan to Apr 2026</p>
+          <div>
+            <h3>AI Engineering Intern</h3>
+            <p class="where">Insymetri</p>
+            <p>With a team of four, I built Cliopa, a tool that reviews customer service calls with AI so that people no longer have to check them by hand. I wrote the scoring pipeline in Python and Airflow on PostgreSQL and tested it with the company’s own staff on real calls. A good share of my time went into trying to break it, so that we knew where it was biased or simply wrong before anyone relied on it.</p>
+          </div>
+        </li>
+        <li class="reveal">
+          <p class="when">Jan to Jul 2023</p>
+          <div>
+            <h3>Instructional Assistant, Management Communication</h3>
+            <p class="where">Marriott School of Business, Brigham Young University</p>
+            <p>A few months after ChatGPT came out, I built an AI conversation partner for a required class assignment. I also gave feedback on writing and presentations to more than 75 students across three sections.</p>
+          </div>
+        </li>
+      </ol>
+    </section>
+
+    <!-- About -->
+    <section class="section wrap" id="about" aria-labelledby="about-title">
+      <header class="section-head reveal">
+        <p class="label"><span>03</span>About</p>
+        <h2 id="about-title">A little about me, and how I like to work.</h2>
+      </header>
+
+      <div class="about">
+        <div class="about-copy reveal">
+          <p>I grew up in Mongolia, studied business in Seattle, and came to Brigham Young University for a combined bachelor’s and master’s degree in Information Systems with an emphasis in data analytics. I graduate in December 2026.</p>
+          <p>I speak Russian, Mongolian and English. Between 2014 and 2019 I represented Mongolia in CISV International programs in India, Vietnam, Belgium, Finland and South Korea, where I helped design and lead activities for groups of thirty to fifty people.</p>
+          <p>What I care about most in my work is whether the person who asked the question can use the answer. An analysis isn’t finished for me until they can take the result and work with it on their own.</p>
+        </div>
+
+        <dl class="facts reveal" data-spot>
+          <div><dt>Education</dt><dd>M.S. Information Systems Management and B.S. Information Systems, BYU Marriott School of Business, December 2026</dd></div>
+          <div><dt>Languages</dt><dd>Russian, Mongolian, English</dd></div>
+          <div><dt>Data</dt><dd>Python, SQL on Snowflake and PostgreSQL, Airflow, Excel with VBA</dd></div>
+          <div><dt>Showing it</dt><dd>Tableau, Power BI, JavaScript, HTML and CSS</dd></div>
+          <div><dt>AI</dt><dd>Applications built on language models, agent workflows, prompt testing</dd></div>
+          <div><dt>Based in</dt><dd>Provo, Utah, and open to relocating</dd></div>
+        </dl>
+      </div>
+
+      <div class="principles">
+        <div class="principle reveal" data-spot>
+          <p class="p-num">a</p>
+          <h3>I start from the decision.</h3>
+          <p>In the readmission project the real question was never whether a given patient would come back. It was which twenty calls a nurse should make this morning. Asking it that way changed what I measured and what I built.</p>
+        </div>
+        <div class="principle reveal" data-spot>
+          <p class="p-num">b</p>
+          <h3>I check whether something simpler would do.</h3>
+          <p>Before I trust a model, I compare it with the simplest rule a sensible person would use. In the dzud project three weather conditions forecast as well as a model with 46 inputs, so the three conditions are what I published.</p>
+        </div>
+        <div class="principle reveal" data-spot>
+          <p class="p-num">c</p>
+          <h3>I say what the work can’t do.</h3>
+          <p>My readmission model is about level with an experienced nurse’s rule of thumb at choosing the list, and the page says so. I would rather show people where the limit is than have them find it later.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Contact -->
+    <section class="section wrap contact" id="contact" aria-labelledby="contact-title">
+      <div class="contact-card reveal" data-spot>
+        <p class="label"><span>04</span>Contact</p>
+        <h2 id="contact-title">If you have a question your numbers haven’t answered yet, I’d like to hear it.</h2>
+        <p>I’m looking for a full-time role in data or AI after I graduate in December 2026. Email is the best way to reach me.</p>
+        <div class="prompt">
+          <span class="prompt-mark" aria-hidden="true">&gt;</span>
+          <a class="prompt-mail" href="mailto:timur.kherlenbayar@outlook.com">timur.kherlenbayar@outlook.com</a>
+          <button class="copy" id="copy" type="button">copy</button>
+        </div>
+        <div class="contact-links">
+          <a href="https://www.linkedin.com/in/timur-kherlenbayar" target="_blank" rel="noopener noreferrer">LinkedIn <span aria-hidden="true">↗</span></a>
+          <a href="https://github.com/RumitOsu" target="_blank" rel="noopener noreferrer">GitHub <span aria-hidden="true">↗</span></a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer wrap">
+    <span>© 2026 Timur Kherlenbayar</span>
+    <span class="footer-right">
+      <button id="motion" type="button" aria-pressed="false">motion: on</button>
+      <a href="#top">back to top ↑</a>
+    </span>
+  </footer>
+
+  <div class="themes" role="group" aria-label="Choose the backdrop">
+    <span aria-hidden="true">backdrop</span>
+    <button type="button" data-theme-pick="pond" aria-pressed="true" aria-label="Koi pond backdrop" style="--a:#0a3a38;--b:#ff9a6c"><i></i><b>pond</b></button>
+    <button type="button" data-theme-pick="steppe" aria-pressed="false" aria-label="Steppe night backdrop" style="--a:#0f1630;--b:#f2cc7e"><i></i><b>steppe</b></button>
+    <button type="button" data-theme-pick="embers" aria-pressed="false" aria-label="Embers backdrop" style="--a:#1b1916;--b:#d97757"><i></i><b>embers</b></button>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>

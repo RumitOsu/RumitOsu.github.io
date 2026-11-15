@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="pond">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#05201f">
+  <meta name="description" content="Every data and AI project by Timur Kherlenbayar. Each card opens a working page you can try.">
+  <title>Projects — Timur Kherlenbayar</title>
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../assets/fonts/type-home.css">
+  <link rel="stylesheet" href="../style.css">
+  <script>
+    document.documentElement.classList.add('js');
+    try { var t = localStorage.getItem('tk-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+  </script>
+  <script src="../backdrop.js" defer></script>
+  <script src="../app.js" defer></script>
+</head>
+<body>
+  <canvas id="field" aria-hidden="true"></canvas>
+  <div class="glow glow-a" aria-hidden="true"></div>
+  <div class="glow glow-b" aria-hidden="true"></div>
+
+  <a class="skip" href="#list">Skip to the projects</a>
+
+  <header class="nav">
+    <a class="brand" href="../" aria-label="Timur Kherlenbayar, home page"><span class="brand-mark" aria-hidden="true">&gt;</span>timur kherlenbayar<span class="caret" aria-hidden="true"></span></a>
+    <nav aria-label="Main">
+      <a href="../">home</a>
+      <a href="./" aria-current="page">projects</a>
+      <a href="../#about">about</a>
+      <a class="nav-cta" href="../#contact">contact</a>
+    </nav>
+  </header>
+
+  <main id="top">
+    <section class="page-head wrap" aria-labelledby="page-title">
+      <p class="label"><span>~/projects</span>All projects</p>
+      <h1 id="page-title">Everything I’ve built so far.</h1>
+      <p>Each card opens a working page that you can try for yourself. I add to this list whenever I finish something new, and the newest work is at the top.</p>
+    </section>
+
+    <!-- To add a project, copy one <li> block, change the text and the link, and put it first in the list.
+         Add class="card cool" for the blue accent. -->
+    <section class="wrap" id="list" aria-label="Projects">
+      <ul class="cards">
+        <li>
+          <a class="card cool reveal" data-spot href="anatomy-of-a-dzud/">
+            <span class="card-top"><span>Data story · Mongolia</span><span>2026</span></span>
+            <span class="card-stat"><b>2% → 36%</b><span>is how far the risk of a mass livestock die-off rises when three weather conditions meet</span></span>
+            <span class="card-title">Anatomy of a Dzud</span>
+            <span class="card-text">A scroll-driven story about Mongolia’s killing winters, built from thirty years of livestock and climate records, with a map you can explore.</span>
+            <span class="card-tags"><span>Python</span><span>LightGBM</span><span>Climate data</span></span>
+            <span class="card-go">Step into the story <span aria-hidden="true">→</span></span>
+          </a>
+        </li>
+        <li>
+          <a class="card reveal" data-spot href="who-gets-the-call/">
+            <span class="card-top"><span>Applied machine learning · Healthcare</span><span>2026</span></span>
+            <span class="card-stat"><b>43%</b><span>of the patients who came back to hospital were on the model’s list of twenty calls</span></span>
+            <span class="card-title">Who Gets the Call?</span>
+            <span class="card-text">A tool that chooses which twenty of a hundred discharged patients a nurse should phone, explains every choice, and writes a short guide for the call.</span>
+            <span class="card-tags"><span>Python</span><span>SQL</span><span>XGBoost</span><span>FastAPI</span></span>
+            <span class="card-go">Open the project <span aria-hidden="true">→</span></span>
+          </a>
+        </li>
+        <li>
+          <div class="card ghost reveal">
+            <span class="card-top"><span>Next</span><span>in progress</span></span>
+            <span class="card-title">The next project is on its way.</span>
+            <span class="card-text">Until it is ready to show, the work I haven’t finished yet is on <a href="https://github.com/RumitOsu" target="_blank" rel="noopener noreferrer">my GitHub <span aria-hidden="true">↗</span></a>.</span>
+          </div>
+        </li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="footer wrap">
+    <span>© 2026 Timur Kherlenbayar</span>
+    <span class="footer-right">
+      <button id="motion" type="button" aria-pressed="false">motion: on</button>
+      <a href="../">back to the home page</a>
+    </span>
+  </footer>
+
+  <div class="themes" role="group" aria-label="Choose the backdrop">
+    <span aria-hidden="true">backdrop</span>
+    <button type="button" data-theme-pick="pond" aria-pressed="true" aria-label="Koi pond backdrop" style="--a:#0a3a38;--b:#ff9a6c"><i></i><b>pond</b></button>
+    <button type="button" data-theme-pick="steppe" aria-pressed="false" aria-label="Steppe night backdrop" style="--a:#0f1630;--b:#f2cc7e"><i></i><b>steppe</b></button>
+    <button type="button" data-theme-pick="embers" aria-pressed="false" aria-label="Embers backdrop" style="--a:#1b1916;--b:#d97757"><i></i><b>embers</b></button>
+  </div>
+</body>
+</html>
