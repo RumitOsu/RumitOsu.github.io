@@ -34,7 +34,7 @@
 }
 
 * { box-sizing: border-box; }
-html { scroll-behavior: smooth; scroll-padding-top: 84px; -webkit-text-size-adjust: 100%; }
+html { scroll-padding-top: 84px; -webkit-text-size-adjust: 100%; }
 body {
   margin: 0; background: var(--bg); color: var(--ink);
   font: 400 17px/1.7 var(--sans); -webkit-font-smoothing: antialiased; overflow-x: hidden;
@@ -109,18 +109,14 @@ main, .nav, .footer { position: relative; z-index: 2; }
 .btn.ghost { border-color: var(--line-2); color: var(--ink); background: rgba(255, 255, 255, .02); }
 .btn.ghost:hover { border-color: var(--ink-2); background: rgba(255, 255, 255, .05); }
 
-/* A soft light that follows the pointer across a card, and lights its border. */
-[data-spot] { position: relative; isolation: isolate; }
-[data-spot]::before, [data-spot]::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; opacity: 0; visibility: hidden; transition: opacity .35s, visibility 0s .35s; }
-[data-spot]::before { z-index: -1; background: radial-gradient(520px circle at var(--mx, 50%) var(--my, 50%), color-mix(in srgb, var(--accent) 10%, transparent), transparent 62%); }
-[data-spot]::after {
-  padding: 1px; background: radial-gradient(360px circle at var(--mx, 50%) var(--my, 50%), color-mix(in srgb, var(--accent-2) 85%, transparent), transparent 65%);
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
-  mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
-}
-[data-spot]:hover::before, [data-spot]:hover::after { opacity: 1; visibility: visible; transition: opacity .35s, visibility 0s; }
-.project.flip[data-spot]::before, .card.cool[data-spot]::before { background: radial-gradient(520px circle at var(--mx, 50%) var(--my, 50%), color-mix(in srgb, var(--cool) 10%, transparent), transparent 62%); }
-.project.flip[data-spot]::after, .card.cool[data-spot]::after { background: radial-gradient(360px circle at var(--mx, 50%) var(--my, 50%), color-mix(in srgb, var(--cool-2) 80%, transparent), transparent 65%); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); }
+/* A soft light that follows the pointer across a card. It is one small round patch moved with
+   transform, so following the pointer never repaints the card, and the card's border warms on hover. */
+[data-spot] { position: relative; isolation: isolate; overflow: hidden; transition: border-color .3s; }
+[data-spot]::before { content: ""; position: absolute; left: 0; top: 0; width: 680px; height: 680px; margin: -340px 0 0 -340px; z-index: -1; border-radius: 50%; pointer-events: none; opacity: 0; transition: opacity .35s; transform: translate(var(--mx, 340px), var(--my, 340px)); background: radial-gradient(circle closest-side, color-mix(in srgb, var(--accent) 13%, transparent), color-mix(in srgb, var(--accent) 6%, transparent) 45%, transparent); }
+[data-spot]:hover { border-color: color-mix(in srgb, var(--accent-2) 42%, var(--line-2)); }
+[data-spot]:hover::before { opacity: 1; will-change: transform; }
+.project.flip[data-spot]::before, .card.cool[data-spot]::before { background: radial-gradient(circle closest-side, color-mix(in srgb, var(--cool) 13%, transparent), color-mix(in srgb, var(--cool) 6%, transparent) 45%, transparent); }
+.project.flip[data-spot]:hover, .card.cool[data-spot]:hover { border-color: color-mix(in srgb, var(--cool-2) 42%, var(--line-2)); }
 
 /* ---------- hero ---------- */
 .hero { min-height: 100vh; min-height: 100svh; padding-top: 110px; padding-bottom: 70px; display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(0, .92fr); gap: clamp(32px, 5vw, 76px); align-items: center; }
@@ -315,7 +311,6 @@ a.card:hover .card-go span { transform: translateX(4px); }
 .motion-off .caret, .motion-off .pulse::after, .motion-off .shimmer { animation: none; }
 .motion-off .shimmer { background-position: 50% 0; }
 .motion-off .call-grid i { transition: none; }
-.motion-off { scroll-behavior: auto; }
 
 /* ---------- smaller screens ---------- */
 @media (max-width: 980px) {

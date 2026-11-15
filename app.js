@@ -121,6 +121,18 @@ function syncMotion() {
 motionButton.addEventListener('click', () => { motion = !motion; store.set('tk-motion', motion ? 'on' : 'off'); syncMotion(); });
 reduce.addEventListener('change', (e) => { if (e.matches) motion = false; syncMotion(); });
 
+/* ---------- links to sections on this page glide there ---------- */
+// Done here and not with the CSS scroll-behavior setting, which makes wheel scrolling uneven in Chrome.
+document.addEventListener('click', (e) => {
+  const link = e.target.closest && e.target.closest('a[href^="#"]');
+  if (!link || e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey) return;
+  const id = link.getAttribute('href').slice(1), target = id && document.getElementById(id);
+  if (!target) return;
+  e.preventDefault();
+  target.scrollIntoView({ behavior: motion ? 'smooth' : 'auto', block: 'start' });
+  history.pushState(null, '', '#' + id);
+});
+
 /* ---------- nav, reveals, copy ---------- */
 const nav = $('.nav');
 const onScroll = () => nav.classList.toggle('scrolled', window.scrollY > 12);

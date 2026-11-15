@@ -474,8 +474,18 @@
     }
     raf = requestAnimationFrame(loop);
   }
+  /* While the page is being scrolled the backdrop holds still and picks up again a moment after the
+     scrolling stops. Scrolling is the one time the browser most needs every frame to itself, and
+     nobody is watching the koi while the text is moving. */
+  let resting = false, restTimer = 0;
+  window.addEventListener('scroll', () => {
+    if (!resting) { resting = true; cancelAnimationFrame(raf); }
+    clearTimeout(restTimer);
+    restTimer = setTimeout(() => { resting = false; sync(); }, 140);
+  }, { passive: true });
   function sync() {
     cancelAnimationFrame(raf);
+    if (resting) return;
     if (motion && !document.hidden) { last = performance.now(); mPrev = 0; raf = requestAnimationFrame(loop); }
     else if (scene) frame(0);
   }
