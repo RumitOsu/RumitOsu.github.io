@@ -3,21 +3,33 @@
    The page sits on a grid of small tiles, each holding one character. Nothing is drawn as a
    smooth shape: cranes, koi, clouds and the moon are all painted by lighting up tiles, so
    they read as a mosaic that is always moving. Three scenes share one engine:
-     steppe  a night sky over the Mongolian steppe, with cranes passing
      pond    a koi pond seen from above
+     steppe  a night sky over the Mongolian steppe, with cranes passing
      embers  fireflies in the dark
-   Exposes window.Backdrop = { setTheme(name), setMotion(on) }. */
+
+   How it stays cheap: the picture that changes every frame is tiny, one pixel per tile, and the
+   browser's compositor stretches it to fill the window. Three layers sit on top of each other:
+     #field       the tiles, one pixel each, scaled up with hard edges
+     .bd-stencil  drawn once: the gaps between tiles and the character in every tile, in the page colour
+     .bd-haze     the soft glows around creatures, two pixels per tile, scaled up smoothly
+   Exposes window.Backdrop = { setTheme(name), setMotion(on), bench(n) }.
+   Add #fps to the page address to see how it is running in a given browser. */
 (function () {
   const canvas = document.getElementById('field');
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
+  const stencil = document.createElement('canvas'), haze = document.createElement('canvas');
+  stencil.className = 'bd-stencil'; haze.className = 'bd-haze';
+  stencil.setAttribute('aria-hidden', 'true'); haze.setAttribute('aria-hidden', 'true');
+  canvas.after(stencil); stencil.after(haze);
+  const sctx = stencil.getContext('2d'), hctx = haze.getContext('2d');
+  const HAZE = 2;   // haze pixels per tile
   const GLYPHS = '0123456789ABCDEFGHJKLMNPQRSTUVWXYZ+=#%*<>/';
   const TAU = Math.PI * 2;
 
   // S is the tile size in CSS pixels, cell the same tile in device pixels, q the ratio between them.
   let S = 10, W = 0, H = 0, cols = 0, rows = 0, q = 1, cell = 10;
-  let bufR, bufG, bufB, bufA, bufL, touched, count = 0, lane;
-  let img, small, sctx, maskPattern, atlas;
+  let bufR, bufG, bufB, bufA, touched, count = 0, lane, img;
   const P = 64;   // the pattern of characters repeats every 64 tiles
   let scene = null, themeName = 'pond', motion = true, raf = 0, last = 0, clock = 0;
   const pointer = { x: -9999, y: -9999 };
@@ -41,12 +53,7 @@
     bufB[i] = (c[2] * a + bufB[i] * old * (1 - a)) / out;
     bufA[i] = Math.min(out, 1);
   }
-  // Same, for faint tiles whose character should glow (stars, glints on the water, the pointer's light).
-  function paintLit(cx, cy, c, a) {
-    if (cx < 0 || cy < 0 || cx >= cols || cy >= rows || a <= 0.004) return;
-    bufL[cy * cols + cx] = 1;
-    paint(cx, cy, c, a);
-  }
+  const paintLit = paint;
   // Shapes are given in pixels. A tile at the edge of a shape is lit in proportion to how far
   // inside the shape it sits, so things glide from tile to tile instead of jumping a whole tile.
   const edge = (inside) => inside >= S * .5 ? 1 : inside <= -S * .5 ? 0 : inside / S + .5;
@@ -89,77 +96,51 @@
   }
   const glow = (x, y, r, c, a) => glows.push([x, y, r, c, a]);
 
-  /* Drawing a frame. Every tile is one pixel in a tiny image the size of the grid. That image is
-     scaled up in a single call, the gaps between tiles and the character in each tile are cut
-     out of it with one prepared stencil, and the soft glows are slipped in behind. The cost of a
-     frame therefore barely depends on how many tiles are lit. */
+  // Drawing a frame: write one pixel per lit tile, hand the tiny image over, and redraw the glows.
   function flush() {
-    const px = img.data, cw = canvas.width, ch = canvas.height;
+    const px = img.data;
     px.fill(0);
     for (let n = 0; n < count; n++) {
       const i = touched[n], a = bufA[i] * lane[i % cols], o = i * 4;
-      bufA[i] = a;
       px[o] = bufR[i]; px[o + 1] = bufG[i]; px[o + 2] = bufB[i]; px[o + 3] = a * 255;
-    }
-    sctx.putImageData(img, 0, 0);
-    ctx.globalCompositeOperation = 'source-over';
-    ctx.clearRect(0, 0, cw, ch);
-    ctx.drawImage(small, 0, 0, cols * cell, rows * cell);
-    ctx.globalCompositeOperation = 'destination-out';
-    ctx.fillStyle = maskPattern;
-    ctx.fillRect(0, 0, cw, ch);
-    ctx.globalCompositeOperation = 'source-over';
-    for (let n = 0; n < count; n++) {
-      const i = touched[n];
-      if (bufL[i]) {
-        const a = bufA[i];
-        if (a >= .05 && a < .4) {
-          const cx = i % cols, cy = (i / cols) | 0;
-          ctx.globalAlpha = Math.min(.9, a * 2.4);
-          ctx.drawImage(atlas, glyphAt(cx, cy) * cell, 0, cell, cell, cx * cell, cy * cell, cell, cell);
-        }
-        bufL[i] = 0;
-      }
       bufA[i] = 0;
     }
-    ctx.globalAlpha = 1;
     count = 0;
-    ctx.globalCompositeOperation = 'destination-over';
+    ctx.putImageData(img, 0, 0);
+    hctx.clearRect(0, 0, haze.width, haze.height);
+    const f = HAZE / S;
     for (let n = 0; n < glows.length; n++) {
-      const g = glows[n], x = g[0] * q, y = g[1] * q, r = g[2] * q, c = g[3];
-      const grad = ctx.createRadialGradient(x, y, 0, x, y, r);
+      const g = glows[n], x = g[0] * f, y = g[1] * f, r = g[2] * f, c = g[3];
+      const grad = hctx.createRadialGradient(x, y, 0, x, y, r);
       grad.addColorStop(0, `rgba(${c[0]},${c[1]},${c[2]},${g[4]})`);
       grad.addColorStop(1, `rgba(${c[0]},${c[1]},${c[2]},0)`);
-      ctx.fillStyle = grad; ctx.fillRect(x - r, y - r, r * 2, r * 2);
+      hctx.fillStyle = grad; hctx.fillRect(x - r, y - r, r * 2, r * 2);
     }
     glows.length = 0;
-    ctx.globalCompositeOperation = 'source-over';
   }
 
-  const glyphFont = () => `600 ${Math.round(cell * .68)}px "JetBrains Mono", ui-monospace, Consolas, monospace`;
-  // The stencil: solid lines where the gaps between tiles go, and one half-strength character per tile.
-  function buildMask() {
-    const size = P * cell, m = document.createElement('canvas'), c = m.getContext('2d');
+  /* The stencil is drawn once per scene and window size, then left alone. It paints the page colour
+     over the gaps between tiles and over one character in every tile, so each lit tile shows its
+     character as a darker cut. A hair-thin lighter line marks the grid where nothing is lit. */
+  function buildStencil() {
+    const size = P * cell, m = document.createElement('canvas'), c = m.getContext('2d'), bg = scene.bg, ink = scene.ink;
     m.width = m.height = size;
-    const gap = Math.max(1, Math.round(cell * .1));
-    c.fillStyle = '#000';
+    const gap = Math.max(1, Math.round(cell * .1)), hair = Math.max(1, Math.round(q));
+    c.fillStyle = `rgb(${bg[0]},${bg[1]},${bg[2]})`;
     for (let n = 0; n < P; n++) {
       c.fillRect(n * cell, 0, gap, size); c.fillRect((n + 1) * cell - gap, 0, gap, size);
       c.fillRect(0, n * cell, size, gap); c.fillRect(0, (n + 1) * cell - gap, size, gap);
     }
-    // Characters this small are mostly soft edges, so each one is struck twice to cut deep enough to read.
-    c.globalAlpha = .8; c.font = glyphFont(); c.textAlign = 'center'; c.textBaseline = 'middle';
+    // Characters this small are mostly soft edges, so each one is struck twice to read clearly.
+    c.globalAlpha = .8; c.font = `600 ${Math.round(cell * .68)}px "JetBrains Mono", ui-monospace, Consolas, monospace`;
+    c.textAlign = 'center'; c.textBaseline = 'middle';
     for (let pass = 0; pass < 2; pass++)
       for (let cy = 0; cy < P; cy++) for (let cx = 0; cx < P; cx++) c.fillText(GLYPHS[glyphAt(cx, cy)], cx * cell + cell / 2, cy * cell + cell / 2 + .5 * q);
-    maskPattern = ctx.createPattern(m, 'repeat');
-  }
-  // One row of ready-drawn glowing characters in the scene's light colour.
-  function buildAtlas() {
-    atlas = document.createElement('canvas');
-    atlas.width = GLYPHS.length * cell; atlas.height = cell;
-    const c = atlas.getContext('2d'), l = scene.lit;
-    c.fillStyle = `rgb(${l[0]},${l[1]},${l[2]})`; c.font = glyphFont(); c.textAlign = 'center'; c.textBaseline = 'middle';
-    for (let n = 0; n < GLYPHS.length; n++) c.fillText(GLYPHS[n], n * cell + cell / 2, cell / 2 + .5 * q);
+    c.globalAlpha = 1; c.fillStyle = `rgba(${ink[0]},${ink[1]},${ink[2]},.022)`;
+    for (let n = 0; n < P; n++) { c.fillRect(n * cell, 0, hair, size); c.fillRect(0, n * cell, size, hair); }
+    sctx.clearRect(0, 0, stencil.width, stencil.height);
+    sctx.fillStyle = sctx.createPattern(m, 'repeat');
+    sctx.fillRect(0, 0, stencil.width, stencil.height);
   }
 
   // A soft patch of lit tiles under the pointer, in every scene.
@@ -211,7 +192,7 @@
     }
   }
   const steppe = {
-    lit: STAR,
+    bg: [10, 15, 31], ink: [238, 240, 248],
     light: [147, 181, 255],
     init() {
       const small = W < 700;
@@ -295,7 +276,7 @@
   const KOI = { white: [246, 242, 232], orange: [255, 142, 80], red: [228, 76, 54], black: [30, 44, 50], gold: [246, 200, 92] };
   const PROFILE = [1.5, 2.0, 2.3, 2.35, 2.25, 2.05, 1.8, 1.5, 1.2, .95, .75, 1.0, 1.25];
   const pond = {
-    lit: [150, 236, 224],
+    bg: [5, 32, 31], ink: [236, 247, 243],
     light: [127, 227, 210],
     init() {
       const small = W < 700;
@@ -393,7 +374,7 @@
 
   /* ---------- scene: embers ---------- */
   const embers = {
-    lit: FLY_WARM,
+    bg: [18, 17, 15], ink: [240, 236, 228],
     light: [232, 140, 105],
     init() {
       this.flies = [];
@@ -428,55 +409,60 @@
   function resize() {
     q = Math.min(window.devicePixelRatio || 1, 2);
     W = window.innerWidth; H = window.innerHeight;
+    if (!W || !H) { cols = 0; return; }   // a window with no size yet; the resize event will call again
     // A tile is a whole number of device pixels, so its edges stay sharp on any screen scaling.
     cell = Math.max(4, Math.round((W < 700 ? 9 : 10) * q));
     S = cell / q;
     cols = Math.ceil(W / S); rows = Math.ceil(H / S);
-    canvas.width = Math.round(W * q); canvas.height = Math.round(H * q);
-    ctx.imageSmoothingEnabled = false;
+    canvas.width = cols; canvas.height = rows;
+    haze.width = cols * HAZE; haze.height = rows * HAZE;
+    stencil.width = cols * cell; stencil.height = rows * cell;
+    for (const layer of [canvas, stencil, haze]) { layer.style.width = cols * S + 'px'; layer.style.height = rows * S + 'px'; }
     const n = cols * rows;
     bufR = new Float32Array(n); bufG = new Float32Array(n); bufB = new Float32Array(n); bufA = new Float32Array(n);
-    bufL = new Uint8Array(n); touched = new Int32Array(n); count = 0;
-    img = new ImageData(cols, rows);
-    small = document.createElement('canvas'); small.width = cols; small.height = rows;
-    sctx = small.getContext('2d');
+    touched = new Int32Array(n); count = 0;
+    img = ctx.createImageData(cols, rows);
     // Full strength in the page margins, quieter behind the column of text.
     lane = new Float32Array(cols);
     const half = Math.min(W, 1188) / 2;
     const quiet = W < 700 ? .42 : .56;
     for (let cx = 0; cx < cols; cx++) lane[cx] = quiet + (1 - quiet) * clamp((Math.abs((cx + .5) * S - W / 2) - half * .9) / 130, 0, 1);
-    document.documentElement.style.setProperty('--cell', S + 'px');
-    buildMask();
-    if (scene) { buildAtlas(); scene.init(); frame(0); }
+    if (scene) { buildStencil(); scene.init(); frame(0); }
   }
   function frame(dt) {
+    if (!cols || !scene) return;
     if (dt > 0) scene.step(dt);
     scene.draw(clock);
     flush();
   }
-  /* The backdrop redraws in step with the screen. The first frames are timed to learn the screen's
-     refresh rate: up to about 80 a second every frame is drawn, and on faster screens every second
-     or third one, which keeps the pacing even (144 Hz gives 72 frames a second). */
-  let every = 1, tick = 0, probe = [], lastTick = 0;
+  // Add #fps to the page address to see how the backdrop is really running in this browser.
+  const meter = location.hash === '#fps' ? document.createElement('div') : null;
+  if (meter) {
+    meter.style.cssText = 'position:fixed;left:12px;bottom:12px;z-index:99;font:12px/1.6 ui-monospace,Consolas,monospace;color:#fff;background:rgba(0,0,0,.8);padding:9px 12px;border-radius:8px;white-space:pre;pointer-events:none';
+    meter.textContent = 'measuring...';
+    document.body.append(meter);
+  }
+  let mFrames = 0, mCost = 0, mWorst = 0, mSince = 0, mPrev = 0;
+  // The backdrop redraws once for every frame the screen shows.
   function loop(now) {
-    if (probe) {
-      if (lastTick) probe.push(now - lastTick);
-      lastTick = now;
-      if (probe.length >= 30) {
-        probe.sort((a, b) => a - b);
-        every = Math.max(1, Math.round(1000 / probe[15] / 72));
-        probe = null;
+    const dt = Math.min((now - last) / 1000, .06);
+    last = now; clock += dt;
+    const t0 = meter ? performance.now() : 0;
+    frame(dt);
+    if (meter) {
+      mFrames++; mCost += performance.now() - t0;
+      if (mPrev && now - mPrev > mWorst) mWorst = now - mPrev;
+      mPrev = now;
+      if (now - mSince >= 1000) {
+        meter.textContent = `${Math.round(mFrames * 1000 / (now - mSince))} frames a second\n${(mCost / mFrames).toFixed(2)} ms to draw one\nlongest gap ${mWorst.toFixed(0)} ms\n${cols} x ${rows} tiles, window ${W} x ${H}, scale ${q}`;
+        mFrames = 0; mCost = 0; mWorst = 0; mSince = now;
       }
-    }
-    if (++tick % every === 0) {
-      const dt = Math.min((now - last) / 1000, .06);
-      last = now; clock += dt; frame(dt);
     }
     raf = requestAnimationFrame(loop);
   }
   function sync() {
     cancelAnimationFrame(raf);
-    if (motion && !document.hidden) { last = performance.now(); lastTick = 0; raf = requestAnimationFrame(loop); }
+    if (motion && !document.hidden) { last = performance.now(); mPrev = 0; raf = requestAnimationFrame(loop); }
     else if (scene) frame(0);
   }
 
@@ -487,21 +473,19 @@
   window.addEventListener('pointerdown', (e) => { if (scene === pond && motion) pond.ripple(e.clientX, e.clientY); }, { passive: true });
   document.addEventListener('visibilitychange', sync);
   // The characters are drawn once into the stencil, so redo it when the real font has arrived.
-  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if (!scene || !cols) return; buildMask(); buildAtlas(); if (!motion) frame(0); });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if (scene && cols) buildStencil(); });
 
   window.Backdrop = {
     setTheme(name) {
       themeName = SCENES[name] ? name : 'pond';
       scene = SCENES[themeName];
-      if (!cols) resize(); else { buildAtlas(); scene.init(); frame(0); }
+      if (!cols) resize(); else { buildStencil(); scene.init(); frame(0); }
     },
     setMotion(on) { motion = on; sync(); },
-    get everyNthFrame() { return every; },
     // Draws n frames back to back and returns the average cost of one, in milliseconds.
     bench(n = 120) {
       const t0 = performance.now();
       for (let i = 0; i < n; i++) { clock += 1 / 30; frame(1 / 30); }
-      ctx.getImageData(0, 0, 1, 1);
       return +((performance.now() - t0) / n).toFixed(2);
     }
   };

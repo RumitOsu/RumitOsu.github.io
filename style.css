@@ -10,7 +10,6 @@
   --mono: "JetBrains Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
   --w: 1140px;
   --r: 16px;
-  --cell: 10px;
 }
 /* Koi pond: dark teal water, koi orange, pale aqua. */
 :root, [data-theme="pond"] {
@@ -51,11 +50,10 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 main, .nav, .footer { position: relative; z-index: 2; }
 
 /* ---------- background ---------- */
-/* Faint grid lines mark the tiles that backdrop.js paints on. */
-body::before { content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none;
-  background-image: linear-gradient(color-mix(in srgb, var(--ink) 2%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in srgb, var(--ink) 2%, transparent) 1px, transparent 1px);
-  background-size: var(--cell) var(--cell); }
-#field { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
+/* Three stacked layers made by backdrop.js: the tiles (a tiny picture stretched with hard edges),
+   a stencil of gaps and characters that is drawn once, and the soft glows. */
+#field, .bd-stencil, .bd-haze { position: fixed; left: 0; top: 0; z-index: 0; pointer-events: none; }
+#field { image-rendering: crisp-edges; image-rendering: pixelated; }
 .glow { position: fixed; z-index: 0; pointer-events: none; border-radius: 50%; opacity: .5; will-change: transform; }
 .glow-a { width: 46vw; height: 46vw; min-width: 420px; min-height: 420px; right: -12vw; top: -14vw; background: radial-gradient(circle closest-side, color-mix(in srgb, var(--accent) 24%, transparent), color-mix(in srgb, var(--accent) 15%, transparent) 30%, color-mix(in srgb, var(--accent) 6%, transparent) 62%, transparent); animation: drift-a 26s ease-in-out infinite alternate; }
 .glow-b { width: 40vw; height: 40vw; min-width: 380px; min-height: 380px; left: -14vw; bottom: -16vw; background: radial-gradient(circle closest-side, color-mix(in srgb, var(--cool) 20%, transparent), color-mix(in srgb, var(--cool) 12%, transparent) 30%, color-mix(in srgb, var(--cool) 5%, transparent) 62%, transparent); animation: drift-b 32s ease-in-out infinite alternate; }
@@ -97,10 +95,10 @@ body::before { content: ""; position: fixed; inset: 0; z-index: 0; pointer-event
 .label, .kicker, .eyebrow { font: 400 12.5px/1.4 var(--mono); letter-spacing: .04em; color: var(--mute); display: flex; align-items: center; gap: 12px; }
 .label span, .kicker span { color: var(--accent); }
 .kicker.cool span { color: var(--cool); }
-.pulse { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 0 color-mix(in srgb, var(--accent) 60%, transparent); animation: pulse 2.4s ease-out infinite; flex: none; display: inline-block; }
-.pulse.ok { background: var(--ok); box-shadow: 0 0 0 0 color-mix(in srgb, var(--ok) 60%, transparent); animation-name: pulse-ok; margin-right: 8px; }
-@keyframes pulse { 70%, 100% { box-shadow: 0 0 0 9px transparent; } }
-@keyframes pulse-ok { 70%, 100% { box-shadow: 0 0 0 9px transparent; } }
+.pulse { position: relative; width: 8px; height: 8px; border-radius: 50%; background: var(--accent); flex: none; display: inline-block; }
+.pulse::after { content: ""; position: absolute; inset: 0; border-radius: 50%; background: inherit; opacity: .6; animation: pulse 2.4s ease-out infinite; }
+.pulse.ok { background: var(--ok); margin-right: 8px; }
+@keyframes pulse { 70%, 100% { transform: scale(3.2); opacity: 0; } }
 
 .btn {
   display: inline-flex; align-items: center; gap: 10px; text-decoration: none; white-space: nowrap;
@@ -132,8 +130,9 @@ body::before { content: ""; position: fixed; inset: 0; z-index: 0; pointer-event
 /* ---------- hero ---------- */
 .hero { min-height: 100vh; min-height: 100svh; padding-top: 110px; padding-bottom: 70px; display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(0, .92fr); gap: clamp(32px, 5vw, 76px); align-items: center; }
 .hero h1 { font: 400 clamp(2.1rem, 3.4vw, 3.1rem)/1.12 var(--serif); letter-spacing: -.025em; margin: 22px 0 26px; text-wrap: balance; }
-.shimmer { background: linear-gradient(100deg, var(--accent) 0%, var(--accent) 35%, #fff 50%, var(--accent) 65%, var(--accent) 100%); background-size: 250% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; font-style: italic; animation: shimmer 6s linear infinite; padding-right: .06em; }
-@keyframes shimmer { from { background-position: 125% 0; } to { background-position: -125% 0; } }
+.shimmer { background: linear-gradient(100deg, var(--accent) 0%, var(--accent) 35%, #fff 50%, var(--accent) 65%, var(--accent) 100%); background-size: 250% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; font-style: italic; animation: shimmer 9s ease-in-out infinite; padding-right: .06em; }
+/* The highlight rests for most of the cycle and then sweeps across once. */
+@keyframes shimmer { 0%, 70% { background-position: 125% 0; } 100% { background-position: -125% 0; } }
 .lede { color: var(--ink-2); font-size: 1.09rem; max-width: 35em; }
 .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 34px; }
 
@@ -179,7 +178,7 @@ body::before { content: ""; position: fixed; inset: 0; z-index: 0; pointer-event
 .project h3 a { text-decoration: none; background: linear-gradient(currentColor, currentColor) 0 100% / 0 1px no-repeat; transition: background-size .35s; }
 .project h3 a:hover { background-size: 100% 1px; }
 .project-copy > p:not(.kicker) { color: var(--ink-2); margin-bottom: 14px; }
-.stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; margin: 26px 0 24px; padding-top: 24px; border-top: 1px solid var(--line); }
+.stats { display: grid; grid-template-columns: repeat(3, minmax(min-content, 1fr)); gap: 18px; margin: 26px 0 24px; padding-top: 24px; border-top: 1px solid var(--line); }
 .stats dt { font: 400 clamp(1.45rem, 2.2vw, 1.9rem)/1.1 var(--serif); color: var(--accent-2); letter-spacing: -.02em; white-space: nowrap; }
 .flip .stats dt { color: var(--cool-2); }
 .stats dd { font-size: 13.5px; line-height: 1.5; color: var(--mute); margin-top: 8px; }
@@ -205,15 +204,23 @@ body::before { content: ""; position: fixed; inset: 0; z-index: 0; pointer-event
 .call-grid[data-phase="2"] i.back { background: var(--ink-2); transform: scale(1.12); }
 .call-grid[data-phase="2"] i.back.called { background: var(--accent); box-shadow: 0 0 0 2px var(--bg), 0 0 0 3.5px var(--accent), 0 0 20px 3px color-mix(in srgb, var(--accent) 75%, transparent); }
 
-.venn { width: min(100%, 340px); margin: 10px auto 0; overflow: visible; }
-.ring circle { fill: color-mix(in srgb, var(--cool) 9%, transparent); stroke: color-mix(in srgb, var(--cool) 70%, transparent); stroke-width: 1.2; }
-.ring text { font: 400 11px var(--mono); fill: var(--ink-2); text-anchor: middle; letter-spacing: .03em; }
-.core { opacity: 1; }
-.core-num { font: 400 30px var(--serif); fill: #fff6ea; text-anchor: middle; letter-spacing: -.02em; }
+/* The three rings are plain boxes moved with transform and opacity only, which the graphics card
+   animates without the page being repainted. */
+.venn { position: relative; width: min(100%, 340px); aspect-ratio: 320 / 280; margin: 10px auto 0; }
+.ring { position: absolute; width: 46.25%; aspect-ratio: 1; border-radius: 50%; border: 1.2px solid color-mix(in srgb, var(--cool) 70%, transparent); background: color-mix(in srgb, var(--cool) 9%, transparent); }
+.r1 { left: 26.875%; top: 10.7%; }
+.r2 { left: 13.75%; top: 35%; }
+.r3 { left: 40%; top: 35%; }
+.ring span { position: absolute; transform: translateX(-50%); font: 400 11px/1 var(--mono); color: var(--ink-2); letter-spacing: .03em; white-space: nowrap; }
+.r1 span { left: 50%; top: 10%; }
+.r2 span { left: 23%; top: 73%; }
+.r3 span { left: 77%; top: 73%; }
+.core { position: absolute; left: 35.625%; top: 37.14%; width: 28.75%; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle, rgba(255, 217, 168, .95), rgba(233, 135, 87, .55) 55%, rgba(217, 119, 87, 0)); }
+.core-num { position: absolute; left: 0; right: 0; top: 53.57%; margin-top: -.5em; text-align: center; font: 400 30px/1 var(--serif); color: #fff6ea; letter-spacing: -.02em; }
 html:not(.motion-off) .r1 { animation: r1 11s ease-in-out infinite; }
 html:not(.motion-off) .r2 { animation: r2 11s ease-in-out infinite; }
 html:not(.motion-off) .r3 { animation: r3 11s ease-in-out infinite; }
-html:not(.motion-off) .core, html:not(.motion-off) .core-num { animation: core 11s ease-in-out infinite; transform-origin: 160px 150px; }
+html:not(.motion-off) .core, html:not(.motion-off) .core-num { animation: core 11s ease-in-out infinite; }
 @keyframes r1 { 0%, 14%, 100% { transform: translate(0, -34px); } 42%, 82% { transform: none; } }
 @keyframes r2 { 0%, 14%, 100% { transform: translate(-36px, 22px); } 42%, 82% { transform: none; } }
 @keyframes r3 { 0%, 14%, 100% { transform: translate(36px, 22px); } 42%, 82% { transform: none; } }
@@ -310,7 +317,7 @@ a.card:hover .card-go span { transform: translateX(4px); }
 .js:not(.motion-off) .reveal.in { opacity: 1; transform: none; }
 
 /* ---------- motion off ---------- */
-.motion-off .glow, .motion-off .caret, .motion-off .pulse, .motion-off .shimmer { animation: none; }
+.motion-off .glow, .motion-off .caret, .motion-off .pulse::after, .motion-off .shimmer { animation: none; }
 .motion-off .shimmer { background-position: 50% 0; }
 .motion-off .call-grid i { transition: none; }
 .motion-off { scroll-behavior: auto; }
@@ -336,7 +343,7 @@ a.card:hover .card-go span { transform: translateX(4px); }
   .term-meta { display: none; }
   .term-body { min-height: 0; }
   .stats { grid-template-columns: 1fr; gap: 14px; }
-  .stats > div { display: grid; grid-template-columns: 112px 1fr; gap: 14px; align-items: baseline; }
+  .stats > div { display: grid; grid-template-columns: 128px 1fr; gap: 14px; align-items: baseline; }
   .stats dd { margin-top: 0; }
   .timeline li { grid-template-columns: 1fr; gap: 6px; padding: 26px 0; }
   .cards { grid-template-columns: 1fr; }
