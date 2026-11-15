@@ -47,37 +47,44 @@
     bufL[cy * cols + cx] = 1;
     paint(cx, cy, c, a);
   }
-  // Shapes are given in pixels and land on whichever tiles their centre covers.
-  function disc(x, y, r, c, a, soft) {
-    const x0 = Math.floor((x - r) / S), x1 = Math.floor((x + r) / S), y0 = Math.floor((y - r) / S), y1 = Math.floor((y + r) / S);
+  // Shapes are given in pixels. A tile at the edge of a shape is lit in proportion to how far
+  // inside the shape it sits, so things glide from tile to tile instead of jumping a whole tile.
+  const edge = (inside) => inside >= S * .5 ? 1 : inside <= -S * .5 ? 0 : inside / S + .5;
+  function disc(x, y, r, c, a) {
+    const R = r + S * .5;
+    const x0 = Math.floor((x - R) / S), x1 = Math.floor((x + R) / S), y0 = Math.floor((y - R) / S), y1 = Math.floor((y + R) / S);
     for (let cy = y0; cy <= y1; cy++) for (let cx = x0; cx <= x1; cx++) {
       const dx = (cx + .5) * S - x, dy = (cy + .5) * S - y, d = Math.sqrt(dx * dx + dy * dy);
-      if (d <= r) paint(cx, cy, c, soft ? a * (1 - soft * (d / r) * (d / r)) : a);
+      if (d < R) paint(cx, cy, c, a * edge(r - d));
     }
   }
   function ellipse(x, y, rx, ry, c, a) {
-    const x0 = Math.floor((x - rx) / S), x1 = Math.floor((x + rx) / S), y0 = Math.floor((y - ry) / S), y1 = Math.floor((y + ry) / S);
+    const x0 = Math.floor((x - rx) / S) - 1, x1 = Math.floor((x + rx) / S) + 1, y0 = Math.floor((y - ry) / S) - 1, y1 = Math.floor((y + ry) / S) + 1;
+    const least = Math.min(rx, ry);
     for (let cy = y0; cy <= y1; cy++) for (let cx = x0; cx <= x1; cx++) {
       const dx = ((cx + .5) * S - x) / rx, dy = ((cy + .5) * S - y) / ry, d = dx * dx + dy * dy;
-      if (d <= 1) paint(cx, cy, c, a * (1 - .55 * d));
+      const w = edge((1 - Math.sqrt(d)) * least);
+      if (w > 0) paint(cx, cy, c, a * w * (1 - .55 * Math.min(d, 1)));
     }
   }
   function capsule(xa, ya, xb, yb, r, c, a) {
-    const x0 = Math.floor((Math.min(xa, xb) - r) / S), x1 = Math.floor((Math.max(xa, xb) + r) / S);
-    const y0 = Math.floor((Math.min(ya, yb) - r) / S), y1 = Math.floor((Math.max(ya, yb) + r) / S);
+    const R = r + S * .5;
+    const x0 = Math.floor((Math.min(xa, xb) - R) / S), x1 = Math.floor((Math.max(xa, xb) + R) / S);
+    const y0 = Math.floor((Math.min(ya, yb) - R) / S), y1 = Math.floor((Math.max(ya, yb) + R) / S);
     const vx = xb - xa, vy = yb - ya, len = vx * vx + vy * vy || 1;
     for (let cy = y0; cy <= y1; cy++) for (let cx = x0; cx <= x1; cx++) {
       const px = (cx + .5) * S, py = (cy + .5) * S;
       const t = clamp(((px - xa) * vx + (py - ya) * vy) / len, 0, 1);
-      const dx = px - (xa + vx * t), dy = py - (ya + vy * t);
-      if (dx * dx + dy * dy <= r * r) paint(cx, cy, c, a);
+      const dx = px - (xa + vx * t), dy = py - (ya + vy * t), d = Math.sqrt(dx * dx + dy * dy);
+      if (d < R) paint(cx, cy, c, a * edge(r - d));
     }
   }
   function ring(x, y, r, c, a) {
     const x0 = Math.floor((x - r - S) / S), x1 = Math.floor((x + r + S) / S), y0 = Math.floor((y - r - S) / S), y1 = Math.floor((y + r + S) / S);
     for (let cy = y0; cy <= y1; cy++) for (let cx = x0; cx <= x1; cx++) {
       const dx = (cx + .5) * S - x, dy = (cy + .5) * S - y;
-      if (Math.abs(Math.sqrt(dx * dx + dy * dy) - r) < S * .62) paint(cx, cy, c, a);
+      const w = 1 - Math.abs(Math.sqrt(dx * dx + dy * dy) - r) / (S * .95);
+      if (w > 0) paint(cx, cy, c, a * w);
     }
   }
   const glow = (x, y, r, c, a) => glows.push([x, y, r, c, a]);
@@ -187,10 +194,20 @@
   const FAR_BIRD = [['W...W', '.W.W.', '..B..'], ['.....', 'WWBWW', '.....'], ['..B..', '.W.W.', 'W...W']];
   const BIRD = { B: [232, 237, 250], W: [196, 206, 236], T: [124, 138, 190], N: [176, 187, 222], H: [242, 245, 253], L: [140, 152, 196] };
   function sprite(frames, f, x, y, dir, alpha) {
-    const pic = frames[f], w = pic[0].length, cx0 = Math.round(x / S) - (w >> 1), cy0 = Math.round(y / S) - (pic.length >> 1);
-    for (let r = 0; r < pic.length; r++) for (let c = 0; c < w; c++) {
-      const ch = pic[r][c];
-      if (ch !== '.') paint(dir > 0 ? cx0 + c : cx0 + w - 1 - c, cy0 + r, BIRD[ch], ch === 'L' ? alpha * .5 : alpha);
+    const pic = frames[f], w = pic[0].length, h = pic.length;
+    const fx = x / S - w / 2, fy = y / S - h / 2, cx0 = Math.floor(fx), cy0 = Math.floor(fy), tx = fx - cx0, ty = fy - cy0;
+    for (let r = 0; r <= h; r++) for (let c = 0; c <= w; c++) {
+      let sum = 0, best = 0, ch = '';
+      for (let n = 0; n < 4; n++) {
+        const sc = c - (n & 1), sr = r - (n >> 1);
+        if (sc < 0 || sr < 0 || sc >= w || sr >= h) continue;
+        const p = pic[sr][dir > 0 ? sc : w - 1 - sc];
+        if (p === '.') continue;
+        const share = ((n & 1) ? tx : 1 - tx) * ((n >> 1) ? ty : 1 - ty);
+        sum += p === 'L' ? share * .5 : share;
+        if (share > best) { best = share; ch = p; }
+      }
+      if (sum > .02) paint(cx0 + c, cy0 + r, BIRD[ch], alpha * sum);
     }
   }
   const steppe = {
@@ -362,11 +379,11 @@
       }
       for (const p of this.pads) {
         const x = p.fx * W + Math.sin(t * .23 + p.ph) * 3, y = p.fy * H + Math.cos(t * .19 + p.ph) * 3, r = p.r * S;
-        const x0 = Math.floor((x - r) / S), x1 = Math.floor((x + r) / S), y0 = Math.floor((y - r) / S), y1 = Math.floor((y + r) / S);
+        const x0 = Math.floor((x - r) / S) - 1, x1 = Math.floor((x + r) / S) + 1, y0 = Math.floor((y - r) / S) - 1, y1 = Math.floor((y + r) / S) + 1;
         for (let cy = y0; cy <= y1; cy++) for (let cx = x0; cx <= x1; cx++) {
-          const dx = (cx + .5) * S - x, dy = (cy + .5) * S - y, d = Math.hypot(dx, dy);
-          if (d > r || (d > S && Math.abs(angleDiff(Math.atan2(dy, dx), p.notch)) < .34)) continue;
-          paint(cx, cy, d > r - S * 1.15 ? PAD_RIM : (hash(cx, cy) % 3 ? PAD : PAD_PALE), .62);
+          const dx = (cx + .5) * S - x, dy = (cy + .5) * S - y, d = Math.hypot(dx, dy), w = edge(r - d);
+          if (w <= 0 || (d > S && Math.abs(angleDiff(Math.atan2(dy, dx), p.notch)) < .34)) continue;
+          paint(cx, cy, d > r - S * 1.15 ? PAD_RIM : (hash(cx, cy) % 3 ? PAD : PAD_PALE), .62 * w);
         }
         if (p.flower) { disc(x + S, y - S, S * 1.25, [250, 162, 190], .92); paint(Math.floor((x + S) / S), Math.floor((y - S) / S), [255, 226, 150], 1); }
       }
@@ -394,9 +411,11 @@
       for (const f of this.flies) {
         const on = Math.max(0, Math.sin(f.ph)) ** 1.5, c = f.warm ? FLY_WARM : FLY_HOT;
         if (on < .03) continue;
-        const cx = Math.floor(f.x / S), cy = Math.floor(f.y / S);
-        paint(cx, cy, c, on * .95);
-        paintLit(cx + 1, cy, c, on * .22); paintLit(cx - 1, cy, c, on * .22); paintLit(cx, cy + 1, c, on * .22); paintLit(cx, cy - 1, c, on * .22);
+        const gx = f.x / S - .5, gy = f.y / S - .5, cx = Math.floor(gx), cy = Math.floor(gy), tx = gx - cx, ty = gy - cy;
+        paintLit(cx, cy, c, on * Math.min(.95, (1 - tx) * (1 - ty) * 1.6));
+        paintLit(cx + 1, cy, c, on * Math.min(.95, tx * (1 - ty) * 1.6));
+        paintLit(cx, cy + 1, c, on * Math.min(.95, (1 - tx) * ty * 1.6));
+        paintLit(cx + 1, cy + 1, c, on * Math.min(.95, tx * ty * 1.6));
         glow(f.x, f.y, S * 6, c, on * .2);
       }
       lantern(this.light);
@@ -435,14 +454,29 @@
     scene.draw(clock);
     flush();
   }
+  /* The backdrop redraws in step with the screen. The first frames are timed to learn the screen's
+     refresh rate: up to about 80 a second every frame is drawn, and on faster screens every second
+     or third one, which keeps the pacing even (144 Hz gives 72 frames a second). */
+  let every = 1, tick = 0, probe = [], lastTick = 0;
   function loop(now) {
-    const dt = Math.min((now - last) / 1000, .06);
-    if (dt >= .03) { last = now; clock += dt; frame(dt); }
+    if (probe) {
+      if (lastTick) probe.push(now - lastTick);
+      lastTick = now;
+      if (probe.length >= 30) {
+        probe.sort((a, b) => a - b);
+        every = Math.max(1, Math.round(1000 / probe[15] / 72));
+        probe = null;
+      }
+    }
+    if (++tick % every === 0) {
+      const dt = Math.min((now - last) / 1000, .06);
+      last = now; clock += dt; frame(dt);
+    }
     raf = requestAnimationFrame(loop);
   }
   function sync() {
     cancelAnimationFrame(raf);
-    if (motion && !document.hidden) { last = performance.now(); raf = requestAnimationFrame(loop); }
+    if (motion && !document.hidden) { last = performance.now(); lastTick = 0; raf = requestAnimationFrame(loop); }
     else if (scene) frame(0);
   }
 
@@ -462,6 +496,7 @@
       if (!cols) resize(); else { buildAtlas(); scene.init(); frame(0); }
     },
     setMotion(on) { motion = on; sync(); },
+    get everyNthFrame() { return every; },
     // Draws n frames back to back and returns the average cost of one, in milliseconds.
     bench(n = 120) {
       const t0 = performance.now();
