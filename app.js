@@ -48,10 +48,17 @@ for (const b of themeButtons) {
 
 /* ---------- pointer light on cards ---------- */
 for (const el of $$('[data-spot]')) {
+  let queued = false, x = 0, y = 0;
   el.addEventListener('pointermove', (e) => {
-    const r = el.getBoundingClientRect();
-    el.style.setProperty('--mx', `${e.clientX - r.left}px`);
-    el.style.setProperty('--my', `${e.clientY - r.top}px`);
+    x = e.clientX; y = e.clientY;
+    if (queued) return;
+    queued = true;
+    requestAnimationFrame(() => {
+      queued = false;
+      const r = el.getBoundingClientRect();
+      el.style.setProperty('--mx', `${x - r.left}px`);
+      el.style.setProperty('--my', `${y - r.top}px`);
+    });
   }, { passive: true });
 }
 

@@ -14,8 +14,11 @@
   const GLYPHS = '0123456789ABCDEFGHJKLMNPQRSTUVWXYZ+=#%*<>/';
   const TAU = Math.PI * 2;
 
-  let S = 10, W = 0, H = 0, cols = 0, rows = 0, dpr = 1;
-  let bufR, bufG, bufB, bufA, touched, count = 0, lane;
+  // S is the tile size in CSS pixels, cell the same tile in device pixels, q the ratio between them.
+  let S = 10, W = 0, H = 0, cols = 0, rows = 0, q = 1, cell = 10;
+  let bufR, bufG, bufB, bufA, bufL, touched, count = 0, lane;
+  let img, small, sctx, maskPattern, atlas;
+  const P = 64;   // the pattern of characters repeats every 64 tiles
   let scene = null, themeName = 'pond', motion = true, raf = 0, last = 0, clock = 0;
   const pointer = { x: -9999, y: -9999 };
   const glows = [];
@@ -24,6 +27,7 @@
   const pick = (list) => list[(Math.random() * list.length) | 0];
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
   const hash = (x, y) => { let h = (x * 374761393 + y * 668265263) | 0; h = (h ^ (h >>> 13)) * 1274126177 | 0; return (h ^ (h >>> 16)) >>> 0; };
+  const glyphAt = (cx, cy) => hash(cx % P, cy % P) % GLYPHS.length;
   const angleDiff = (a, b) => { let d = (a - b) % TAU; if (d > Math.PI) d -= TAU; if (d < -Math.PI) d += TAU; return d; };
 
   /* ---------- tile buffer ---------- */
@@ -36,6 +40,12 @@
     bufG[i] = (c[1] * a + bufG[i] * old * (1 - a)) / out;
     bufB[i] = (c[2] * a + bufB[i] * old * (1 - a)) / out;
     bufA[i] = Math.min(out, 1);
+  }
+  // Same, for faint tiles whose character should glow (stars, glints on the water, the pointer's light).
+  function paintLit(cx, cy, c, a) {
+    if (cx < 0 || cy < 0 || cx >= cols || cy >= rows || a <= 0.004) return;
+    bufL[cy * cols + cx] = 1;
+    paint(cx, cy, c, a);
   }
   // Shapes are given in pixels and land on whichever tiles their centre covers.
   function disc(x, y, r, c, a, soft) {
@@ -72,32 +82,77 @@
   }
   const glow = (x, y, r, c, a) => glows.push([x, y, r, c, a]);
 
+  /* Drawing a frame. Every tile is one pixel in a tiny image the size of the grid. That image is
+     scaled up in a single call, the gaps between tiles and the character in each tile are cut
+     out of it with one prepared stencil, and the soft glows are slipped in behind. The cost of a
+     frame therefore barely depends on how many tiles are lit. */
   function flush() {
-    ctx.clearRect(0, 0, W, H);
-    for (const [x, y, r, c, a] of glows) {
-      const g = ctx.createRadialGradient(x, y, 0, x, y, r);
-      g.addColorStop(0, `rgba(${c[0]},${c[1]},${c[2]},${a})`);
-      g.addColorStop(1, `rgba(${c[0]},${c[1]},${c[2]},0)`);
-      ctx.fillStyle = g; ctx.fillRect(x - r, y - r, r * 2, r * 2);
+    const px = img.data, cw = canvas.width, ch = canvas.height;
+    px.fill(0);
+    for (let n = 0; n < count; n++) {
+      const i = touched[n], a = bufA[i] * lane[i % cols], o = i * 4;
+      bufA[i] = a;
+      px[o] = bufR[i]; px[o + 1] = bufG[i]; px[o + 2] = bufB[i]; px[o + 3] = a * 255;
+    }
+    sctx.putImageData(img, 0, 0);
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.clearRect(0, 0, cw, ch);
+    ctx.drawImage(small, 0, 0, cols * cell, rows * cell);
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.fillStyle = maskPattern;
+    ctx.fillRect(0, 0, cw, ch);
+    ctx.globalCompositeOperation = 'source-over';
+    for (let n = 0; n < count; n++) {
+      const i = touched[n];
+      if (bufL[i]) {
+        const a = bufA[i];
+        if (a >= .05 && a < .4) {
+          const cx = i % cols, cy = (i / cols) | 0;
+          ctx.globalAlpha = Math.min(.9, a * 2.4);
+          ctx.drawImage(atlas, glyphAt(cx, cy) * cell, 0, cell, cell, cx * cell, cy * cell, cell, cell);
+        }
+        bufL[i] = 0;
+      }
+      bufA[i] = 0;
+    }
+    ctx.globalAlpha = 1;
+    count = 0;
+    ctx.globalCompositeOperation = 'destination-over';
+    for (let n = 0; n < glows.length; n++) {
+      const g = glows[n], x = g[0] * q, y = g[1] * q, r = g[2] * q, c = g[3];
+      const grad = ctx.createRadialGradient(x, y, 0, x, y, r);
+      grad.addColorStop(0, `rgba(${c[0]},${c[1]},${c[2]},${g[4]})`);
+      grad.addColorStop(1, `rgba(${c[0]},${c[1]},${c[2]},0)`);
+      ctx.fillStyle = grad; ctx.fillRect(x - r, y - r, r * 2, r * 2);
     }
     glows.length = 0;
-    const inset = S > 8 ? 1 : .5, size = S - inset * 2, dark = scene.glyph;
-    for (let n = 0; n < count; n++) {
-      const i = touched[n], cx = i % cols, cy = (i / cols) | 0;
-      bufA[i] *= lane[cx];
-      ctx.fillStyle = `rgba(${bufR[i] | 0},${bufG[i] | 0},${bufB[i] | 0},${bufA[i].toFixed(3)})`;
-      ctx.fillRect(cx * S + inset, cy * S + inset, size, size);
+    ctx.globalCompositeOperation = 'source-over';
+  }
+
+  const glyphFont = () => `600 ${Math.round(cell * .68)}px "JetBrains Mono", ui-monospace, Consolas, monospace`;
+  // The stencil: solid lines where the gaps between tiles go, and one half-strength character per tile.
+  function buildMask() {
+    const size = P * cell, m = document.createElement('canvas'), c = m.getContext('2d');
+    m.width = m.height = size;
+    const gap = Math.max(1, Math.round(cell * .1));
+    c.fillStyle = '#000';
+    for (let n = 0; n < P; n++) {
+      c.fillRect(n * cell, 0, gap, size); c.fillRect((n + 1) * cell - gap, 0, gap, size);
+      c.fillRect(0, n * cell, size, gap); c.fillRect(0, (n + 1) * cell - gap, size, gap);
     }
-    // One character per tile. Solid tiles get it cut out dark, faint tiles get it lit.
-    for (let n = 0; n < count; n++) {
-      const i = touched[n], a = bufA[i]; if (a < .07) continue;
-      const cx = i % cols, cy = (i / cols) | 0;
-      ctx.fillStyle = a > .36 ? `rgba(${dark[0]},${dark[1]},${dark[2]},${Math.min(.62, a * .7).toFixed(3)})`
-        : `rgba(${bufR[i] | 0},${bufG[i] | 0},${bufB[i] | 0},${Math.min(.9, a * 2.4).toFixed(3)})`;
-      ctx.fillText(GLYPHS[hash(cx, cy) % GLYPHS.length], cx * S + S / 2, cy * S + S / 2 + .5);
-    }
-    for (let n = 0; n < count; n++) bufA[touched[n]] = 0;
-    count = 0;
+    // Characters this small are mostly soft edges, so each one is struck twice to cut deep enough to read.
+    c.globalAlpha = .8; c.font = glyphFont(); c.textAlign = 'center'; c.textBaseline = 'middle';
+    for (let pass = 0; pass < 2; pass++)
+      for (let cy = 0; cy < P; cy++) for (let cx = 0; cx < P; cx++) c.fillText(GLYPHS[glyphAt(cx, cy)], cx * cell + cell / 2, cy * cell + cell / 2 + .5 * q);
+    maskPattern = ctx.createPattern(m, 'repeat');
+  }
+  // One row of ready-drawn glowing characters in the scene's light colour.
+  function buildAtlas() {
+    atlas = document.createElement('canvas');
+    atlas.width = GLYPHS.length * cell; atlas.height = cell;
+    const c = atlas.getContext('2d'), l = scene.lit;
+    c.fillStyle = `rgb(${l[0]},${l[1]},${l[2]})`; c.font = glyphFont(); c.textAlign = 'center'; c.textBaseline = 'middle';
+    for (let n = 0; n < GLYPHS.length; n++) c.fillText(GLYPHS[n], n * cell + cell / 2, cell / 2 + .5 * q);
   }
 
   // A soft patch of lit tiles under the pointer, in every scene.
@@ -107,7 +162,7 @@
     const x0 = Math.floor((pointer.x - r) / S), x1 = Math.floor((pointer.x + r) / S), y0 = Math.floor((pointer.y - r) / S), y1 = Math.floor((pointer.y + r) / S);
     for (let cy = y0; cy <= y1; cy++) for (let cx = x0; cx <= x1; cx++) {
       const dx = (cx + .5) * S - pointer.x, dy = (cy + .5) * S - pointer.y, d = Math.sqrt(dx * dx + dy * dy);
-      if (d < r) paint(cx, cy, c, (1 - d / r) * (1 - d / r) * (.1 + .16 * ((hash(cx, cy) % 100) / 100)));
+      if (d < r) paintLit(cx, cy, c, (1 - d / r) * (1 - d / r) * (.1 + .16 * ((hash(cx, cy) % 100) / 100)));
     }
     glow(pointer.x, pointer.y, r * 1.6, c, .07);
   }
@@ -117,6 +172,10 @@
     for (let i = 0; i < n; i++) list.push({ cx: (Math.random() * cols) | 0, cy: (Math.random() * rows) | 0, ph: rand(0, TAU), sp: rand(.4, 1.3), big: Math.random() < .12 });
     return list;
   }
+
+  const STAR = [214, 224, 255], MOON = [246, 214, 142], MOON_DIM = [226, 186, 110], CLOUD = [126, 142, 208], HILL = [58, 74, 138];
+  const GLINT = [140, 232, 220], RIPPLE = [170, 240, 228], PAD_RIM = [40, 118, 86], PAD = [82, 168, 108], PAD_PALE = [122, 198, 124];
+  const FLY_WARM = [255, 198, 120], FLY_HOT = [240, 132, 96];
 
   /* ---------- scene: steppe night ---------- */
   // B body, W wing, T wing tip, N neck, H head, L legs. Drawn flying right, mirrored for left.
@@ -135,7 +194,7 @@
     }
   }
   const steppe = {
-    glyph: [10, 15, 31],
+    lit: STAR,
     light: [147, 181, 255],
     init() {
       const small = W < 700;
@@ -174,7 +233,7 @@
       // stars
       for (const s of this.stars) {
         const a = .1 + .3 * (.5 + .5 * Math.sin(t * s.sp + s.ph));
-        paint(s.cx, s.cy, [214, 224, 255], s.big ? a * 1.7 : a);
+        paintLit(s.cx, s.cy, STAR, s.big ? a * 1.7 : a);
       }
       // moon: a disc with a bite taken out of it
       const mr = (small ? 3.6 : 5.4) * S, mx = W * (small ? .82 : .9), my = small ? 150 : H * .19;
@@ -183,17 +242,17 @@
       for (let cy = y0; cy <= y1; cy++) for (let cx = x0; cx <= x1; cx++) {
         const px = (cx + .5) * S, py = (cy + .5) * S;
         const d = Math.hypot(px - mx, py - my), bite = Math.hypot(px - (mx - mr * .52), py - (my - mr * .2));
-        if (d <= mr && bite > mr * .92) paint(cx, cy, hash(cx, cy) % 5 ? [246, 214, 142] : [226, 186, 110], .88);
+        if (d <= mr && bite > mr * .92) paint(cx, cy, hash(cx, cy) % 5 ? MOON : MOON_DIM, .88);
       }
       // clouds
-      for (const c of this.clouds) for (const p of c.puffs) ellipse(c.x + p.ox, c.y + p.oy, p.rx, p.ry, [126, 142, 208], c.a);
+      for (const c of this.clouds) for (const p of c.puffs) ellipse(c.x + p.ox, c.y + p.oy, p.rx, p.ry, CLOUD, c.a);
       // far hills along the bottom, and a ger with its door lit
       const base = H - (small ? 3 : 6) * S;
       for (let cx = 0; cx < cols; cx++) {
         const x = cx * S;
         const h1 = base - (Math.sin(x * .0031 + this.hills[0]) + Math.sin(x * .0077 + this.hills[1]) * .5) * S * 2.6;
         const h2 = base + S * 2.5 - Math.sin(x * .0052 + this.hills[2]) * S * 1.8;
-        for (let cy = Math.max(0, Math.floor(h1 / S)); cy < rows; cy++) paint(cx, cy, [58, 74, 138], cy * S > h2 ? .3 : .17);
+        for (let cy = Math.max(0, Math.floor(h1 / S)); cy < rows; cy++) paint(cx, cy, HILL, cy * S > h2 ? .3 : .17);
       }
       if (!small) {
         const gx = W * .1, gy = base - S * .5;
@@ -219,7 +278,7 @@
   const KOI = { white: [246, 242, 232], orange: [255, 142, 80], red: [228, 76, 54], black: [30, 44, 50], gold: [246, 200, 92] };
   const PROFILE = [1.5, 2.0, 2.3, 2.35, 2.25, 2.05, 1.8, 1.5, 1.2, .95, .75, 1.0, 1.25];
   const pond = {
-    glyph: [5, 32, 31],
+    lit: [150, 236, 224],
     light: [127, 227, 210],
     init() {
       const small = W < 700;
@@ -279,9 +338,9 @@
     draw(t) {
       for (const s of this.shimmer) {
         const v = Math.sin(t * s.sp * .6 + s.ph);
-        if (v > 0) { paint(s.cx, s.cy, [140, 232, 220], v * .13); paint(s.cx + 1, s.cy, [140, 232, 220], v * .07); }
+        if (v > 0) { paintLit(s.cx, s.cy, GLINT, v * .13); paintLit(s.cx + 1, s.cy, GLINT, v * .07); }
       }
-      for (const r of this.ripples) ring(r.x, r.y, 14 + r.age * 62, [170, 240, 228], (1 - r.age / 2.6) * .3);
+      for (const r of this.ripples) ring(r.x, r.y, 14 + r.age * 62, RIPPLE, (1 - r.age / 2.6) * .3);
       for (const k of this.koi) {
         const n = k.pts.length, u = S * k.scale;
         glow(k.pts[2].x, k.pts[2].y, u * 11, k.cols[3] === KOI.gold ? KOI.gold : KOI.orange, .1);
@@ -307,7 +366,7 @@
         for (let cy = y0; cy <= y1; cy++) for (let cx = x0; cx <= x1; cx++) {
           const dx = (cx + .5) * S - x, dy = (cy + .5) * S - y, d = Math.hypot(dx, dy);
           if (d > r || (d > S && Math.abs(angleDiff(Math.atan2(dy, dx), p.notch)) < .34)) continue;
-          paint(cx, cy, d > r - S * 1.15 ? [40, 118, 86] : (hash(cx, cy) % 3 ? [82, 168, 108] : [122, 198, 124]), .62);
+          paint(cx, cy, d > r - S * 1.15 ? PAD_RIM : (hash(cx, cy) % 3 ? PAD : PAD_PALE), .62);
         }
         if (p.flower) { disc(x + S, y - S, S * 1.25, [250, 162, 190], .92); paint(Math.floor((x + S) / S), Math.floor((y - S) / S), [255, 226, 150], 1); }
       }
@@ -317,7 +376,7 @@
 
   /* ---------- scene: embers ---------- */
   const embers = {
-    glyph: [18, 17, 15],
+    lit: FLY_WARM,
     light: [232, 140, 105],
     init() {
       this.flies = [];
@@ -333,11 +392,11 @@
     },
     draw() {
       for (const f of this.flies) {
-        const on = Math.max(0, Math.sin(f.ph)) ** 1.5, c = f.warm ? [255, 198, 120] : [240, 132, 96];
+        const on = Math.max(0, Math.sin(f.ph)) ** 1.5, c = f.warm ? FLY_WARM : FLY_HOT;
         if (on < .03) continue;
         const cx = Math.floor(f.x / S), cy = Math.floor(f.y / S);
         paint(cx, cy, c, on * .95);
-        paint(cx + 1, cy, c, on * .22); paint(cx - 1, cy, c, on * .22); paint(cx, cy + 1, c, on * .22); paint(cx, cy - 1, c, on * .22);
+        paintLit(cx + 1, cy, c, on * .22); paintLit(cx - 1, cy, c, on * .22); paintLit(cx, cy + 1, c, on * .22); paintLit(cx, cy - 1, c, on * .22);
         glow(f.x, f.y, S * 6, c, on * .2);
       }
       lantern(this.light);
@@ -348,24 +407,28 @@
 
   /* ---------- loop ---------- */
   function resize() {
-    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    q = Math.min(window.devicePixelRatio || 1, 2);
     W = window.innerWidth; H = window.innerHeight;
-    S = W < 700 ? 9 : 10;
+    // A tile is a whole number of device pixels, so its edges stay sharp on any screen scaling.
+    cell = Math.max(4, Math.round((W < 700 ? 9 : 10) * q));
+    S = cell / q;
     cols = Math.ceil(W / S); rows = Math.ceil(H / S);
-    canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    ctx.font = `600 ${Math.round(S * .62)}px "JetBrains Mono", ui-monospace, Consolas, monospace`;
-    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    canvas.width = Math.round(W * q); canvas.height = Math.round(H * q);
+    ctx.imageSmoothingEnabled = false;
     const n = cols * rows;
     bufR = new Float32Array(n); bufG = new Float32Array(n); bufB = new Float32Array(n); bufA = new Float32Array(n);
-    touched = new Int32Array(n); count = 0;
+    bufL = new Uint8Array(n); touched = new Int32Array(n); count = 0;
+    img = new ImageData(cols, rows);
+    small = document.createElement('canvas'); small.width = cols; small.height = rows;
+    sctx = small.getContext('2d');
     // Full strength in the page margins, quieter behind the column of text.
     lane = new Float32Array(cols);
     const half = Math.min(W, 1188) / 2;
     const quiet = W < 700 ? .42 : .56;
     for (let cx = 0; cx < cols; cx++) lane[cx] = quiet + (1 - quiet) * clamp((Math.abs((cx + .5) * S - W / 2) - half * .9) / 130, 0, 1);
     document.documentElement.style.setProperty('--cell', S + 'px');
-    if (scene) { scene.init(); frame(0); }
+    buildMask();
+    if (scene) { buildAtlas(); scene.init(); frame(0); }
   }
   function frame(dt) {
     if (dt > 0) scene.step(dt);
@@ -389,14 +452,22 @@
   document.addEventListener('pointerleave', () => { pointer.x = -9999; pointer.y = -9999; });
   window.addEventListener('pointerdown', (e) => { if (scene === pond && motion) pond.ripple(e.clientX, e.clientY); }, { passive: true });
   document.addEventListener('visibilitychange', sync);
-  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if (scene && !motion) frame(0); });
+  // The characters are drawn once into the stencil, so redo it when the real font has arrived.
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => { if (!scene || !cols) return; buildMask(); buildAtlas(); if (!motion) frame(0); });
 
   window.Backdrop = {
     setTheme(name) {
       themeName = SCENES[name] ? name : 'pond';
       scene = SCENES[themeName];
-      if (!cols) resize(); else { scene.init(); frame(0); }
+      if (!cols) resize(); else { buildAtlas(); scene.init(); frame(0); }
     },
-    setMotion(on) { motion = on; sync(); }
+    setMotion(on) { motion = on; sync(); },
+    // Draws n frames back to back and returns the average cost of one, in milliseconds.
+    bench(n = 120) {
+      const t0 = performance.now();
+      for (let i = 0; i < n; i++) { clock += 1 / 30; frame(1 / 30); }
+      ctx.getImageData(0, 0, 1, 1);
+      return +((performance.now() - t0) / n).toFixed(2);
+    }
   };
 })();
