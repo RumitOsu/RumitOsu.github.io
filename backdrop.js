@@ -11,7 +11,8 @@
    browser's compositor stretches it to fill the window. Three layers sit on top of each other:
      #field       the tiles, one pixel each, scaled up with hard edges
      .bd-stencil  drawn once: the gaps between tiles and the character in every tile, in the page colour
-     .bd-haze     the soft glows around creatures, two pixels per tile, scaled up smoothly
+     .bd-haze     the soft glows around creatures and the two colour washes in the corners,
+                  two pixels per tile, scaled up smoothly
    Exposes window.Backdrop = { setTheme(name), setMotion(on), bench(n) }.
    Add #fps to the page address to see how it is running in a given browser. */
 (function () {
@@ -109,6 +110,10 @@
     ctx.putImageData(img, 0, 0);
     hctx.clearRect(0, 0, haze.width, haze.height);
     const f = HAZE / S;
+    // Two wide washes of the scene's colours, top right and bottom left, drifting very slowly.
+    const dim = W < 700 ? .8 : 1, da = .5 + .5 * Math.sin(clock * .12), db = .5 + .5 * Math.sin(clock * .098 + 1.7);
+    wash((W * (.89 - .09 * da)) * f, (W * .09 + H * .08 * da) * f, Math.max(210, W * .23) * (1 + .12 * da) * f, scene.wash[0], .12 * dim);
+    wash((W * (.06 + .1 * db)) * f, (H - W * .04 - H * .09 * db) * f, Math.max(190, W * .2) * (1 + .08 * db) * f, scene.wash[1], .1 * dim);
     for (let n = 0; n < glows.length; n++) {
       const g = glows[n], x = g[0] * f, y = g[1] * f, r = g[2] * f, c = g[3];
       const grad = hctx.createRadialGradient(x, y, 0, x, y, r);
@@ -117,6 +122,15 @@
       hctx.fillStyle = grad; hctx.fillRect(x - r, y - r, r * 2, r * 2);
     }
     glows.length = 0;
+  }
+
+  function wash(x, y, r, c, a) {
+    const grad = hctx.createRadialGradient(x, y, 0, x, y, r), rgb = `${c[0]},${c[1]},${c[2]}`;
+    grad.addColorStop(0, `rgba(${rgb},${a})`);
+    grad.addColorStop(.3, `rgba(${rgb},${a * .62})`);
+    grad.addColorStop(.62, `rgba(${rgb},${a * .25})`);
+    grad.addColorStop(1, `rgba(${rgb},0)`);
+    hctx.fillStyle = grad; hctx.fillRect(x - r, y - r, r * 2, r * 2);
   }
 
   /* The stencil is drawn once per scene and window size, then left alone. It paints the page colour
@@ -192,7 +206,7 @@
     }
   }
   const steppe = {
-    bg: [10, 15, 31], ink: [238, 240, 248],
+    bg: [10, 15, 31], ink: [238, 240, 248], wash: [[242, 204, 126], [147, 181, 255]],
     light: [147, 181, 255],
     init() {
       const small = W < 700;
@@ -276,7 +290,7 @@
   const KOI = { white: [246, 242, 232], orange: [255, 142, 80], red: [228, 76, 54], black: [30, 44, 50], gold: [246, 200, 92] };
   const PROFILE = [1.5, 2.0, 2.3, 2.35, 2.25, 2.05, 1.8, 1.5, 1.2, .95, .75, 1.0, 1.25];
   const pond = {
-    bg: [5, 32, 31], ink: [236, 247, 243],
+    bg: [5, 32, 31], ink: [236, 247, 243], wash: [[255, 154, 108], [127, 227, 210]],
     light: [127, 227, 210],
     init() {
       const small = W < 700;
@@ -374,7 +388,7 @@
 
   /* ---------- scene: embers ---------- */
   const embers = {
-    bg: [18, 17, 15], ink: [240, 236, 228],
+    bg: [18, 17, 15], ink: [240, 236, 228], wash: [[217, 119, 87], [159, 171, 247]],
     light: [232, 140, 105],
     init() {
       this.flies = [];

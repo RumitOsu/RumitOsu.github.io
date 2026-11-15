@@ -54,11 +54,6 @@ main, .nav, .footer { position: relative; z-index: 2; }
    a stencil of gaps and characters that is drawn once, and the soft glows. */
 #field, .bd-stencil, .bd-haze { position: fixed; left: 0; top: 0; z-index: 0; pointer-events: none; }
 #field { image-rendering: crisp-edges; image-rendering: pixelated; }
-.glow { position: fixed; z-index: 0; pointer-events: none; border-radius: 50%; opacity: .5; will-change: transform; }
-.glow-a { width: 46vw; height: 46vw; min-width: 420px; min-height: 420px; right: -12vw; top: -14vw; background: radial-gradient(circle closest-side, color-mix(in srgb, var(--accent) 24%, transparent), color-mix(in srgb, var(--accent) 15%, transparent) 30%, color-mix(in srgb, var(--accent) 6%, transparent) 62%, transparent); animation: drift-a 26s ease-in-out infinite alternate; }
-.glow-b { width: 40vw; height: 40vw; min-width: 380px; min-height: 380px; left: -14vw; bottom: -16vw; background: radial-gradient(circle closest-side, color-mix(in srgb, var(--cool) 20%, transparent), color-mix(in srgb, var(--cool) 12%, transparent) 30%, color-mix(in srgb, var(--cool) 5%, transparent) 62%, transparent); animation: drift-b 32s ease-in-out infinite alternate; }
-@keyframes drift-a { to { transform: translate3d(-9vw, 8vh, 0) scale(1.12); } }
-@keyframes drift-b { to { transform: translate3d(10vw, -9vh, 0) scale(1.08); } }
 
 /* Switching scenes: the new one opens out in a circle (driven from app.js). */
 ::view-transition-old(root), ::view-transition-new(root) { animation: none; mix-blend-mode: normal; }
@@ -66,7 +61,7 @@ main, .nav, .footer { position: relative; z-index: 2; }
 ::view-transition-new(root) { z-index: 2; }
 
 /* Text that sits straight on the backdrop gets a soft halo so passing creatures don't fight it. */
-.hero-copy, .section-head, .timeline, .about-copy { text-shadow: 0 0 14px var(--bg), 0 0 4px var(--bg); }
+.hero-copy, .section-head, .timeline, .about-copy { text-shadow: 0 0 5px var(--bg); }
 .shimmer, .btn { text-shadow: none; }
 
 /* ---------- nav ---------- */
@@ -116,14 +111,14 @@ main, .nav, .footer { position: relative; z-index: 2; }
 
 /* A soft light that follows the pointer across a card, and lights its border. */
 [data-spot] { position: relative; isolation: isolate; }
-[data-spot]::before, [data-spot]::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; opacity: 0; transition: opacity .35s; }
+[data-spot]::before, [data-spot]::after { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; opacity: 0; visibility: hidden; transition: opacity .35s, visibility 0s .35s; }
 [data-spot]::before { z-index: -1; background: radial-gradient(520px circle at var(--mx, 50%) var(--my, 50%), color-mix(in srgb, var(--accent) 10%, transparent), transparent 62%); }
 [data-spot]::after {
   padding: 1px; background: radial-gradient(360px circle at var(--mx, 50%) var(--my, 50%), color-mix(in srgb, var(--accent-2) 85%, transparent), transparent 65%);
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor;
   mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0);
 }
-[data-spot]:hover::before, [data-spot]:hover::after { opacity: 1; }
+[data-spot]:hover::before, [data-spot]:hover::after { opacity: 1; visibility: visible; transition: opacity .35s, visibility 0s; }
 .project.flip[data-spot]::before, .card.cool[data-spot]::before { background: radial-gradient(520px circle at var(--mx, 50%) var(--my, 50%), color-mix(in srgb, var(--cool) 10%, transparent), transparent 62%); }
 .project.flip[data-spot]::after, .card.cool[data-spot]::after { background: radial-gradient(360px circle at var(--mx, 50%) var(--my, 50%), color-mix(in srgb, var(--cool-2) 80%, transparent), transparent 65%); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) content-box exclude, linear-gradient(#000 0 0); }
 
@@ -227,12 +222,12 @@ html:not(.motion-off) .core, html:not(.motion-off) .core-num { animation: core 1
 @keyframes core { 0%, 30%, 94%, 100% { opacity: 0; transform: scale(.7); } 48%, 82% { opacity: 1; transform: scale(1); } 62% { opacity: 1; transform: scale(1.08); } }
 
 .all-link { display: flex; align-items: center; flex-wrap: wrap; gap: 14px 22px; margin-top: 34px; }
-.all-link p { color: var(--mute); font-size: 15px; text-shadow: 0 0 14px var(--bg), 0 0 4px var(--bg); }
+.all-link p { color: var(--mute); font-size: 15px; text-shadow: 0 0 5px var(--bg); }
 .all-link p a, .card-text a { color: var(--ink-2); text-underline-offset: 4px; text-decoration-color: var(--line-2); transition: color .2s, text-decoration-color .2s; }
 .all-link p a:hover, .card-text a:hover { color: var(--accent-2); text-decoration-color: var(--accent); }
 
 /* ---------- all projects page ---------- */
-.page-head { padding-top: clamp(120px, 15vw, 170px); padding-bottom: clamp(32px, 5vw, 56px); text-shadow: 0 0 14px var(--bg), 0 0 4px var(--bg); }
+.page-head { padding-top: clamp(120px, 15vw, 170px); padding-bottom: clamp(32px, 5vw, 56px); text-shadow: 0 0 5px var(--bg); }
 .page-head h1 { font: 400 clamp(2.2rem, 4.4vw, 3.6rem)/1.08 var(--serif); letter-spacing: -.025em; margin: 18px 0 18px; text-wrap: balance; }
 .page-head > p:not(.label) { color: var(--ink-2); max-width: 38em; font-size: 1.06rem; }
 .cards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; padding-bottom: clamp(70px, 10vw, 130px); }
@@ -317,7 +312,7 @@ a.card:hover .card-go span { transform: translateX(4px); }
 .js:not(.motion-off) .reveal.in { opacity: 1; transform: none; }
 
 /* ---------- motion off ---------- */
-.motion-off .glow, .motion-off .caret, .motion-off .pulse::after, .motion-off .shimmer { animation: none; }
+.motion-off .caret, .motion-off .pulse::after, .motion-off .shimmer { animation: none; }
 .motion-off .shimmer { background-position: 50% 0; }
 .motion-off .call-grid i { transition: none; }
 .motion-off { scroll-behavior: auto; }
@@ -349,7 +344,6 @@ a.card:hover .card-go span { transform: translateX(4px); }
   .cards { grid-template-columns: 1fr; }
   .facts > div { grid-template-columns: 1fr; gap: 0; }
   .prompt { padding-left: 14px; font-size: 13.5px; }
-  .glow { opacity: .4; }
   .themes > span, .themes button b { display: none; }
   .themes button { padding: 9px; }
   .footer { padding-bottom: 76px; }
