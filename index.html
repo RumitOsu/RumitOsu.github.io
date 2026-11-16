@@ -10,14 +10,14 @@
   <meta property="og:type" content="website">
   <title>Timur Kherlenbayar — data and AI work</title>
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="assets/fonts/type-home.css?v=8">
-  <link rel="stylesheet" href="style.css?v=8">
+  <link rel="stylesheet" href="assets/fonts/type-home.css?v=9">
+  <link rel="stylesheet" href="style.css?v=9">
   <script>
     document.documentElement.classList.add('js');
     try { var t = localStorage.getItem('tk-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
   </script>
-  <script src="backdrop.js?v=8" defer></script>
-  <script src="app.js?v=8" defer></script>
+  <script src="backdrop.js?v=9" defer></script>
+  <script src="app.js?v=9" defer></script>
 </head>
 <body>
   <canvas id="field" aria-hidden="true"></canvas>
@@ -57,9 +57,9 @@
           <p class="t-out" style="--d:1.3s"><i aria-hidden="true">●</i><span>Timur Kherlenbayar, a data analyst who graduates from BYU in December 2026 and is looking for full-time work in data and AI.</span></p>
 
           <p class="t-cmd" style="--n:18;--d:2.3s"><b aria-hidden="true">&gt;</b><span>what has he built?</span></p>
-          <a class="t-row" style="--d:3.4s" href="projects/who-gets-the-call/">
+          <a class="t-row" style="--d:3.4s" href="projects/pick-the-winner/">
             <i aria-hidden="true">●</i>
-            <span><strong>Who Gets the Call?</strong><em>A nurse has time for 20 calls. The model’s list reaches 43% of the patients who come back.</em></span>
+            <span><strong>Pick the Winner</strong><em>One winning headline in three wasn’t really the best, and the tests were still worth running.</em></span>
             <u aria-hidden="true">→</u>
           </a>
           <a class="t-row" style="--d:3.9s" href="projects/anatomy-of-a-dzud/">
@@ -67,12 +67,12 @@
             <span><strong>Anatomy of a Dzud</strong><em>Three weather conditions take the risk of a mass livestock die-off from 2% to 36%.</em></span>
             <u aria-hidden="true">→</u>
           </a>
-
-          <a class="t-row" style="--d:4.4s" href="projects/pick-the-winner/">
+          <a class="t-row" style="--d:4.4s" href="projects/who-gets-the-call/">
             <i aria-hidden="true">●</i>
-            <span><strong>Pick the Winner</strong><em>One winning headline in three wasn’t really the best, and the tests were still worth running.</em></span>
+            <span><strong>Who Gets the Call?</strong><em>A nurse has time for 20 calls. The model’s list reaches 43% of the patients who come back.</em></span>
             <u aria-hidden="true">→</u>
           </a>
+
 
           <p class="t-cmd t-idle" style="--d:5.3s"><b aria-hidden="true">&gt;</b><span class="caret" aria-hidden="true"></span></p>
         </div>
@@ -90,23 +90,37 @@
 
       <article class="project reveal" data-spot>
         <div class="project-copy">
-          <p class="kicker"><span>01</span>Applied machine learning · Healthcare</p>
-          <h3><a href="projects/who-gets-the-call/">Who Gets the Call?</a></h3>
-          <p>One hundred patients leave the hospital today, and about ten of them will be back within a month. The nurse who follows up has time for twenty calls. I built a tool that picks those twenty, gives a reason for every name on the list, and turns a discharge note into a short guide for the call.</p>
-          <p>The page lets you try the nurse’s job yourself before it shows you what the model would have done. It also shows the part I found most interesting, which is that an experienced nurse’s rule of thumb gets almost as far as the model does.</p>
+          <p class="kicker"><span>01</span>Experiments · Media</p>
+          <h3><a href="projects/pick-the-winner/">Pick the Winner</a></h3>
+          <p>For two years the website Upworthy chose its headlines by trying them out on live visitors, and it later released the records of 32,487 of those tests. I used them to ask how often the winner of a test was really the best headline, and whether a person, a model or an AI could have picked it without running the test.</p>
+          <p>The page opens with a game in which you try to pick real winners yourself. After that it measures how much of a test result is luck, and it ends on the part that surprised me, which is that the tests were wrong about the best headline a third of the time and were still well worth running.</p>
           <dl class="stats">
-            <div><dt>43%</dt><dd>of the patients who came back were on the model’s list of twenty</dd></div>
-            <div><dt>20%</dt><dd>is what twenty calls picked at random would have reached</dd></div>
-            <div><dt>101,766</dt><dd>hospital stays from a public research dataset sit behind it</dd></div>
+            <div><dt>67%</dt><dd>of the winning headlines were truly the best one in their test</dd></div>
+            <div><dt>82%</dt><dd>of the gain from choosing well was collected by the tests anyway</dd></div>
+            <div><dt>32,487</dt><dd>real headline tests from a public research archive sit behind it</dd></div>
           </dl>
-          <ul class="tags" aria-label="Built with"><li>Python</li><li>SQL and DuckDB</li><li>XGBoost</li><li>FastAPI</li><li>A local language model</li></ul>
-          <div class="actions"><a class="btn primary" href="projects/who-gets-the-call/">Open the project <span aria-hidden="true">→</span></a></div>
+          <ul class="tags" aria-label="Built with"><li>Python</li><li>Experiment statistics</li><li>Simulation</li><li>scikit-learn</li><li>A local language model</li></ul>
+          <div class="actions">
+            <a class="btn primary" href="projects/pick-the-winner/">Play the game <span aria-hidden="true">→</span></a>
+            <a class="btn ghost" href="https://github.com/RumitOsu/pick-the-winner" target="_blank" rel="noopener noreferrer">Code on GitHub <span aria-hidden="true">↗</span></a>
+          </div>
         </div>
-        <a class="project-vis vis-call" href="projects/who-gets-the-call/" tabindex="-1" aria-hidden="true">
-          <div class="vis-top"><span>100 patients go home</span><span id="call-phase">day 0</span></div>
-          <div class="call-grid" id="call-grid"></div>
-          <p class="vis-caption" id="call-caption">A nurse has time for twenty calls.</p>
-          <div class="legend"><span><i class="k-called"></i>called</span><span><i class="k-back"></i>came back</span><span><i class="k-both"></i>came back, and got a call</span></div>
+        <a class="project-vis vis-pick" href="projects/pick-the-winner/" tabindex="-1" aria-hidden="true">
+          <div class="vis-top"><span>one story, two headlines</span><span>3,000 visitors each</span></div>
+          <div class="slips">
+            <div class="slip">
+              <p class="slip-h">A Brilliant Scientist Walks Into A Toy Store. Then He Starts Changing Lives Left And Right.</p>
+              <div class="slip-bar"><i style="width:69%"></i></div>
+              <p class="slip-n"><span>38 clicks</span><span>1.25%</span></p>
+            </div>
+            <div class="slip win">
+              <span class="slip-stamp">winner</span>
+              <p class="slip-h">He Was Left Out Because He Couldn’t Keep Up. But Then He Got The Coolest Toy Ever From A Scientist.</p>
+              <div class="slip-bar"><i style="width:100%"></i></div>
+              <p class="slip-n"><span>55 clicks</span><span>1.81%</span></p>
+            </div>
+          </div>
+          <p class="vis-caption">Every test names a winner.<br>Two times in three it was truly the best.</p>
         </a>
       </article>
 
@@ -142,37 +156,26 @@
 
       <article class="project reveal" data-spot>
         <div class="project-copy">
-          <p class="kicker"><span>03</span>Experiments · Media</p>
-          <h3><a href="projects/pick-the-winner/">Pick the Winner</a></h3>
-          <p>For two years the website Upworthy chose its headlines by trying them out on live visitors, and it later released the records of 32,487 of those tests. I used them to ask how often the winner of a test was really the best headline, and whether a person, a model or an AI could have picked it without running the test.</p>
-          <p>The page opens with a game in which you try to pick real winners yourself. After that it measures how much of a test result is luck, and it ends on the part that surprised me, which is that the tests were wrong about the best headline a third of the time and were still well worth running.</p>
+          <p class="kicker"><span>03</span>Applied machine learning · Healthcare</p>
+          <h3><a href="projects/who-gets-the-call/">Who Gets the Call?</a></h3>
+          <p>One hundred patients leave the hospital today, and about ten of them will be back within a month. The nurse who follows up has time for twenty calls. I built a tool that picks those twenty, gives a reason for every name on the list, and turns a discharge note into a short guide for the call.</p>
+          <p>The page lets you try the nurse’s job yourself before it shows you what the model would have done. It also shows the part I found most interesting, which is that an experienced nurse’s rule of thumb gets almost as far as the model does.</p>
           <dl class="stats">
-            <div><dt>67%</dt><dd>of the winning headlines were truly the best one in their test</dd></div>
-            <div><dt>82%</dt><dd>of the gain from choosing well was collected by the tests anyway</dd></div>
-            <div><dt>32,487</dt><dd>real headline tests from a public research archive sit behind it</dd></div>
+            <div><dt>43%</dt><dd>of the patients who came back were on the model’s list of twenty</dd></div>
+            <div><dt>20%</dt><dd>is what twenty calls picked at random would have reached</dd></div>
+            <div><dt>101,766</dt><dd>hospital stays from a public research dataset sit behind it</dd></div>
           </dl>
-          <ul class="tags" aria-label="Built with"><li>Python</li><li>Experiment statistics</li><li>Simulation</li><li>scikit-learn</li><li>A local language model</li></ul>
+          <ul class="tags" aria-label="Built with"><li>Python</li><li>SQL and DuckDB</li><li>XGBoost</li><li>FastAPI</li><li>A local language model</li></ul>
           <div class="actions">
-            <a class="btn primary" href="projects/pick-the-winner/">Play the game <span aria-hidden="true">→</span></a>
-            <a class="btn ghost" href="https://github.com/RumitOsu/pick-the-winner" target="_blank" rel="noopener noreferrer">Code on GitHub <span aria-hidden="true">↗</span></a>
+            <a class="btn primary" href="projects/who-gets-the-call/">Open the project <span aria-hidden="true">→</span></a>
+            <a class="btn ghost" href="https://github.com/RumitOsu/readmission-follow-up-assistant" target="_blank" rel="noopener noreferrer">Code on GitHub <span aria-hidden="true">↗</span></a>
           </div>
         </div>
-        <a class="project-vis vis-pick" href="projects/pick-the-winner/" tabindex="-1" aria-hidden="true">
-          <div class="vis-top"><span>one story, two headlines</span><span>3,000 visitors each</span></div>
-          <div class="slips">
-            <div class="slip">
-              <p class="slip-h">A Brilliant Scientist Walks Into A Toy Store. Then He Starts Changing Lives Left And Right.</p>
-              <div class="slip-bar"><i style="width:69%"></i></div>
-              <p class="slip-n"><span>38 clicks</span><span>1.25%</span></p>
-            </div>
-            <div class="slip win">
-              <span class="slip-stamp">winner</span>
-              <p class="slip-h">He Was Left Out Because He Couldn’t Keep Up. But Then He Got The Coolest Toy Ever From A Scientist.</p>
-              <div class="slip-bar"><i style="width:100%"></i></div>
-              <p class="slip-n"><span>55 clicks</span><span>1.81%</span></p>
-            </div>
-          </div>
-          <p class="vis-caption">Every test names a winner.<br>Two times in three it was truly the best.</p>
+        <a class="project-vis vis-call" href="projects/who-gets-the-call/" tabindex="-1" aria-hidden="true">
+          <div class="vis-top"><span>100 patients go home</span><span id="call-phase">day 0</span></div>
+          <div class="call-grid" id="call-grid"></div>
+          <p class="vis-caption" id="call-caption">A nurse has time for twenty calls.</p>
+          <div class="legend"><span><i class="k-called"></i>called</span><span><i class="k-back"></i>came back</span><span><i class="k-both"></i>came back, and got a call</span></div>
         </a>
       </article>
 
