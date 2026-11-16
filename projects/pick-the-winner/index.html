@@ -503,6 +503,8 @@ footer a { color: var(--ink); }
         <dd>Models are logistic regressions on the difference between two headlines, built with scikit-learn. The meaning model uses sentence embeddings from all-mpnet-base-v2. The language model is Qwen3 with 8 billion parameters, run locally through Ollama, with the headlines shuffled for every test because it turned out to favour certain positions in a list. It was scored on a random 1,500 of the scored tests. Tests are grouped into stories by shared headlines, pictures and opening lines, and no story appears on both sides of the contest. As a further check I removed every scored test that had a headline closely resembling one from the learning period, and the results did not change.</dd>
         <dt>Tools</dt>
         <dd>Python, pandas, NumPy, SciPy, scikit-learn, sentence-transformers and Ollama for the analysis. The page is plain HTML, CSS and JavaScript with no libraries, and the simulator in section 1 runs in your browser.</dd>
+        <dt>Code</dt>
+        <dd>Every step of the analysis, and the script that puts its numbers into this page, is in a public repository: <a href="https://github.com/RumitOsu/pick-the-winner" target="_blank" rel="noopener noreferrer">github.com/RumitOsu/pick-the-winner</a>.</dd>
       </dl>
     </div>
   </section>
@@ -511,7 +513,7 @@ footer a { color: var(--ink); }
 <footer class="pad">
   <div class="col">
     <span>A project by <a href="../../">Timur Kherlenbayar</a>, 2026.</span>
-    <span><a href="../">All projects</a> · <a href="../../#contact">Contact</a></span>
+    <span><a href="https://github.com/RumitOsu/pick-the-winner" target="_blank" rel="noopener noreferrer">Code on GitHub</a> · <a href="../">All projects</a> · <a href="../../#contact">Contact</a></span>
   </div>
 </footer>
 
