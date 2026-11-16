@@ -217,6 +217,21 @@ html:not(.motion-off) .core, html:not(.motion-off) .core-num { animation: core 1
 @keyframes r3 { 0%, 14%, 100% { transform: translate(36px, 22px); } 42%, 82% { transform: none; } }
 @keyframes core { 0%, 30%, 94%, 100% { opacity: 0; transform: scale(.7); } 48%, 82% { opacity: 1; transform: scale(1); } 62% { opacity: 1; transform: scale(1.08); } }
 
+/* "Pick the Winner": two headline slips whose click bars fill, then one gets the stamp. Transform and opacity only. */
+.slips { display: grid; gap: 16px; margin: 30px 0 22px; }
+.slip { position: relative; border: 1px solid var(--line-2); border-radius: 14px; padding: 16px 16px 13px; background: rgba(255, 255, 255, 0.03); }
+.slip-h { font: 400 1.02rem/1.34 var(--serif); color: var(--ink-2); }
+.slip.win .slip-h { color: var(--ink); }
+.slip-bar { height: 5px; border-radius: 3px; background: var(--line); overflow: hidden; margin-top: 13px; }
+.slip-bar i { display: block; height: 100%; border-radius: 3px; background: var(--ink-2); transform-origin: 0 50%; }
+.slip.win .slip-bar i { background: var(--accent); }
+.slip-n { display: flex; justify-content: space-between; font: 400 11.5px/1 var(--mono); color: var(--mute); margin-top: 9px; letter-spacing: .03em; }
+.slip-stamp { position: absolute; right: 14px; top: -12px; font: 500 11px/1 var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--accent-2); background: var(--bg); border: 1px solid var(--accent); border-radius: 7px; padding: 6px 9px; transform: rotate(4deg); }
+html:not(.motion-off) .slip-bar i { animation: slipbar 9s cubic-bezier(.3, .7, .2, 1) infinite; }
+html:not(.motion-off) .slip-stamp { animation: slipstamp 9s ease infinite; }
+@keyframes slipbar { 0%, 6% { transform: scaleX(0); } 34%, 100% { transform: none; } }
+@keyframes slipstamp { 0%, 38% { opacity: 0; transform: rotate(4deg) scale(1.5); } 44%, 94% { opacity: 1; transform: rotate(4deg); } 100% { opacity: 0; transform: rotate(4deg); } }
+
 .all-link { display: flex; align-items: center; flex-wrap: wrap; gap: 14px 22px; margin-top: 34px; }
 .all-link p { color: var(--mute); font-size: 15px; text-shadow: 0 0 5px var(--bg); }
 .all-link p a, .card-text a { color: var(--ink-2); text-underline-offset: 4px; text-decoration-color: var(--line-2); transition: color .2s, text-decoration-color .2s; }

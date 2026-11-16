@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#f3eee3">
+<meta name="description" content="Upworthy ran 32,487 headline tests. A data project by Timur Kherlenbayar on how often the winning headline was really the best one, and whether a person or a model could have picked it without a test.">
+<meta property="og:title" content="Pick the Winner — Timur Kherlenbayar">
+<meta property="og:description" content="How often is the winner of an A/B test really the best option? An interactive look at 32,487 real headline tests.">
+<title>Pick the Winner — Timur Kherlenbayar</title>
+<link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="../../assets/fonts/type-2.css">
+<style>
+/* A committed light look: newsprint, black ink, an editor's red pencil and a yellow marker.
+   One reading column (680px) with wider exhibits (1080px) for the game and the charts. */
+:root {
+  color-scheme: light;
+  --paper: #f3eee3;
+  --paper-2: #e9e2d2;
+  --card: #fcfaf4;
+  --ink: #1b1915;
+  --ink-2: #48423a;
+  --muted: #6d6558;
+  --rule: #d3cab7;
+  --red: #c2321d;
+  --red-soft: #f1d3c9;
+  --blue: #1f4f9c;
+  --blue-soft: #d5deee;
+  --marker: #ffdf5e;
+  --green: #2c7548;
+  --serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --cond: "Sofia Sans Condensed", "Arial Narrow", Arial, sans-serif;
+  --xcond: "Sofia Sans Extra Condensed", "Sofia Sans Condensed", "Arial Narrow", Impact, sans-serif;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 19px/1.68 var(--serif); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+body::before { content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: .5;
+  background: radial-gradient(1200px 600px at 15% -10%, #fbf8f0 0%, transparent 60%), radial-gradient(900px 700px at 110% 30%, #ece4d2 0%, transparent 55%); }
+main, header, footer { position: relative; z-index: 1; }
+.pad { padding-left: max(20px, env(safe-area-inset-left, 0px)); padding-right: max(20px, env(safe-area-inset-right, 0px)); }
+.col { max-width: 680px; margin: 0 auto; }
+.wide { max-width: 1080px; margin: 0 auto; }
+p { margin: 0 0 1.15em; color: var(--ink-2); }
+p strong, p b { color: var(--ink); font-weight: 600; }
+a { color: var(--blue); text-underline-offset: 3px; }
+h1, h2, h3 { margin: 0; text-wrap: balance; }
+h2 { font: 600 clamp(30px, 4.4vw, 42px)/1.12 var(--serif); letter-spacing: -0.015em; margin-bottom: .6em; }
+h3 { font: 600 22px/1.25 var(--serif); }
+button { font: inherit; color: inherit; cursor: pointer; }
+button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid var(--blue); outline-offset: 3px; }
+.label { font: 700 13px/1 var(--cond); letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
+.num { font-family: var(--cond); font-variant-numeric: tabular-nums; }
+mark { background: linear-gradient(transparent 55%, var(--marker) 55%); color: inherit; padding: 0 .08em; }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* Top bar */
+.top { position: sticky; top: 0; z-index: 20; display: flex; justify-content: space-between; align-items: center; gap: 12px; height: 44px;
+  background: rgba(243, 238, 227, .96); border-bottom: 1px solid var(--rule); font: 600 15px/1 var(--cond); letter-spacing: .04em; }
+.top a { color: var(--ink); text-decoration: none; padding: 8px 0; }
+.top a:hover { color: var(--red); }
+.top span { color: var(--muted); }
+
+/* Masthead */
+.mast { padding-top: clamp(28px, 6vw, 64px); text-align: center; }
+.mast-row { display: flex; justify-content: space-between; gap: 12px; border-top: 3px double var(--ink); border-bottom: 1px solid var(--ink); padding: 9px 2px 8px; }
+.mast h1 { font: 900 clamp(60px, 13.4vw, 156px)/.86 var(--xcond); text-transform: uppercase; letter-spacing: -0.012em; margin: .14em 0 .1em; }
+.mast h1 em { font-style: normal; color: var(--red); }
+.mast-rule { border: 0; border-top: 1px solid var(--ink); border-bottom: 3px double var(--ink); height: 6px; margin: 0; }
+.deck { font-size: clamp(20px, 2.5vw, 24px); line-height: 1.55; color: var(--ink); margin: 1.5em auto 0; text-align: left; }
+.deck + p { margin-top: 1.1em; text-align: left; }
+
+section { padding-top: clamp(64px, 9vw, 112px); }
+.sec-no { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+.sec-no::after { content: ""; flex: 1; border-top: 1px solid var(--rule); }
+.exhibit { margin: 34px auto 38px; }
+.frame { background: var(--card); border: 1px solid var(--ink); box-shadow: 5px 5px 0 var(--paper-2); padding: clamp(18px, 3vw, 30px); }
+.frame-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; border-bottom: 1px solid var(--rule); padding-bottom: 12px; margin-bottom: 20px; }
+.frame-head h3 { font-size: 21px; }
+.cap { font: 500 15.5px/1.5 var(--cond); color: var(--muted); margin: 14px 0 0; letter-spacing: .01em; }
+.btn { font: 700 16px/1 var(--cond); letter-spacing: .08em; text-transform: uppercase; background: var(--ink); color: var(--paper); border: 1px solid var(--ink); padding: 13px 20px 12px; border-radius: 2px; transition: background .15s, transform .15s; }
+.btn:hover { background: var(--red); border-color: var(--red); }
+.btn:active { transform: translateY(1px); }
+.btn.quiet { background: transparent; color: var(--ink); }
+.btn.quiet:hover { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+
+/* The game */
+.game-status { display: flex; align-items: center; gap: 14px; }
+.pips { display: flex; gap: 5px; }
+.pips i { width: 14px; height: 14px; border: 1.5px solid var(--ink); border-radius: 50%; background: transparent; }
+.pips i.hit { background: var(--ink); }
+.pips i.miss { background: var(--red); border-color: var(--red); }
+.pips i.now { box-shadow: 0 0 0 3px var(--marker); }
+.duel { display: grid; grid-template-columns: 1fr auto 1fr; gap: clamp(10px, 2vw, 22px); align-items: stretch; }
+.or { align-self: center; font: 800 26px/1 var(--xcond); color: var(--muted); text-transform: uppercase; }
+.pick { position: relative; text-align: left; background: #fffdf8; border: 1px solid var(--ink); border-radius: 2px; padding: clamp(18px, 2.6vw, 30px) clamp(16px, 2.4vw, 28px) clamp(16px, 2.2vw, 24px);
+  display: flex; flex-direction: column; justify-content: space-between; gap: 18px; min-height: 230px; transition: transform .18s, box-shadow .18s, opacity .3s; box-shadow: 3px 3px 0 var(--paper-2); }
+.pick .hl { font: 600 clamp(21px, 2.5vw, 29px)/1.22 var(--serif); letter-spacing: -0.012em; color: var(--ink); }
+.pick .hint { font: 700 13px/1 var(--cond); letter-spacing: .14em; text-transform: uppercase; color: var(--muted); }
+.pick:not(:disabled):hover { transform: translate(-2px, -3px); box-shadow: 7px 8px 0 var(--marker); }
+.pick:not(:disabled):hover .hint { color: var(--red); }
+.pick:disabled { cursor: default; }
+.pick.lost { opacity: .62; }
+.pick.chosen { outline: 3px solid var(--ink); outline-offset: 3px; }
+.result { display: none; }
+.pick.shown .result { display: block; }
+.pick.shown .hint { display: none; }
+.rate { display: block; font: 800 40px/1 var(--xcond); letter-spacing: .01em; }
+.rate small { font: 500 15px/1.3 var(--cond); color: var(--muted); display: block; margin-top: 5px; letter-spacing: .01em; }
+.bar { display: block; height: 8px; background: var(--paper-2); margin-top: 12px; }
+.bar i { display: block; height: 100%; background: var(--ink); width: 0; transition: width .7s cubic-bezier(.2, .7, .2, 1); }
+.pick.won .bar i { background: var(--red); }
+.stamp { position: absolute; top: 14px; right: 12px; font: 900 19px/1 var(--xcond); letter-spacing: .1em; text-transform: uppercase; color: var(--red); border: 3px solid var(--red); padding: 6px 9px 4px; border-radius: 3px; transform: rotate(7deg) scale(1.6); opacity: 0; background: rgba(255, 253, 248, .9); }
+.pick.won .stamp { animation: stamp .32s .15s cubic-bezier(.2, 1.4, .4, 1) forwards; }
+@keyframes stamp { to { transform: rotate(7deg) scale(1); opacity: 1; } }
+.after { min-height: 92px; margin-top: 20px; display: flex; justify-content: space-between; align-items: center; gap: 18px; flex-wrap: wrap; }
+.verdict { font: 500 17px/1.5 var(--cond); color: var(--ink-2); max-width: 720px; margin: 0; }
+.verdict b { color: var(--ink); }
+.verdict .ok { color: var(--green); font-weight: 700; }
+.verdict .no { color: var(--red); font-weight: 700; }
+.final { display: none; }
+.final.on { display: block; }
+.final h3 { font: 600 clamp(26px, 3.4vw, 36px)/1.15 var(--serif); margin-bottom: 18px; }
+.board { display: grid; gap: 10px; margin: 0 0 20px; padding: 0; list-style: none; }
+.board li { display: grid; grid-template-columns: minmax(150px, 250px) 1fr 62px; gap: 14px; align-items: center; font: 600 17px/1.2 var(--cond); }
+.board .track { height: 22px; background: var(--paper-2); position: relative; }
+.board .track i { position: absolute; inset: 0 auto 0 0; background: var(--ink); width: 0; transition: width .8s cubic-bezier(.2, .7, .2, 1); }
+.board li.you .track i { background: var(--red); }
+.board li.you { color: var(--red); }
+.board .v { font: 800 24px/1 var(--xcond); text-align: right; }
+@media (max-width: 720px) {
+  .duel { grid-template-columns: 1fr; }
+  .or { justify-self: center; }
+  .pick { min-height: 0; }
+  .board li { grid-template-columns: 1fr 62px; }
+  .board .track { grid-column: 1 / -1; order: 3; height: 12px; }
+}
+
+/* A real test */
+.test { width: 100%; border-collapse: collapse; }
+.test th { font: 700 13px/1.2 var(--cond); letter-spacing: .12em; text-transform: uppercase; color: var(--muted); text-align: right; padding: 0 0 10px 14px; border-bottom: 1px solid var(--ink); white-space: nowrap; }
+.test th:first-child { text-align: left; padding-left: 0; }
+.test td { padding: 14px 0 14px 14px; border-bottom: 1px solid var(--rule); vertical-align: middle; text-align: right; font: 600 19px/1 var(--cond); font-variant-numeric: tabular-nums; }
+.test td:first-child { text-align: left; padding-left: 0; font: 600 19px/1.3 var(--serif); }
+.test tr.lead td:first-child { background: linear-gradient(transparent 60%, var(--marker) 60%) no-repeat; background-size: 100% 100%; }
+.test .rb { display: inline-block; vertical-align: middle; height: 10px; background: var(--ink); margin-right: 10px; }
+.test tr.lead .rb { background: var(--red); }
+.test td.w { width: 34%; white-space: nowrap; }
+@media (max-width: 720px) { .test th:nth-child(2), .test td:nth-child(2) { display: none; } .test td.w { width: auto; } .test .rb { display: none; } .test td:first-child { font-size: 16.5px; } .test td { font-size: 17px; padding-left: 12px; } }
+
+/* The simulator */
+.sim { display: grid; grid-template-columns: minmax(250px, 330px) 1fr; gap: clamp(20px, 4vw, 44px); align-items: start; }
+.ctl { display: grid; gap: 22px; }
+.ctl label { display: block; font: 600 16px/1.3 var(--cond); color: var(--ink-2); }
+.ctl output { display: block; font: 800 34px/1.05 var(--xcond); color: var(--ink); margin: 2px 0 6px; }
+input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 26px; background: transparent; margin: 0; }
+input[type=range]::-webkit-slider-runnable-track { height: 4px; background: var(--ink); }
+input[type=range]::-moz-range-track { height: 4px; background: var(--ink); }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 22px; height: 22px; border-radius: 50%; background: var(--red); border: 3px solid var(--card); box-shadow: 0 0 0 1.5px var(--ink); margin-top: -9px; cursor: grab; }
+input[type=range]::-moz-range-thumb { width: 18px; height: 18px; border-radius: 50%; background: var(--red); border: 3px solid var(--card); box-shadow: 0 0 0 1.5px var(--ink); cursor: grab; }
+.truth { font: 500 15.5px/1.5 var(--cond); color: var(--ink-2); border-left: 3px solid var(--ink); padding-left: 12px; margin: 0; }
+.grid400 { display: grid; grid-template-columns: repeat(25, 1fr); gap: 3px; }
+.grid400 i { aspect-ratio: 1; background: var(--paper-2); transition: background .12s; }
+.grid400 i.good { background: var(--ink); }
+.grid400 i.bad { background: var(--red); }
+.sim-read { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 18px; border-top: 1px solid var(--rule); padding-top: 16px; }
+.sim-read div { font: 500 15px/1.4 var(--cond); color: var(--ink-2); }
+.sim-read b { display: block; font: 800 38px/1 var(--xcond); color: var(--ink); margin-bottom: 4px; }
+.sim-read .bad b { color: var(--red); }
+.key { display: flex; gap: 18px; flex-wrap: wrap; font: 500 15px/1.2 var(--cond); color: var(--ink-2); margin-top: 12px; }
+.key i { display: inline-block; width: 12px; height: 12px; vertical-align: -1px; margin-right: 6px; }
+@media (max-width: 760px) { .sim { grid-template-columns: 1fr; } .sim-read { grid-template-columns: 1fr 1fr; } .grid400 { gap: 2px; } }
+
+/* Charts */
+.hbars { display: grid; gap: 14px; }
+.hbar { display: grid; grid-template-columns: minmax(170px, 290px) 1fr; gap: 16px; align-items: center; }
+.hbar .name { font: 600 17px/1.25 var(--cond); }
+.hbar .name small { display: block; font: 500 14px/1.3 var(--cond); color: var(--muted); }
+.hbar .track { position: relative; height: 30px; }
+.hbar .fill { position: absolute; left: 0; top: 3px; bottom: 3px; background: var(--ink); width: 0; transition: width 1s cubic-bezier(.2, .7, .2, 1); }
+.hbar .val { position: absolute; top: 50%; transform: translateY(-50%); font: 800 24px/1 var(--xcond); padding-left: 8px; white-space: nowrap; transition: left 1s cubic-bezier(.2, .7, .2, 1); left: 0; }
+.hbar .whisk { position: absolute; top: 50%; height: 2px; background: var(--card); mix-blend-mode: difference; opacity: .0; }
+.hbar.red .fill { background: var(--red); } .hbar.red .val { color: var(--red); }
+.hbar.blue .fill { background: var(--blue); } .hbar.blue .val { color: var(--blue); }
+.hbar.ghost .fill { background: repeating-linear-gradient(135deg, var(--ink) 0 2px, transparent 2px 6px); border: 1px solid var(--ink); }
+.hbar.zero .fill { background: var(--muted); min-width: 2px; }
+.chart-axis { position: relative; height: 0; }
+.refline { position: absolute; top: 0; bottom: 0; border-left: 1.5px dashed var(--muted); pointer-events: none; }
+.refline span { position: absolute; top: -22px; left: 6px; font: 600 13px/1 var(--cond); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+.rel { position: relative; }
+@media (max-width: 720px) { .hbar { grid-template-columns: 1fr; gap: 3px; } .hbar .track { height: 26px; } }
+.tabs { display: inline-flex; border: 1px solid var(--ink); border-radius: 2px; overflow: hidden; }
+.tabs button { font: 700 14px/1 var(--cond); letter-spacing: .08em; text-transform: uppercase; background: transparent; border: 0; padding: 10px 14px 9px; color: var(--ink); }
+.tabs button[aria-pressed=true] { background: var(--ink); color: var(--paper); }
+
+.big3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; border-top: 3px double var(--ink); border-bottom: 3px double var(--ink); margin: 40px auto; }
+.big3 > div { padding: 26px clamp(14px, 2.4vw, 30px) 24px; border-left: 1px solid var(--rule); }
+.big3 > div:first-child { border-left: 0; padding-left: 0; }
+.big3 b { display: block; font: 900 clamp(60px, 8.6vw, 104px)/.9 var(--xcond); letter-spacing: -0.01em; color: var(--ink); }
+.big3 b em { font-style: normal; color: var(--red); }
+.big3 p { font: 500 17.5px/1.45 var(--cond); margin: 12px 0 0; color: var(--ink-2); }
+.big3 p s { text-decoration-color: var(--red); text-decoration-thickness: 2px; font-weight: 700; color: var(--ink); }
+@media (max-width: 760px) { .big3 { grid-template-columns: 1fr; } .big3 > div { border-left: 0; border-top: 1px solid var(--rule); padding-left: 0; } .big3 > div:first-child { border-top: 0; } }
+
+.checks { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin: 26px 0 8px; }
+.check { border-top: 2px solid var(--ink); padding-top: 12px; font: 500 15.5px/1.45 var(--cond); color: var(--ink-2); }
+.check .pair { display: flex; gap: 18px; margin: 8px 0 6px; }
+.check .pair span { font: 500 13px/1.2 var(--cond); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.check .pair b { display: block; font: 800 34px/1 var(--xcond); color: var(--ink); margin-top: 4px; }
+@media (max-width: 720px) { .checks { grid-template-columns: 1fr; } }
+
+.traffic { display: grid; grid-template-columns: 1fr minmax(240px, 320px); gap: clamp(18px, 4vw, 44px); align-items: center; }
+.traffic svg { width: 100%; height: auto; display: block; overflow: visible; }
+.traffic svg text { font-family: var(--cond); }
+.t-read b { display: block; font: 900 64px/.95 var(--xcond); }
+.t-read p { font: 500 16px/1.45 var(--cond); margin: 4px 0 18px; }
+.t-read .r2 b { color: var(--red); }
+@media (max-width: 820px) { .traffic { grid-template-columns: 1fr; } .t-read { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 14px; } .t-read > div:first-child { grid-column: 1 / -1; } .t-read b { font-size: 52px; } }
+
+.words { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(18px, 4vw, 44px); }
+.words h3 { font: 700 14px/1 var(--cond); letter-spacing: .14em; text-transform: uppercase; margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid var(--ink); }
+.words ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 8px 8px; }
+.words li { font: 600 19px/1 var(--serif); padding: 8px 11px 9px; border: 1px solid var(--ink); background: #fffdf8; border-radius: 2px; }
+.words .won li { box-shadow: 2px 2px 0 var(--marker); }
+.words .lost li { color: var(--muted); border-color: var(--rule); text-decoration: line-through; text-decoration-color: var(--red); }
+@media (max-width: 720px) { .words { grid-template-columns: 1fr; } }
+
+.advice { counter-reset: a; list-style: none; margin: 26px 0 0; padding: 0; display: grid; gap: 0; border-top: 1px solid var(--ink); }
+.advice li { counter-increment: a; display: grid; grid-template-columns: 62px 1fr; gap: 6px 14px; padding: 22px 0; border-bottom: 1px solid var(--rule); }
+.advice li::before { content: counter(a); font: 900 54px/.9 var(--xcond); color: var(--red); }
+.advice h3 { margin-bottom: 6px; }
+.advice p { margin: 0; grid-column: 2; }
+.notes { font-size: 17px; }
+.notes dt { font: 700 14px/1.3 var(--cond); letter-spacing: .12em; text-transform: uppercase; color: var(--ink); margin-top: 20px; }
+.notes dd { margin: 4px 0 0; color: var(--ink-2); }
+footer { margin-top: clamp(70px, 10vw, 120px); border-top: 3px double var(--ink); padding-top: 22px; padding-bottom: 60px; font: 500 15.5px/1.55 var(--cond); color: var(--muted); }
+footer .col { display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+footer a { color: var(--ink); }
+.fade { opacity: 0; transform: translateY(14px); transition: opacity .6s, transform .6s; }
+.fade.in, .nojs .fade { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } .fade { opacity: 1; transform: none; } }
+</style>
+</head>
+<body class="nojs">
+<div class="top pad"><a href="../../#work" aria-label="Back to Timur’s portfolio">← timur kherlenbayar</a><span>Pick the Winner</span></div>
+
+<header class="mast pad">
+  <div class="wide">
+    <div class="mast-row label"><span>Experiments · Media</span><span>32,487 real headline tests</span></div>
+    <h1>Pick the <em>Winner</em></h1>
+    <hr class="mast-rule">
+  </div>
+  <div class="col">
+    <p class="deck">For two years the website Upworthy settled every argument about a headline in the same way. It wrote several, showed each of them to a few thousand visitors, and kept whichever one drew the most clicks. It ran 32,487 of these tests and later gave the records to researchers.</p>
+    <p>I went through those records with two questions. How often was the winning headline really the best one? And could a person, a model or an AI have picked it without spending any visitors on a test? Before I tell you what I found, I’d like you to try the job yourself.</p>
+  </div>
+</header>
+
+<main>
+  <!-- The game -->
+  <div class="exhibit wide pad" id="game-wrap">
+    <div class="frame" id="game">
+      <div class="frame-head">
+        <h3 id="g-title">Which headline got more clicks?</h3>
+        <div class="game-status"><span class="label" id="g-round">Round 1 of 10</span><span class="pips" id="g-pips" aria-hidden="true"></span></div>
+      </div>
+      <div id="g-play">
+        <div class="duel">
+          <button class="pick" id="g-a" type="button"><span class="stamp" aria-hidden="true">More clicks</span><span class="hl"></span><span class="hint">Pick this one →</span><span class="result"><span class="rate"></span><span class="bar"><i></i></span></span></button>
+          <span class="or" aria-hidden="true">or</span>
+          <button class="pick" id="g-b" type="button"><span class="stamp" aria-hidden="true">More clicks</span><span class="hl"></span><span class="hint">Pick this one →</span><span class="result"><span class="rate"></span><span class="bar"><i></i></span></span></button>
+        </div>
+        <div class="after">
+          <p class="verdict" id="g-verdict" role="status" aria-live="polite">Both headlines were written for the same story and shown with the same picture. One of them was clicked clearly more often.</p>
+          <button class="btn" id="g-next" type="button" hidden>Next round →</button>
+        </div>
+      </div>
+      <div class="final" id="g-final">
+        <h3 id="g-final-title"></h3>
+        <ul class="board" id="g-board"></ul>
+        <p class="verdict" id="g-final-text"></p>
+        <p style="margin:18px 0 0"><button class="btn quiet" id="g-again" type="button">Play ten more</button></p>
+      </div>
+      <noscript><p>The game needs JavaScript. Everything below it reads fine without.</p></noscript>
+    </div>
+    <p class="cap">Every pair in the game is a real test from the archive. I should admit that these are the easy ones: a pair only made it into the game if the test left almost no doubt about which headline was better. Most of the archive is not like that, and that is what the rest of this page is about.</p>
+  </div>
+
+  <!-- 1 -->
+  <section class="pad" id="one-test">
+    <div class="col fade">
+      <div class="sec-no label">1 · The evidence behind a winner</div>
+      <h2>What one test looked like</h2>
+      <p>Here is a real test from December 2014. Every visitor saw the same story with the same picture, and only the headline changed from one visitor to the next.</p>
+    </div>
+    <div class="exhibit wide fade">
+      <div class="frame">
+        <table class="test">
+          <thead><tr><th>Headline</th><th>Shown to</th><th>Clicks</th><th>Click rate</th></tr></thead>
+          <tbody id="ex-body"><tr class="lead"><td>He Was Left Out Because He Couldn&#x27;t Keep Up. But Then He Got The Coolest Toy Ever From A Scientist.</td><td>3,038</td><td>55</td><td class="w"><span class="rb" style="width:60%"></span>1.81%</td></tr><tr class=""><td>Because He Didn&#x27;t Want Kids To Feel Left Out, A Brilliant Scientist Messed With Some Toys</td><td>3,007</td><td>46</td><td class="w"><span class="rb" style="width:51%"></span>1.53%</td></tr><tr class=""><td>A Brilliant Scientist Walks Into A Toy Store. Then He Starts Changing Lives Left And Right.</td><td>3,032</td><td>38</td><td class="w"><span class="rb" style="width:42%"></span>1.25%</td></tr><tr class=""><td>This Guy Knows He Did His Job Well When A Kid &#x27;Runs Away From Home&#x27;</td><td>3,087</td><td>26</td><td class="w"><span class="rb" style="width:28%"></span>0.84%</td></tr></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="col fade">
+      <p>Upworthy would have gone with the first headline, and it looks like an easy call. But notice how few clicks sit behind each of those rates. Across the whole archive, the typical headline was shown to 3,117 people and clicked by <strong>42</strong> of them.</p>
+      <p>Counts that small move around by luck. A headline that deserves 42 clicks will quite often collect 35 from one batch of visitors and 50 from the next, without anything about the headline having changed. So when one headline finishes a few clicks ahead of another, part of that lead belongs to the headline and part of it belongs to the particular visitors who happened to see it.</p>
+      <p>You can watch this happen. Below are two made-up headlines whose true click rates I have fixed in advance, so that for once we know which one is better. Each small square is one complete test with fresh visitors, and it turns red when the worse headline comes out ahead.</p>
+    </div>
+    <div class="exhibit wide fade">
+      <div class="frame">
+        <div class="frame-head"><h3>Run the same test 400 times</h3><button class="btn" id="s-run" type="button">Run it again</button></div>
+        <div class="sim">
+          <div class="ctl">
+            <div>
+              <label for="s-n">Visitors who see each headline</label>
+              <output id="s-n-out" for="s-n">3,100</output>
+              <input type="range" id="s-n" min="0" max="100" value="44" aria-describedby="s-truth">
+            </div>
+            <div>
+              <label for="s-e">How much better the better headline truly is</label>
+              <output id="s-e-out" for="s-e">20%</output>
+              <input type="range" id="s-e" min="2" max="60" value="20" step="1">
+            </div>
+            <p class="truth" id="s-truth"></p>
+          </div>
+          <div>
+            <div class="grid400" id="s-grid" role="img" aria-label="400 simulated tests"></div>
+            <div class="key"><span><i style="background:var(--ink)"></i>the better headline won</span><span><i style="background:var(--red)"></i>the worse headline won</span></div>
+            <div class="sim-read" aria-live="polite">
+              <div class="bad"><b id="s-wrong">–</b>of these tests crowned the worse headline</div>
+              <div><b id="s-lead">–</b>is the lead the better headline showed in the tests it won</div>
+              <div><b id="s-true">–</b>is the lead it truly has</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <p class="cap">The starting position is a typical Upworthy test: about 3,100 visitors per headline, a click rate a little above 1%, and a true gap between the two headlines of 20%, which is an ordinary gap in this archive. Try a smaller gap, or ten times the visitors.</p>
+    </div>
+    <div class="col fade">
+      <p>Two things show up at the typical setting. The worse headline wins a noticeable share of the tests. And in the tests the better headline does win, its lead looks larger than it really is, because the tests where luck ran against it are exactly the ones it lost. Statisticians call this second effect the winner’s curse. Both problems fade when a test has more visitors, and both get worse when the two headlines are closer together.</p>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section class="pad" id="checks">
+    <div class="col fade">
+      <div class="sec-no label">2 · Measuring the luck</div>
+      <h2>Two checks on the tests themselves</h2>
+      <p>The squares above come from arithmetic, and Upworthy’s visitors were real people. Before going further I wanted to measure how much luck there was in the real tests, in ways that don’t depend on any model of mine. The archive allows two.</p>
+      <h3 style="margin:1.4em 0 .5em">The same thing, tested against itself</h3>
+      <p>In 370 tests, the very same package was entered twice, with the same headline, the same picture and the same text. Any gap between two identical copies is luck by definition. The standard check that analysts use is built so that it calls about 5% of such pairs “significantly different” by accident. In the archive it called <strong>7.1%</strong> of the 1,080 identical pairs different.</p>
+      <p>So the real tests were a little noisier than the textbook assumes, by about 10%. One possible reason is that the same person could be counted more than once. It is a small correction, and I have applied it to every margin of error on this page. I mention it mainly because it is the kind of thing that is easy to skip, and skipping it would have made every result below look more certain than it is.</p>
+      <h3 style="margin:1.4em 0 .5em">The rematch</h3>
+      <p>The second check is the one I find most convincing. Upworthy sometimes tested a story more than once, and 2,269 pairs of headlines ended up facing each other in two separate tests. If winning a test means what it appears to mean, the headline that won the first meeting should usually win the second one too.</p>
+    </div>
+    <div class="exhibit wide fade">
+      <div class="frame">
+        <div class="frame-head"><h3>How often the first winner won the rematch</h3><span class="label">2,269 pairs that met twice</span></div>
+        <div class="rel">
+          <div class="hbars" id="rm-bars"></div>
+        </div>
+      </div>
+      <p class="cap">“Clear” means the first test passed the standard significance check; “not clear” means it did not. The winner is simply the headline with the higher click rate. A coin would agree with the first test half the time.</p>
+    </div>
+    <div class="col fade">
+      <p>The first winner held up <strong>64%</strong> of the time. When the first result had been clear, it held up 88% of the time, which is reassuring. But most first results were not clear, and for those the winner repeated only 60% of the time, which is not far from a coin.</p>
+      <p>The winner’s lead shrank too. Where the first test had been clear, the winner appeared to be ahead by 101% on average. In the rematch the same headline was ahead by 57%.</p>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section class="pad" id="replay">
+    <div class="col fade">
+      <div class="sec-no label">3 · The main question</div>
+      <h2>How often was the winner really the best?</h2>
+      <p>Rematches only cover pairs of headlines, and a typical test had four or five. To answer the question for whole tests I needed something the archive can never contain, which is the truth about each headline. So I built a copy of Upworthy on my computer in which the truth is known.</p>
+      <p>The copy replays each of the 12,359 tests in which only the headline varied. Every replayed test has the same number of headlines as the real one, the same number of visitors and the same general click rate. The true differences between headlines are drawn to be as large as the archive says they are once the luck has been taken out. Then the visitors are sent through again, 300 times per test, and each time I can see whether the headline that came out on top was truly the best.</p>
+      <p>A copy like this is only worth something if it behaves like the original, so I compared the two on three things the real archive can show.</p>
+      <div class="checks">
+        <div class="check">The typical winner’s lead over the average headline in its test.<div class="pair"><span>Real<b>34%</b></span><span>Copy<b>32%</b></span></div></div>
+        <div class="check">Tests in which the standard check finds some difference among the headlines.<div class="pair"><span>Real<b>54%</b></span><span>Copy<b>52%</b></span></div></div>
+        <div class="check">Rematches that the first winner goes on to win. The copy was built without the rematches.<div class="pair"><span>Real<b>63.6%</b></span><span>Copy<b>63.6%</b></span></div></div>
+      </div>
+      <p>The copy tracks the real archive closely on all three, including the rematches, which it was never fitted to. Here is what it says about the question.</p>
+    </div>
+    <div class="wide fade">
+      <div class="big3">
+        <div><b>67%</b><p>of the winners Upworthy’s tests declared were truly the best headline in their test. About one winner in three was not.</p></div>
+        <div><b><em>+23%</em></b><p>is how far ahead of the average headline a winner truly was. The scoreboard said <s>+37%</s>.</p></div>
+        <div><b>82%</b><p>of everything there was to gain from choosing the right headline, the tests still collected.</p></div>
+      </div>
+    </div>
+    <div class="col fade">
+      <p>I did not expect these three numbers to sit together. One winner in three was not the best headline, and the scoreboard overstated the typical winner’s advantage by more than half. And yet the tests collected <mark>82% of the gain that perfect knowledge would have delivered</mark>.</p>
+      <p>The reason is that these tests rarely went badly wrong. When the best headline lost, it nearly always lost to one that was almost as good. Only 13% of winners were truly worse than the average headline in their own test. Being wrong about which headline is best turns out to be cheap, as long as you are roughly right about which ones are good.</p>
+      <p>The same copy can replay the tests with less or more traffic than Upworthy really used, which answers a practical question: was all that traffic needed?</p>
+    </div>
+    <div class="exhibit wide fade">
+      <div class="frame">
+        <div class="frame-head"><h3>What the same tests would deliver with less or more traffic</h3><span class="label">Drag the slider</span></div>
+        <div class="traffic">
+          <div>
+            <svg id="t-svg" viewBox="0 0 640 320" role="img" aria-label="Two rising curves showing that both accuracy and gain flatten as traffic grows"></svg>
+            <input type="range" id="t-slider" min="0" max="8" step="1" value="3" aria-label="Traffic compared with what Upworthy used">
+          </div>
+          <div class="t-read" aria-live="polite">
+            <div><span class="label" id="t-m">Upworthy’s real traffic</span><p id="t-n" style="margin-bottom:14px"></p></div>
+            <div class="r1"><b id="t-best">–</b><p>of winners are truly the best headline</p></div>
+            <div class="r2"><b id="t-share">–</b><p>of the possible gain is collected</p></div>
+          </div>
+        </div>
+      </div>
+      <p class="cap">Each point replays all 12,359 tests 300 times at that level of traffic.</p>
+    </div>
+    <div class="col fade">
+      <p>With half the visitors, the tests would still have collected 73% of the possible gain, against 82% at full traffic. Doubling the traffic would have added only 7 points more. Upworthy was already on the flat part of the curve, and it could have run twice as many tests on the same audience at very little cost to each one.</p>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section class="pad" id="contest">
+    <div class="col fade">
+      <div class="sec-no label">4 · Skipping the test</div>
+      <h2>Could anyone have called it without the test?</h2>
+      <p>A test costs visitors, and some of them are shown the weaker headlines. If the winner could be predicted from the words alone, the test would not be needed. So I held a contest. Each contestant is given the headlines of a test, and nothing else, and has to pick one.</p>
+      <p>The contest is set up the way a prediction would really be used, looking forward in time. The contestants learn from the 17,755 tests that Upworthy started before August 2014. They are then scored on 4,559 later tests, all of them about stories that first appeared in September 2014 or after, so nothing they are scored on could have been seen before.</p>
+      <p>There are seven contestants. The first is a rule of thumb that anyone could apply. Three are models of growing complexity that learn from past results, and a fifth combines those three. The last two are a language model of the kind behind today’s AI assistants, once on its own and once after being shown some past results.</p>
+    </div>
+    <div class="exhibit wide fade">
+      <div class="frame">
+        <div class="frame-head">
+          <h3 id="c-title">How much better than an average headline was each contestant’s pick?</h3>
+          <div class="tabs" role="group" aria-label="Choose the measure"><button type="button" id="c-tab-lift" aria-pressed="true">Gain from the pick</button><button type="button" id="c-tab-pairs" aria-pressed="false">Pairs called right</button></div>
+        </div>
+        <div class="hbars" id="c-bars"></div>
+      </div>
+      <p class="cap" id="c-cap"></p>
+    </div>
+    <div class="col fade" id="contest-text">
+      <p>Reading the words gets a contestant further than I expected. The combined model had never seen any of these stories, and the headline it picked was clicked <strong>17% more often</strong> than the average headline in its test. That is 56% of what perfect knowledge would deliver, and it costs no visitors at all. A real test has to run on roughly a quarter of Upworthy’s traffic before it does as well.</p><p>The test still wins, at +23%. It also has an advantage that the chart cannot show. The models learned what Upworthy’s readers liked in 2013 and the first half of 2014, and they are only as good as that taste is stable. A test asks today’s readers.</p><p>The language model is the surprise in the other direction. Given no examples, its picks did 4.3% better than average, which puts it level with the checklist model and a long way behind the others. Showing it twelve past tests together with how they came out made no real difference (3.5%). Its taste also had little in common with the combined model’s. The two chose the same headline in 23% of tests, and two contestants picking at random would agree in 21%.</p><p>I would not read that as “language models are bad at headlines”. This is a small model that runs on a laptop, and a larger one would probably do better. What the result does show is where the skill comes from. The plain models above it are far simpler, but they learned from 17,755 of Upworthy’s own tests what this particular audience clicked on. The language model knows what headlines in general look like, and that turned out to be worth much less than knowing the readers.</p><p>One caution for anyone who repeats this. My first version of the contest looked better than the one above: the combined model called 84% of the clear pairs, against 80% here. The archive comes divided at random into three files, and I had trained on two of them and scored on the third. But Upworthy usually tested a story several times within a day or two, often with lightly edited headlines, so retests of the same story ended up on both sides and the model was partly being asked to remember. Dividing the tests by time closes that door, and it is also how a model like this would really be used.</p>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section class="pad" id="words">
+    <div class="col fade">
+      <div class="sec-no label">5 · A look inside</div>
+      <h2>What the word model noticed</h2>
+      <p>The word model is simple enough to read. It gives every word and two-word phrase a score, and a headline’s score is the sum of its parts. These are the words and phrases it learned to value most and least from 59,066 head-to-head results.</p>
+    </div>
+    <div class="exhibit wide fade">
+      <div class="frame">
+        <div class="words">
+          <div class="won"><h3>Helped a headline win</h3><ul><li>this</li><li>response</li><li>hilarious</li><li>watch</li><li>her</li><li>what</li><li>here&#x27;s</li><li>asked</li><li>then</li><li>seconds</li><li>about to</li><li>minutes</li><li>year old</li><li>caught</li><li>him</li><li>mistake</li><li>you&#x27;ll</li><li>guess</li></ul></div>
+          <div class="lost"><h3>Held a headline back</h3><ul><li>?</li><li>:</li><li>!</li><li>can</li><li>better</li><li>deserve</li><li>save</li><li>together</li><li>freedom</li><li>help</li><li>support</li><li>government</li><li>rights</li><li>equality</li><li>future</li><li>economy</li><li>community</li><li>what if</li></ul></div>
+        </div>
+      </div>
+      <p class="cap">The strongest 18 in each direction, after leaving out names and words tied to a single news story.</p>
+    </div>
+    <div class="col fade">
+      <p>The left side is the style Upworthy became known for. These headlines point at something without saying what it is (<em>this</em>, <em>here’s</em>, <em>what</em>). They promise a moment (<em>then</em>, <em>asked</em>, <em>caught</em>, <em>response</em>), and they tell you how little of your time it will take (<em>seconds</em>, <em>minutes</em>). They speak of a person as <em>her</em> or <em>him</em> and leave the name out.</p><p>The right side interests me more. It is full of what the stories were actually about: rights, equality, community, the economy, the future. Headlines that named the cause tended to lose to headlines that kept it back. Question marks, colons and exclamation marks counted against a headline as well.</p><p>None of this is advice. It is a record of what one audience clicked on over two particular years, and in August 2014 Facebook announced that it would start showing fewer headlines that withhold what a story is about. A model trained on these words would have gone on recommending them.</p>
+    </div>
+  </section>
+
+  <!-- 6 -->
+  <section class="pad" id="advice">
+    <div class="col fade">
+      <div class="sec-no label">6 · So what</div>
+      <h2>What I would tell the editor</h2>
+      <p>The point of all this is a decision that someone has to make every day, so here is what I would say to the person making it.</p>
+      <ol class="advice">
+        <li><h3>Keep running the tests.</h3><p>Nothing else in the contest matched them. A test delivers a headline about 23% better than average, and the best model I could build delivers about 17%. The tests’ real weakness, which is naming the wrong winner one time in three, costs very little, because the wrong winner is nearly always a good headline too.</p></li><li><h3>Don’t repeat the winner’s lead.</h3><p>A winner that appears to be 37% ahead of the average headline is really about 23% ahead. If the number on the scoreboard goes into a report or a forecast, the person reading it should be told that about 39% of it is luck.</p></li><li><h3>Spend less traffic on each test, and run more tests.</h3><p>Half the traffic still collects 73% of the possible gain, against 82% at full traffic. The visitors saved would do more good in a second test on another story than they do in sharpening the first.</p></li><li><h3>Let a model decide what gets tested.</h3><p>The model is not good enough to replace the test, but it is good enough to prepare it. The headline the combined model liked least was clicked 16% less often than the average headline in its test, and it turned out to be the best one only 11% of the time. Dropping it before the test starts would spare visitors from the weakest option and leave more of them for the headlines that have a chance.</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- 7 -->
+  <section class="pad" id="limits">
+    <div class="col fade">
+      <div class="sec-no label">7 · Limits</div>
+      <h2>What this can’t tell you</h2>
+      <p><strong>A click is not the same as a good headline.</strong> The tests counted who clicked. They did not count who read to the end, who shared the story, or who felt misled once they arrived. A headline can win the click and lose the reader, and nothing here can see that.</p>
+      <p><strong>This is one website at one moment.</strong> Upworthy’s visitors in 2013 to 2015 came mostly from Facebook, and the style that worked on them wore out quickly. The words in section 5 are a record of that audience and should not be read as advice for today. What should carry over is the arithmetic of small counts, which is the same for any test that ends with a few dozen clicks, sign-ups or purchases on each side.</p>
+      <p><strong>The copy of Upworthy is a model.</strong> It matches the real archive on everything I could check, including rematches it had never seen, but the 67% and the 82% come from the copy. They are estimates, and they rest on my description of how large the true differences between headlines are.</p>
+      <p><strong>I only replayed tests where the headline alone varied.</strong> That is 12,359 of the 32,487 tests. The rest also changed the picture or the text shown with the story, which makes it impossible to say what a win was a win for.</p>
+      <p><strong>The contestants could be stronger.</strong> The language model is a small one that runs on a laptop, and I did not train it on this data. A larger model, or one trained on these tests, would probably do better than either version here.</p>
+    </div>
+  </section>
+
+  <!-- 8 -->
+  <section class="pad" id="method">
+    <div class="col fade">
+      <div class="sec-no label">8 · Method</div>
+      <h2>How this was made</h2>
+      <dl class="notes">
+        <dt>Data</dt>
+        <dd>The Upworthy Research Archive, released by J. Nathan Matias, Kevin Munger, Marianne Aubin Le Quere and Charles Ebersole (Scientific Data, 2021) under a CC BY 4.0 licence. It holds 150,817 packages from 32,487 tests run between January 2013 and April 2015. The archive comes in three files: one for exploring, one for confirming, and one held back. I used them in that order for the noise measurements, and divided the tests by time for the contest, for the reason given in section 4.</dd>
+        <dt>Measuring the luck</dt>
+        <dd>The noise comes from 1,080 identical pairs. Its spread is measured from the middle half of their results, so that a few broken tests cannot move it. The size of true headline effects is fitted on the first two files as a mixture of bell curves of different widths, and checked against the third file and against 2,269 rematches that played no part in the fitting.</dd>
+        <dt>The copy</dt>
+        <dd>12,359 headline-only tests, each replayed 300 times at nine levels of traffic, in Python with NumPy.</dd>
+        <dt>The contest</dt>
+        <dd>Models are logistic regressions on the difference between two headlines, built with scikit-learn. The meaning model uses sentence embeddings from all-mpnet-base-v2. The language model is Qwen3 with 8 billion parameters, run locally through Ollama, with the headlines shuffled for every test because it turned out to favour certain positions in a list. It was scored on a random 1,500 of the scored tests. Tests are grouped into stories by shared headlines, pictures and opening lines, and no story appears on both sides of the contest. As a further check I removed every scored test that had a headline closely resembling one from the learning period, and the results did not change.</dd>
+        <dt>Tools</dt>
+        <dd>Python, pandas, NumPy, SciPy, scikit-learn, sentence-transformers and Ollama for the analysis. The page is plain HTML, CSS and JavaScript with no libraries, and the simulator in section 1 runs in your browser.</dd>
+      </dl>
+    </div>
+  </section>
+</main>
+
+<footer class="pad">
+  <div class="col">
+    <span>A project by <a href="../../">Timur Kherlenbayar</a>, 2026.</span>
+    <span><a href="../">All projects</a> · <a href="../../#contact">Contact</a></span>
+  </div>
+</footer>
+
+<script>
+const DATA = {"phi":1.098476800065554,"typical":{"impr":3117.0,"clicks":42.0},"rematch":{"all":{"pairs":2269,"held":0.6359629792860291},"sig":{"pairs":316,"held":0.879746835443038},"ns":{"pairs":1953,"held":0.5965181771633384}},"traffic":[{"m":0.125,"best":0.4711608274671629,"share":0.4942227386649202,"shown":0.7391413532727914,"true":0.13724812174368559},{"m":0.25,"best":0.534483911859104,"share":0.6152288566807299,"shown":0.5545416850327375,"true":0.17074325189750023},{"m":0.5,"best":0.6035965693017235,"share":0.7286573405993667,"shown":0.4417455364425094,"true":0.2021909542860276},{"m":1.0,"best":0.6735542249912344,"share":0.8231835975202563,"shown":0.37392150545927233,"true":0.22862472318558763},{"m":2.0,"best":0.7380936969010438,"share":0.892001594517796,"shown":0.3337544239304915,"true":0.24772463849242649},{"m":4.0,"best":0.7936351376864363,"share":0.9368540456926603,"shown":0.3103133884617941,"true":0.26017582021742736},{"m":8.0,"best":0.8396639426059282,"share":0.9641026776717231,"shown":0.29665566335226207,"true":0.26769266798561464},{"m":16.0,"best":0.8767931601801656,"share":0.9798876163880723,"shown":0.28913223957942635,"true":0.2722953583366025},{"m":32.0,"best":0.9060962321654934,"share":0.9887317839852737,"shown":0.28429286287523303,"true":0.27443045623193657}],"contest":{"rows":[{"key":"coin","name":"Picking at random","sub":null,"lift":0.0,"clear":0.5,"pairs":0.5,"cls":"zero"},{"key":"rule","name":"A rule of thumb","sub":"pick the headline that says “this”, “these” or “here”","lift":0.018203784721423734,"lo":0.008295234600108423,"hi":0.0272981840139205,"clear":0.5459249676584734,"pairs":0.5245861283771309,"top":0.22833954814652335,"cls":""},{"key":"checklist","name":"A checklist model","sub":"18 simple traits, such as length and punctuation","lift":0.03877328446663008,"lo":0.028911234982886076,"hi":0.04798560619583555,"clear":0.5950840879689522,"pairs":0.5423718382669703,"top":0.24610660232507128,"cls":""},{"key":"words","name":"A word model","sub":"which words and phrases tended to win","lift":0.1214958584296129,"lo":0.11171287841948399,"hi":0.13189090621935254,"clear":0.7270375161707633,"pairs":0.5968572424969741,"top":0.31958762886597936,"cls":""},{"key":"meaning","name":"A meaning model","sub":"a neural network’s reading of each headline","lift":0.15865157585814232,"lo":0.14850378311023762,"hi":0.16826230996567515,"clear":0.7798928109406764,"pairs":0.6194227337066897,"top":0.3491993858302259,"cls":""},{"key":"combined","name":"All three models combined","sub":null,"lift":0.16555561400048222,"lo":0.15545179138214213,"hi":0.17614954237613764,"clear":0.7959711698392165,"pairs":0.6294951484193899,"top":0.3617021276595745,"cls":"blue"},{"key":"llm0","name":"A language model","sub":"given no examples","lift":0.042879263385508744,"lo":0.02583683171222377,"hi":0.05966331527665162,"clear":0.5835978835978836,"pairs":0.5326857282502444,"top":0.244,"cls":""},{"key":"llm","name":"The same language model","sub":"after seeing 12 past tests and their results","lift":0.03474411630121477,"lo":0.017859238206483875,"hi":0.053099218774221,"clear":0.6015873015873016,"pairs":0.5334799608993157,"top":0.226,"cls":""}],"test_lift":0.23221056967601628,"oracle_lift":0.29602881382999907,"llm_tests":1500,"scored_tests":4559,"scored_pairs":48747,"clear_pairs":5411,"ceiling":0.7351602840078052},"game":[{"w":{"h":"2 Seconds In, You're Going To Be Uncomfortable. By The End, You Better Still Be.","c":52,"n":3784},"l":{"h":"See Why We Have Absolutely Ridiculous Standards When It Comes To Sports In 30 Seconds","c":17,"n":3747},"m":1,"q":0},{"w":{"h":"Every birthday her daughter asks if her party will be in the hallway again. It is.","c":76,"n":3114},"l":{"h":"She doesn't want her daughter's birthday ruined by being in the hallway again.","c":38,"n":3112},"m":1,"q":1},{"w":{"h":"A Chilling Explanation Of Why So Many Women Come Off Rude When Men Say 'Hello'","c":64,"n":3928},"l":{"h":"When 'Hello' Isn't 'Hello' At All, How Is She Supposed To Feel?","c":32,"n":4068},"m":1,"q":0},{"w":{"h":"A Bunch Of Brazilians Are Tattooing A Blue Circle On Their Arms And They Want You To Know Why","c":36,"n":2829},"l":{"h":"See The Pretty Radical Way Some Patients Owned Their Identity","c":9,"n":2880},"m":1,"q":1},{"w":{"h":"When This School Flipped Day And Night, It Woke Everyone Right Up","c":43,"n":2738},"l":{"h":"What Do They Do All Day At School If They Have To Do Homework All Night? Not This, I Bet.","c":18,"n":2928},"m":1,"q":1},{"w":{"h":"The Video Is Hilarious, But The Statistics That Inspired It Make Me Sick To My Stomach","c":65,"n":3239},"l":{"h":"I'd Love To See These Kids' Lunchtime Trouble Happen To Big World Leaders. Wouldn't You?","c":30,"n":3190},"m":1,"q":1},{"w":{"h":"These Girls Were Asked What Products They Use Every Day. It Gets Pretty Eye-Opening.","c":77,"n":4075},"l":{"h":"You Could Say These Girls Were Surprised At What They've Been Putting On Their Faces","c":32,"n":4121},"m":0,"q":1},{"w":{"h":"A 6-Year-Old Asks ​Neil DeGrasse Tyson An Adorable Question. He Gives Her An Awesome Answer.","c":72,"n":2823},"l":{"h":"Neil DeGrasse Tyson Teaches A 6-Year-Old Girl How To Get Away With Driving Her Parents Mad","c":35,"n":2937},"m":1,"q":1},{"w":{"h":"16 Residents Were Left Behind When A Nursing Home Closed. Here Are The 2 Heroes Who Stayed.","c":40,"n":3216},"l":{"h":"Here’s The Thing: Most Working People Are Just Like These 2 Guys. Heart Of Gold, And A Kind Soul.","c":11,"n":3014},"m":0,"q":1},{"w":{"h":"A Secret That Might Actually Get You Looking Forward To Mondays Instead Of Dreading Them","c":49,"n":5629},"l":{"h":"You Know That Exciting Feeling For Your Future You Had In School? Here's How To Never Lose That.","c":22,"n":5827},"m":1,"q":0},{"w":{"h":"He Cried For A Week When His Parents Left Him. It Was For His Own Good. For As Long As It'd Last.","c":44,"n":3088},"l":{"h":"He May Have Some Really Bad Luck. But You'll See Why His Family Is So Lucky To Have Him.","c":15,"n":2978},"m":1,"q":1},{"w":{"h":"A Mom Finally Says What She Really Thinks About Her Daughter. And Her Reaction? Priceless.","c":51,"n":3163},"l":{"h":"A Son Has Some Things To Say About His Mom Who Cares For Her Mom","c":21,"n":3229},"m":1,"q":1},{"w":{"h":"The 10 Phrases I've Stopped Saying And The People Who Appreciate Me For It","c":85,"n":5572},"l":{"h":"I Gave Up 10 Little Phrases And My Friends Appreciate Me For It","c":49,"n":5417},"m":1,"q":0},{"w":{"h":"In 60 Seconds, He Can Teach You How To Win Every Argument You're Ever In","c":68,"n":4263},"l":{"h":"If You Find Yourself In An Argument, This Shirtless, Wise Man's Advice Will Help You Win","c":31,"n":4320},"m":1,"q":0},{"w":{"h":"You Might See Ariel's Red Hair First, But This Trailer Exposes Plenty Of Red Flags About The Movie","c":86,"n":3119},"l":{"h":"Some Guys Made An Honest Trailer For The Little Mermaid And It Is Glorious","c":50,"n":3042},"m":0,"q":1},{"w":{"h":"A Chart That Shatters Every Single One Of Your Excuses ... Forever.","c":38,"n":3144},"l":{"h":"Only 29 ... 28 ... 27 ... Shopping Days Until Christmas. Here's How To Spend One Of Them.","c":12,"n":3025},"m":1,"q":1},{"w":{"h":"They Went Back To See What Global Warming Had Done, And Couldn’t Even Tell Where They Were Standing","c":55,"n":5726},"l":{"h":"A Great Story About The Amazing Mountains Of The Moon Here On Earth","c":14,"n":5519},"m":1,"q":0},{"w":{"h":"It's Called The Ostrich Effect — And It's Real.","c":57,"n":5980},"l":{"h":"Would You Pay In Order to NOT Know Something? Turns Out You Wouldn't Be Alone.","c":18,"n":5846},"m":0,"q":1},{"w":{"h":"These Couples Are Asked 1 Very Important Question, And You Can Totally Tell How Nervous They Are","c":94,"n":6809},"l":{"h":"Couples Who Are About To Be Parents Talk About How Scared They Are. But Then They Watch The Video.","c":56,"n":6660},"m":1,"q":0},{"w":{"h":"Watch The Speech Leonardo DiCaprio Made To The UN About How To Stop Pretending Science Doesn't Exist","c":103,"n":6417},"l":{"h":"Leonardo DiCaprio Talks About Actual Tangible Ways We Can Make Sure We Don't All Sink Into The Ocean","c":56,"n":6322},"m":1,"q":1},{"w":{"h":"All She Wanted To Do Was Hold Her Girlfriend's Hand. She Soon Realized She Would Have To Leave.","c":62,"n":4829},"l":{"h":"What They Did To Get Here Takes Some Serious Guts, But I'm So Relieved They Made It","c":25,"n":4959},"m":1,"q":1},{"w":{"h":"When I Saw The Second Scene, I Gasped. By, The End, I'm Not Going To Stay Silent.","c":78,"n":3088},"l":{"h":"See Why We Have To Do Something About How We Treat The Source Of Our Bacon","c":42,"n":3085},"m":1,"q":1},{"w":{"h":"If Geek Girls Treated Geek Guys The Way Geek Guys Treat Them, Here's How It Would Sound","c":70,"n":3072},"l":{"h":"They're Both Geeks. She Turns The Tables On Him And It's Kind Of Amazing.","c":38,"n":3051},"m":0,"q":1},{"w":{"h":"The First 1 Minute And 20 Seconds Are So Hard To Watch, Until You See How They Get Released.","c":68,"n":4958},"l":{"h":"The Last 90 Seconds Tell You Everything You Need To Know About How To Rescue Them","c":33,"n":5272},"m":1,"q":0},{"w":{"h":"This Dude Has A Lot Of Rules For Women. I Think He’s Right.","c":59,"n":6133},"l":{"h":"He’s Figured Out How To Finally Tell Women How To Behave","c":24,"n":6284},"m":0,"q":1},{"w":{"h":"It's The 1 Dog Video You Should Watch On The Internet Today.","c":44,"n":3076},"l":{"h":"You Might Want To Trade Places With These 7-Year-Olds After You See What They Do All Day","c":17,"n":3056},"m":1,"q":0},{"w":{"h":"She Entered Her Classroom One Her Final Day And What She Saw Made Her Cry","c":107,"n":4275},"l":{"h":"A Heart Warming Look At One Teacher's Final Day","c":35,"n":4347},"m":1,"q":1},{"w":{"h":"I Usually Can't Stand Yearly Recap Videos, But The One You're About To See Is Kleenex-Worthy","c":51,"n":2782},"l":{"h":"The Moments That Brought Us Together In 2014 Can Bring Us Together Right Now","c":16,"n":2920},"m":1,"q":1},{"w":{"h":"A Question All Couples Should Talk About Before They Get In Too Deep","c":72,"n":4766},"l":{"h":"Men And Women Disagree On Lots, But In This Case, The Woman Is Always Right","c":39,"n":4783},"m":0,"q":1},{"w":{"h":"John Oliver's Hilarious Recreation Of Miss America Shows Exactly Why It's So Messed Up","c":75,"n":4142},"l":{"h":"America's Largest Scholarship Program For Women Is A Beauty Pageant. I Just ... Can't Even.","c":33,"n":4158},"m":1,"q":1},{"w":{"h":"A Random Dude Gives A Woman Some Life Advice. I Don't Think He Was Prepared For Her Reaction.","c":78,"n":6822},"l":{"h":"A Random Dude Has A Piece Of Advice For Women Everywhere","c":44,"n":6746},"m":1,"q":1},{"w":{"h":"Watch This Incredible Young Woman Prove She's More Than Just A Harry Potter Actress","c":116,"n":6522},"l":{"h":"This Famous Actress Considers Herself One Of The Lucky Ones. One Of What, You Ask?","c":69,"n":6535},"m":1,"q":1},{"w":{"h":"Millions Of People Have Looked At This Painting. Why Did It Take 125 Years For Us To See It?","c":92,"n":3006},"l":{"h":"It's Too Easy To Say That Madness Let Him See The Truth ... Right?","c":18,"n":3064},"m":1,"q":1},{"w":{"h":"A Bunch Of Gross Facts About A Really Pretty Color Are Going To Make You Flip","c":56,"n":3076},"l":{"h":"Here's What You Need To Know About A Campaign To Turn Something Really Important Into A Pretty Color","c":15,"n":3138},"m":1,"q":1},{"w":{"h":"What The Heck Is The 'Hotness Gap' And Why Is Hollywood So Obsessed With It?","c":68,"n":3404},"l":{"h":"This Movie Buff Is Sick Of These 5 Hollywood Cliches. See How Many You Can Name.","c":33,"n":3367},"m":0,"q":1},{"w":{"h":"He Said Some Things Using His Eyes That He'd Not Said In Years. His Wife Finally Got To Hear Him.","c":58,"n":2496},"l":{"h":"They Invented A Way To Talk With Eyeballs. It's Helping His Relationship.","c":16,"n":2444},"m":1,"q":0},{"w":{"h":"People Think She's Drunk All The Time. But This Famous Musician's Got A Much More Interesting Story.","c":66,"n":3047},"l":{"h":"She Lives In Mortal Dread Of Public Speaking, But That's What Makes Her Talk So Amazing","c":34,"n":3077},"m":1,"q":1},{"w":{"h":"She Tries Playing The Video Game Using A Female Avatar. What Happens Next Is Way Too Realistic.","c":45,"n":3049},"l":{"h":"If Video Games Were More Like Real Life, Here's What Call Of Duty ​Might​ Look Like","c":19,"n":3051},"m":1,"q":1},{"w":{"h":"This Guy Is Going To Make A Point About The London Subway System That Will Blow You Away","c":52,"n":3064},"l":{"h":"People Like Him Who Live Cities Have A Tough Time Getting Around. But Not For The Reason You Think.","c":19,"n":3084},"m":1,"q":1},{"w":{"h":"Watch This Non-Celebrity Bring A Room Full Of World Leaders To A Standing Ovation","c":93,"n":4662},"l":{"h":"I Love My Mom, But She Probably Couldn't Make World Leaders Cry Like *This* Mom Did","c":55,"n":4736},"m":0,"q":1},{"w":{"h":"The 1st 2 Minutes I Felt His Anger. The Next 2 I Cried With Him. The Last 2, I Felt His Strength.","c":41,"n":4112},"l":{"h":"What Starts With Anger And Turns Into Tears, Ends With Such Wisdom","c":15,"n":4077},"m":1,"q":1},{"w":{"h":"Bad Luck Was All He Had Job-Hunting Until He Dropped One Single Letter In His Name. Not Cool.","c":48,"n":3530},"l":{"h":"One Little Letter In His Name Turned Out To Be The Secret Reason For All His Bad Luck","c":19,"n":3569},"m":1,"q":0},{"w":{"h":"The Part Of The Feguson Protests That No One Wants You To See","c":40,"n":3024},"l":{"h":"What's Sensible, Specific And No Where On The News?","c":12,"n":3076},"m":1,"q":1},{"w":{"h":"10 Hit Songs With A Hidden Meaning That Should Never Be Played Again","c":70,"n":2874},"l":{"h":"10 Hit Songs We Love That Have Something Super Dark In Common","c":27,"n":2855},"m":1,"q":1},{"w":{"h":"A Little Girl Doesn't Respond To This Stereotype About Her Dog, But Her Look Says It All","c":95,"n":4119},"l":{"h":"If You Make *That* Comment About Her Dog, She Won't Respond, But Her Looks Says It All","c":55,"n":4053},"m":1,"q":1},{"w":{"h":"How This Woman's 12 Powerful Words Became The Chorus To An Epic Song","c":95,"n":4739},"l":{"h":"I Heard Singing And Thought It Was A Regular Song. I Was Wrong.","c":56,"n":4764},"m":0,"q":1},{"w":{"h":"This Famous And Recently Humiliated Woman Has An Amazing Reflection On Why We Do This To Each Other","c":72,"n":3936},"l":{"h":"Jennifer Lawrence Has Some Pretty Great Advice About What To Do With Bullies","c":36,"n":3832},"m":1,"q":0},{"w":{"h":"It's Time To Talk About Why Some Very Inappropriate Cheerleaders Aren't Really Innappropriate","c":54,"n":6150},"l":{"h":"Awesomeness Happens When You Give Freedom To People Who Have Been Silenced Since Time Began","c":12,"n":6122},"m":1,"q":0},{"w":{"h":"The Special Effects Are Stunning, But The Real Event At 2:25 That Inspired It Is Truly Astonishing","c":78,"n":4279},"l":{"h":"They Launched A Probe To Look For The Origin Of Life On Earth. Here's What Could Happen Next.","c":46,"n":4366},"m":1,"q":0},{"w":{"h":"There Wasn't A Dry Eye, On Court Or Off. Even The Refs Were Crying.","c":82,"n":2990},"l":{"h":"A Beautiful Game: Even The Refs Were Crying","c":42,"n":3056},"m":1,"q":1},{"w":{"h":"There's An Important Reason To Check The Tags On Clothing. And It's Not To Get The Size.","c":99,"n":4351},"l":{"h":"We Usually Look At Clothing Tags To Make Sure They're The Right Size. Another Reason Matters Too.","c":50,"n":4353},"m":1,"q":1},{"w":{"h":"A time lapse video that allows you to watch the earth breath. It's wonderful.","c":45,"n":2524},"l":{"h":"Watch what it looks like to symbolicly see how the earth lets you breath.","c":17,"n":2607},"m":1,"q":1},{"w":{"h":"The Code Word The Fashion Industry Uses To Justify This Nasty Practice","c":104,"n":4107},"l":{"h":"They Only Wanted Her To Find One Perfect Model. But That's Precisely The Problem.","c":46,"n":4168},"m":1,"q":0},{"w":{"h":"At First Glance It Just Looks Like A Bus. But Inside? It's So Much Bigger.","c":57,"n":4574},"l":{"h":"Everybody Needs To Eat. So Why Do We Let Food Divide Us?","c":24,"n":4622},"m":1,"q":0},{"w":{"h":"Here's What Happens When Women Don't Dream About Their Wedding Day","c":51,"n":3708},"l":{"h":"Someone Asked This Comedian About Her 'Dream Wedding' So She Gave The Perfect Response","c":22,"n":3593},"m":0,"q":0},{"w":{"h":"How One Line From A 1960's Spiderman Comic Brought A Grown Man To Tears","c":69,"n":4385},"l":{"h":"He Never Thought He'd See Someone Like Him In A Comic Book. Then Everything Changed.","c":28,"n":4297},"m":0,"q":0},{"w":{"h":"Just Watch This Man Draw For 2 Minutes And 30 Seconds. I Dare You To Tell Me He's Wrong.","c":51,"n":3645},"l":{"h":"We Need To Do Something Huge To Fix The Economy. His Plan Is My Absolute Favorite.","c":20,"n":3473},"m":1,"q":1},{"w":{"h":"1 Shocking Photo Is Evidence That It May Be Too Late To Save The World From Catastrophe","c":61,"n":7722},"l":{"h":"You See All 35,000 Of Them Just Lying There, And It's Impossible To Ignore Anymore","c":31,"n":7614},"m":0,"q":1},{"w":{"h":"When Oprah Asked This Buddhist For A Piece Of Life Advice, I Kinda Expected To Hear The Opposite","c":56,"n":3002},"l":{"h":"When Oprah and A Buddhist Nun Want To Give You A Piece Of Life Advice, You Might Wanna Listen","c":29,"n":3091},"m":1,"q":0},{"w":{"h":"Remember The Image Of ‘Rosie The Riveter’ Everybody Pretty Much Knows? It’s Not What You Think.","c":48,"n":3112},"l":{"h":"What’s The First Image That Comes To Your Mind When You Hear The Phrase, ‘Rosie The Riveter’?","c":15,"n":3054},"m":1,"q":1},{"w":{"h":"Put 3 Women In A Room And 1 Will Have A Story That Chills You To The Bone. That's Why They Did It.","c":65,"n":6391},"l":{"h":"Put 3 Women In A Room And 1 Will Have A Story That Gives You Chills. They Said, 'No More.'","c":32,"n":6306},"m":1,"q":1},{"w":{"h":"Before We Tell Her What’s Wrong With Her Body, She Wants To Tell Us What’s Right","c":90,"n":3089},"l":{"h":"Best Way To Show Off 7 Swimsuits? Shut Down Folks Who Say You Have No Business Wearing Them.","c":55,"n":3207},"m":1,"q":1},{"w":{"h":"When Your Spouse Of 45 Years Passes Away, You Shouldn't Have To Get Into A Big Battle","c":36,"n":5773},"l":{"h":"They Served Their Country, So Why Aren't They Eligible For A Basic Human Right","c":11,"n":5901},"m":1,"q":1},{"w":{"h":"They Asked 50 Adults 1 Question, But The 5-Year-Olds Blew Their Answers Out Of The Water","c":69,"n":3188},"l":{"h":"These Soul-Baring Answers Prove Everything You Need To Know, You Learned As A Child","c":28,"n":3186},"m":1,"q":1},{"w":{"h":"He Throws To Commercial, But Not Before Saying Something No Late Night Host Has Said Before","c":74,"n":3100},"l":{"h":"One Small Step For Ending Fat-Phobia, A Giant Leap For Late Night TV Shows","c":31,"n":3097},"m":1,"q":1},{"w":{"h":"If You've Ever Wondered What It's Like To Have ADD ... Here's The General Idea","c":82,"n":3498},"l":{"h":"Have You Ever Wondered What Is Going On Inside That Kid's Head? Why Can't She Focus?","c":20,"n":3593},"m":1,"q":1},{"w":{"h":"This Animation Of Philip Seymour Hoffman Might Give You Chills. Then The Feels Will Rain Down.","c":66,"n":3434},"l":{"h":"I Got The Chills At First. Philip Seymour Hoffman Got To The End And I Felt All Of The Feels.","c":35,"n":3470},"m":1,"q":1},{"w":{"h":"They Put The World's Cutest Dog In A Room With A Bunch Of Adorable Kids, And Not A Minute Too Soon","c":64,"n":4313},"l":{"h":"The World's Cutest Dog Met A Bunch Of Adorable Kids. You Can Pretty Much Guess The Rest.","c":30,"n":4421},"m":1,"q":1},{"w":{"h":"It's A Parent's Worst Nightmare. And A Kid's. Is Your Family Ready?","c":50,"n":5158},"l":{"h":"Does Your Family Have A Plan For When Disaster Strikes?","c":14,"n":5259},"m":1,"q":1},{"w":{"h":"Imagine you're 9, have a smartphone, and see your friend's pics from a party you weren't invited to.","c":57,"n":2024},"l":{"h":"Kids having smartphones doesn't have to signal the end of polite society -- if we don't let it.","c":12,"n":2060},"m":1,"q":1},{"w":{"h":"Something Alive Is Moving About Half Of The Water In The Oceans","c":35,"n":3024},"l":{"h":"Oceans May Need These Astounding Animals As Much As They Need The Oceans","c":8,"n":3096},"m":1,"q":0},{"w":{"h":"His Son Was Only 2 Years Old When His Dad Started To Feel Ashamed, Upset And Cheated","c":69,"n":3764},"l":{"h":"He Took His Breath Away At Birth, But At 2 Is When He Really Stole His Heart","c":31,"n":3762},"m":1,"q":1},{"w":{"h":"How 1 haircut and a before and after photo may change everything for people","c":64,"n":2051},"l":{"h":"They became emotional when their 'before and after'. I admit it, I did too.","c":29,"n":2007},"m":0,"q":1},{"w":{"h":"The Mirror That Changes The Way Women Look At Themselves — For The Better","c":46,"n":3649},"l":{"h":"Knowing How They Feel About Themselves At First Makes Me Want To Cry. The End Is Such A Relief.","c":18,"n":3618},"m":0,"q":1},{"w":{"h":"One Of The Grossest Surf Videos I've Ever Seen For Sure","c":46,"n":3248},"l":{"h":"A Seriously Gross Surf Video About What Tourists Do To The Ocean","c":19,"n":3325},"m":1,"q":0},{"w":{"h":"One Dad Vows To Never Tell His Son He's Smart. He Uses These 4 Words Instead.","c":53,"n":6153},"l":{"h":"He Runs A Free Academy Online To Help Kids Get Smarter. So Why Won't He Tell His Own Son He's Smart?","c":15,"n":6285},"m":1,"q":1},{"w":{"h":"It Takes A Few Seconds To Get Used To This Kid's Voice. That's When You Notice His Words.","c":105,"n":3819},"l":{"h":"His Voice Might Be Weird, But His Words Are Completely Amazing","c":44,"n":3855},"m":1,"q":0},{"w":{"h":"The Roughest Celebrity Video I've Very Seen. Even These Stars Look Completely Shocked.","c":83,"n":3039},"l":{"h":"These Celebrities Are Completely Shocked At What They’ve Just Learned Happens To These Dogs","c":29,"n":3049},"m":1,"q":0},{"w":{"h":"At First, I Wasn't Convinced. But Then They Show What This Woman Actually Does Every Day.","c":107,"n":3591},"l":{"h":"At First I Was Skeptical Of Her Plan, But When I Saw What This Woman Does Every Day I Was Thrilled","c":55,"n":3593},"m":1,"q":0},{"w":{"h":"At First, It Felt Like A Lot Of Little Coca-Cola Bubbles On Her Tongue. But Then She Saw It.","c":39,"n":2909},"l":{"h":"A Young Artist Can 'See' Again By Using A Device That Feels Like Coca-Cola Bubbles On Her Tongue","c":10,"n":2870},"m":1,"q":1},{"w":{"h":"They Can't Get Through Their Lines Without Giggling. I Wonder How The Executives Do It.","c":39,"n":3176},"l":{"h":"Ever Wondered What Coal Executives Have To Say For Themselves?","c":13,"n":3162},"m":1,"q":0},{"w":{"h":"2 Monkeys Have A Fight. I Was Surprised By What Happened Next.","c":55,"n":5115},"l":{"h":"We Are Truly Animals ... But Not In The Way You Might Think","c":25,"n":4984},"m":1,"q":0},{"w":{"h":"She Took A Photo Of Herself In Public And Couldn't Help But Notice How People Where Checking Her Out","c":87,"n":3586},"l":{"h":"One Woman Turns The Camera On Her Onlookers And Forces Their Gaze Into A Conversation","c":46,"n":3454},"m":1,"q":0},{"w":{"h":"Next Time You See This At A Wedding, Instead Of Congratulating The Happy Couple, Tell Them To Duck","c":62,"n":4558},"l":{"h":"Next Time I See Drones At A Wedding, I Won't Be Laughing","c":32,"n":4558},"m":1,"q":0},{"w":{"h":"Her name is Gertrude Mamba. Here is her story. Brace yourself.","c":46,"n":2521},"l":{"h":"Pushing a hundred-pound barrel under a hot sun for several miles. That's what it takes to get water.","c":16,"n":2570},"m":1,"q":1},{"w":{"h":"Just Watch This Man Draw For 2 Minutes And 30 Seconds. I Dare You To Tell Me He's Wrong.","c":51,"n":4262},"l":{"h":"Overworked? Underpaid? He's Got Your Back.","c":19,"n":4188},"m":1,"q":1},{"w":{"h":"The Parts Of Your Makeup That The Beauty Industry Doesn't Want You To Find Out About","c":40,"n":7644},"l":{"h":"What If More Of Us Asked These Questions About Our Beauty Products?","c":14,"n":7544},"m":1,"q":1},{"w":{"h":"It Was Really Funny And Kinda Gross And I Laughed... Until The End. Then It was Awful. Point Made.","c":68,"n":3084},"l":{"h":"If Picking Your Nose In Public And Clipping Your Toenails At The Table Are Wrong, How Is This OK?","c":35,"n":3060},"m":1,"q":0},{"w":{"h":"After A Startling Discovery At 17, She Wants You To Take This 'Selfie' Pledge","c":44,"n":3882},"l":{"h":"We Spend The Day Checking Our Phones, Why Not End The Day With A 'Selfie' That Matters?","c":10,"n":3873},"m":1,"q":1},{"w":{"h":"8 Quotes From Supermodels That Make Me Wish People Asked Them Real Questions More Often","c":52,"n":6987},"l":{"h":"8 Fashion Models Who Care About A Lot More Than Just The Way They Look","c":23,"n":7100},"m":1,"q":1},{"w":{"h":"A snooty lady asked this waiter for fancy salt, and his response is hilariously, internationally true.","c":83,"n":2002},"l":{"h":"This comedian makes a hilariously true point about how sheltered we can be in first world countries.","c":27,"n":2062},"m":1,"q":0},{"w":{"h":"The 10 Phrases I've Stopped Saying And The People Who Appreciate Me For It","c":47,"n":5910},"l":{"h":"It Hasn't Been Easy To Rid these Words From My Vocab, But I Think It's Been Worth It","c":15,"n":5973},"m":1,"q":1},{"w":{"h":"Just Watch The Incredible Footage Of What These New Machines Can Do, And Tell Me They're A Bad Idea","c":74,"n":5554},"l":{"h":"These New Inventions Used To Totally Freak Me Out, But Now I See That They're Actually AMAZING","c":39,"n":5627},"m":0,"q":1},{"w":{"h":"Scientists Mapped 8,000 Galaxies Surrounding Us And Found *This* Amazing Discovery","c":67,"n":5126},"l":{"h":"8,000 Galaxies Got Mapped Out By Scientists. The Result? This Amazing Discovery.","c":33,"n":4987},"m":0,"q":1},{"w":{"h":"An 11-Year-Old Saw Something He Could Never Forget. Now He's 16 And He's Set On Making An Impact.","c":55,"n":7411},"l":{"h":"He's Just A Teen, But His Idea To Fight This Huge Problem In His Town Could Be Just What We Need","c":20,"n":7339},"m":0,"q":0},{"w":{"h":"Nothing Prepared Me For This Mind-Bending NASA Video About What Went On Across The Earth During 2006","c":46,"n":4605},"l":{"h":"NASA’s Computers Reveal The Secret Life Of Carbon In The Atmosphere And It’s Totally Riveting","c":19,"n":4522},"m":1,"q":1},{"w":{"h":"If You Can Dry Your Hands Without Thinking Of This Video Every Time, I'll Be Genuinely Surprised","c":67,"n":3120},"l":{"h":"One Is Greener, One Is Cleaner. Which Is Better?","c":25,"n":3045},"m":1,"q":0},{"w":{"h":"When She Saw Her Daughters Facebook Page Asking For Someone To Please Be Her Friend, She Broke Down","c":127,"n":4045},"l":{"h":"Her Friends Were There During The Hardest Time Of Her Life. Until They Got Tired Of Her Problems.","c":79,"n":4165},"m":1,"q":1},{"w":{"h":"She Explains Why So Many Women Don't Say 'Hello'. The Reason Is Absolutely Chilling.","c":88,"n":4471},"l":{"h":"If You've Ever Said 'Hello' And She Didn't Respond, The Reason Why Will Give You Pause","c":49,"n":4503},"m":1,"q":1},{"w":{"h":"If Geek Girls Treated Geek Guys The Way Geek Guys Treat Them, Here's How It Would Sound","c":99,"n":3100},"l":{"h":"It's So Bizarre To Watch Her Treat Him This Way. The Point Couldn't Be Clearer.","c":59,"n":3010},"m":0,"q":1},{"w":{"h":"It Starts Off Cute And Catchy, But Soon This Ingrid Michaelson Video Takes A Turn For Touching","c":42,"n":3005},"l":{"h":"The Best Catchy Message From A Pop Star? 'We're Gonna Be Alright'","c":13,"n":2983},"m":1,"q":0},{"w":{"h":"Hearing These Kittens Talk (Yes, Talk) Was The Most Smile-Inducing 30 Seconds Of My Day","c":46,"n":3065},"l":{"h":"A Bunch Of Adorable Kittens Have A Really Important Message For You. Will You Listen?","c":19,"n":3048},"m":1,"q":1},{"w":{"h":"Feel Like Just Giving Up? These Are The 8 Gifs You Need In Your Life Right Now.","c":72,"n":4131},"l":{"h":"Show These Gifs To Anyone Who Tells You That It Might Be Time To Give Up On Your Dreams","c":26,"n":4007},"m":1,"q":1},{"w":{"h":"Her Name Is Sylvia Earle, And She's Here To Scare The Living Daylights Out Of You","c":44,"n":3255},"l":{"h":"It Was Once Her Home, But Now It’s Being Completely Destroyed By Everyone Around Her","c":15,"n":3277},"m":1,"q":1},{"w":{"h":"A Comedian Gets Real, Totally Nails The Scary Reason Why Women Smile When Strange Men Tell Them To","c":105,"n":4632},"l":{"h":"What Women Are Really Thinking When Strange Men Tell Them To Smile (It's Why We Smile Anyway)","c":49,"n":4605},"m":1,"q":1},{"w":{"h":"What You Didn’t Realize About Doing The Dishes Is Powerful But Extremely Simple","c":41,"n":3025},"l":{"h":"Here’s The Real Fabric You Need To Start Sporting. (Hint: It Ain’t Cotton.)","c":13,"n":2970},"m":1,"q":1},{"w":{"h":"She Got A Birthday Card From Her Mom, But The Name On It Broke Her Heart","c":74,"n":3022},"l":{"h":"A Birthday Card From Her Mom Should've Made Her Smile, But It Broke Her Heart Instead","c":35,"n":3015},"m":0,"q":0},{"w":{"h":"*Don't* Tell Kids Not To Take Candy From Strangers. Or Not To Talk To Them. Here's Why.","c":75,"n":3161},"l":{"h":"Telling Our Kids Not To Take Candy From Strangers Or Not To Talk To Them Isn't Helping. Here's Why.","c":30,"n":3031},"m":1,"q":1},{"w":{"h":"His Story Is So Extraordinary, It's About Time Hollywood Turned It Into A Movie","c":44,"n":4430},"l":{"h":"Wanna Be On National TV? You Might Be Able To If You've Got A Story Like His.","c":17,"n":4315},"m":1,"q":1},{"w":{"h":"A Preview Of What The Classroom Might Look Like In 2025 Is Also A Look Into Our Planet's Future","c":48,"n":3036},"l":{"h":"Can A Look Into These Children's Future Change How We Treat The World Today?","c":13,"n":3097},"m":1,"q":0},{"w":{"h":"A Powerful Animation Shows Why New York Is In Big Trouble. A Lot Of Other States Are Too.","c":67,"n":4628},"l":{"h":"A Powerful Animation Shows Why More New Yorkers Should Donate... Themselves","c":33,"n":4610},"m":1,"q":1},{"w":{"h":"Banned From The Front Row At Oprah Because They Had The Wrong Eye Color. Really.","c":109,"n":2831},"l":{"h":"They Were Confused And Frustrated That Having The Wrong Eye Color Kept Them From Oprah's Front Row","c":45,"n":2887},"m":1,"q":1},{"w":{"h":"Watch The 2nd Guy In The First 15 Seconds. Now Don't Be Anything Like Him.","c":78,"n":3790},"l":{"h":"Brilliant PSA Has Me Laughing And Scratching My Head. Is It Really That Hard To Talk To Someone?","c":35,"n":3763},"m":1,"q":0},{"w":{"h":"I Really Hope The Parents Of These People Get To See What They Said Here. They'd Probably Cry.","c":71,"n":6050},"l":{"h":"He Looks Like A Football Player. But That's Not Why Kids Treat Him Like A Movie Star.","c":33,"n":6259},"m":1,"q":1},{"w":{"h":"After Years Of Making Them Laugh, This Is Why Everyone's Now Crying","c":58,"n":7197},"l":{"h":"Joan Rivers Paved The Way For Countless Female Comics While Making Everyone Laugh — For 50 Years","c":28,"n":7250},"m":1,"q":0},{"w":{"h":"A Woman Takes A Camera Out On The Street To Make A Point, And 100+ Men Prove Her Right","c":95,"n":3598},"l":{"h":"Thought-Provoking: 10 Hours Of Walking Around NYC Alone As A Woman","c":55,"n":3633},"m":1,"q":1},{"w":{"h":"Show These 4 Images To The Next Person Who Goes, \"It's Just Not Healthy\"","c":81,"n":3051},"l":{"h":"Lets Stop Wasting Our Time Assuming That Health Has Everything To Do With Size","c":36,"n":3018},"m":1,"q":1},{"w":{"h":"It Broke Her Heart Seeing Her Daughter's Facebook Page, Asking For Someone To Please Be Her Friend","c":164,"n":3713},"l":{"h":"She Cried When She Saw Her Daughter's Words 'Please Be My Friend, I Have Nobody To Hang Out With'","c":111,"n":3757},"m":1,"q":0},{"w":{"h":"She's Known As Malala, But When She Revealed Her Other Names, I Got Teary","c":116,"n":4587},"l":{"h":"They Call Her Malala, But Wait Until You Hear Her Other Names","c":65,"n":4514},"m":1,"q":0},{"w":{"h":"There's Something We Start Doing To Babies When They're Born That Can Mess Them Up For Life","c":49,"n":3057},"l":{"h":"I Could Say 'He's A Person Everyone Should Listen To' But That Would Totally Defeat The Point","c":20,"n":3097},"m":1,"q":1},{"w":{"h":"It Made Me Feel All Warm And Fuzzy At First. Then It Scared Me A Bit. Let's Get To That Happy Place.","c":39,"n":4322},"l":{"h":"There’s 7.3 Billion Of Us Living Here. We’re Gonna Have To Make Some Changes.","c":13,"n":4333},"m":1,"q":0},{"w":{"h":"A Drone Few Over A Pig Farm To Discover It’s Not Really A Farm. It’s Something Much More Disturbing.","c":90,"n":2828},"l":{"h":"Bacon. Everyone’s In Love With Bacon, It Seems. It’s Cool To Love Bacon. Watch This, Please.","c":27,"n":2832},"m":0,"q":1},{"w":{"h":"The People At 3:10 Asked The Daily Show To Pull The Clip. They Didn't.","c":85,"n":3752},"l":{"h":"See Why One Fan's Answer Changed When They Asked Him If He'd Keep Wearing His Jersey","c":37,"n":3812},"m":1,"q":0},{"w":{"h":"Yellow Ranger Was Her Role Model. Then She Decided To Tell One Guy What She Was Really Thinking.","c":67,"n":6702},"l":{"h":"Childhood Fictional Characters Can Be Our Best Friends — But What About When You’re An Adult?","c":22,"n":6539},"m":1,"q":1},{"w":{"h":"The #1 Most Obnoxious Question You Need To Stop Asking When You're Introduced To Someone","c":111,"n":3259},"l":{"h":"The Annoying Question People Ask, That Says Way More About Them, Than Any Answer You Give","c":55,"n":3263},"m":1,"q":1},{"w":{"h":"I've Gotta Admit: This 1 Minute Video Hits Me Right In The Gut.","c":113,"n":7455},"l":{"h":"How Long Is Too Long For A Dog To Wait For You To Come Home?","c":58,"n":7522},"m":1,"q":1},{"w":{"h":"It's A Parent's Worst Nightmare. And A Kid's. Is Your Family Ready?","c":61,"n":4107},"l":{"h":"Here's An Easy Thing You Can Do To Make Your Family Safe","c":18,"n":4103},"m":0,"q":0},{"w":{"h":"Here's What Happiness Looks Like When You Buy It. Don't Be That Person.","c":53,"n":2372},"l":{"h":"When You Buy Happiness, It Isn't Really That Happy. Here's How To Avoid That.","c":13,"n":2479},"m":1,"q":1},{"w":{"h":"The Way These Kids Behave Will Creep You Out. But What's Scarier Is That We Actually Encourage It.","c":60,"n":3039},"l":{"h":"Blue For Boys And Pink For Girls? That's Just The Tip Of The Iceberg That's Sinking Our Kids.","c":18,"n":3055},"m":1,"q":1},{"w":{"h":"She Seriously Makes Me Cry When She Says, ‘Who Wouldn’t Want This Precious Little Boy?’","c":62,"n":4256},"l":{"h":"Remember Ace And Archie? They Were Internet ’Stars' A Few Years Ago. Here They Are With Some News.","c":27,"n":4174},"m":1,"q":1},{"w":{"h":"What Happens If You Don’t Pay Off Your Student Loans? Bad Things. Bad Things Happen.","c":40,"n":5705},"l":{"h":"7 In 10 College Grads Have Student Debt. 1 In 11 Will Default. That's A Disaster In The Making.","c":14,"n":5920},"m":1,"q":0},{"w":{"h":"If You've Ever Wondered What Love Actually Looks Like, I'd Suggest You Take A Gander At These Women","c":52,"n":3037},"l":{"h":"Every Time They Look At Each Other I Only See Love. Odds Are You Will Too. It's Beautiful.","c":20,"n":3092},"m":1,"q":0},{"w":{"h":"What Brings This Mother To Tears Is Worth 3 Minutes Of Your Time","c":61,"n":3456},"l":{"h":"Sometimes, People Just Need To Hear A Simple 'I Love You'","c":20,"n":3386},"m":1,"q":1},{"w":{"h":"She Watered And Cared For It Each And Every Day. Then It Hit Her: She Knew What She Had To Do Next.","c":46,"n":3672},"l":{"h":"How A 3rd Grader’s 40-Pound Cabbage Has Touched A Ton Of People. But Not Literally.","c":19,"n":3587},"m":1,"q":0},{"w":{"h":"5 Easy Ways To Make Yourself A Ridiculously Good Listener","c":46,"n":4777},"l":{"h":"He Tells Us We All Suck At Listening, But Stick With It — He Also Tells Us How To Get Better","c":12,"n":4643},"m":1,"q":1},{"w":{"h":"10 Fabulous Ways Lucille Ball Was The Complete Opposite Of Her T.V. Character","c":92,"n":4564},"l":{"h":"10 Ways Lucille Ball Defied Gender Roles In Real Life","c":46,"n":4463},"m":1,"q":0},{"w":{"h":"Can You Guess What's Missing From 'The Hobbit'? Most People Don't Notice It At First.","c":101,"n":2865},"l":{"h":"Women Are Missing In 'The Hobbit,' And Many People Don't Even Notice","c":46,"n":2857},"m":0,"q":0},{"w":{"h":"If You Saw This At A Crosswalk, You'd Probably Not Want To Cross. Point Made.","c":40,"n":2938},"l":{"h":"Getting From Point A To Point B Just Got A *Lot* More Interesting For Some Folks","c":14,"n":2887},"m":1,"q":1},{"w":{"h":"The First Point She Made Was Like, BOOM! The Other 7 Just Got Better And Better.","c":152,"n":4901},"l":{"h":"8 Times My *Fav* Daily Show Correspondend Tells It Like. It. Is.","c":83,"n":4908},"m":0,"q":1},{"w":{"h":"No One Should Have To Deal With This. Not On The Bus. Not On The Train. Not On The Street. Not Ever.","c":54,"n":6167},"l":{"h":"When Just Getting To Work Feels Like Fighting A Silent War","c":18,"n":6216},"m":1,"q":1},{"w":{"h":"Take A Deep Breath Because This Camera Is Showing A Part Of Us Not Many People See","c":72,"n":4746},"l":{"h":"A New, Simple Lens Attached To A Camera Is Exposing Our Personal Parts Per Million","c":39,"n":4764},"m":1,"q":0},{"w":{"h":"The Dirty Little Secret About What It Means When Men Are Silent","c":59,"n":3000},"l":{"h":"He Has Regrets That Many Men Can Probably Relate To. I Hope They Change Their Ways.","c":24,"n":3088},"m":0,"q":1},{"w":{"h":"A 911 Call That Unnerved The Dispatcher. For Good Reason.","c":70,"n":3093},"l":{"h":"An Act Of Desperation Over 20 Years Ago May Help Save Lives Even Today","c":30,"n":3092},"m":1,"q":1},{"w":{"h":"Just Over 20 Years Ago, One Little Girl Stunned People Around The World With 5 Minutes Of Brilliance","c":85,"n":4251},"l":{"h":"This Girl Has More Common Sense, Compassion And Empathy Than Most Adults","c":32,"n":4322},"m":1,"q":1},{"w":{"h":"It's Kinda Hard To Believe Till You See It With Your Own Eyes, But They Just Invented A Flying Bike","c":35,"n":3895},"l":{"h":"Once You See A Real Hover Vehicle With Your Own Eyes, Cars Are Gonna Feel So 2013","c":9,"n":3825},"m":1,"q":1},{"w":{"h":"The Question Lupita Nyong'o Was Sick Of As A Child And Why We Should Stop Pushing It On Our Own Kids","c":42,"n":3038},"l":{"h":"Lupita Nyong'o Continues Her Rein As Flawless Human And Says Let Children Have Unlimited Dreams","c":15,"n":3086},"m":1,"q":1},{"w":{"h":"They Expected To Help An Injured Dog Hiding In A Bush, But She Had A Big Surprise For Them","c":114,"n":3998},"l":{"h":"They Went To Rescue A Scared Dog With An Injured Eye. What They Found Was A Big Surprise.","c":61,"n":4190},"m":0,"q":0},{"w":{"h":"Watch Each Member Of A Family Say Right Into The Camera What They Think Of Each Other","c":40,"n":3016},"l":{"h":"They’ve Reached The Point In Their Lives Where Who’s The Parent And Who’s The Child Are Switched","c":12,"n":3027},"m":1,"q":1},{"w":{"h":"When Doctors Give 2 Blind Sisters The Gift Of Sight, They Can't Stop Smiling. And Now Neither Can I.","c":80,"n":5989},"l":{"h":"These Doctors Give 2 Blind Sisters The Gift Of Sight And Their Smile Back. I Wanna Hug Them All.","c":45,"n":5866},"m":1,"q":1},{"w":{"h":"A Comment About Her Dog That Has This Girl Raising Her Eyebrows And Shaking Her Head","c":86,"n":4069},"l":{"h":"What You Don't Wanna Say About This Little Girl's Dog, Unless You Want *That* Look","c":45,"n":4203},"m":0,"q":0},{"w":{"h":"This Little Girl Has 5 Cartoon Characters Before Her. The One She Picks Left Me In Tears.","c":51,"n":7170},"l":{"h":"What She Says About These Cartoons Says Mountains About How Children See Themselves. It's Not Good.","c":22,"n":7133},"m":1,"q":1},{"w":{"h":"This Video Is Hilarious Until You Realize We're Actually Teaching This To Kids","c":83,"n":3860},"l":{"h":"This Video Is Hilarious Until You Realize What Our Kids Are *Not* Learning In The Classroom","c":40,"n":3945},"m":1,"q":1},{"w":{"h":"He Took His Camera To A Village Where Prostitution Is A Way Of Life. Here's What He Found.","c":88,"n":3056},"l":{"h":"A Village Where No One Is Stopping (Or Helping) Prostitutes: Riveting Photos And Details","c":43,"n":3079},"m":1,"q":1},{"w":{"h":"30 Women Who Have Never Met Each Other Have 1 Very Significant Thing In Common","c":63,"n":3639},"l":{"h":"Being A Mom Is Beyond Amazing. And Then Other Days, Not So Much. Let's Talk About It.","c":23,"n":3497},"m":1,"q":1},{"w":{"h":"A Woman Asks A Random Dude Whether His Bulge Is Real To Show How Ridiculous Some Men's Behavior Is","c":92,"n":4063},"l":{"h":"It Wouldn't Ever Occur To Me To Yell At Random Men Like This. So Why Do Some Men Do It To Women?","c":43,"n":4141},"m":1,"q":0},{"w":{"h":"A Delightful Little Ditty About Something That Everybody Who Owns A Pair Of Balls Needs To","c":71,"n":4064},"l":{"h":"Guys, You’re Totally Nuts If You Don’t Check Your Nuts. And Other Puns To Follow.","c":38,"n":4067},"m":0,"q":0},{"w":{"h":"How Much Living Space Does A Girl Need? This \"Minimum\" Is Pretty Horrifying.","c":81,"n":6673},"l":{"h":"There Are Rules About Her Space, But Chances Are Good You're Holding More Than That In Your Hand","c":39,"n":6656},"m":1,"q":1},{"w":{"h":"She's The Last Person Left Who Can Speak This Language, But She's Not Letting It Go Without A Fight","c":36,"n":3069},"l":{"h":"I Didn't Think She Could Succeed. But Then I Saw How Determined She Is.","c":8,"n":3072},"m":1,"q":1},{"w":{"h":"A Handsome Dude Wrote 6 Rules For Partying. I'd Follow'em.","c":38,"n":4099},"l":{"h":"6 Party Tips For Kids And Grown-Ups","c":8,"n":4129},"m":1,"q":1},{"w":{"h":"It Happens To Most Men Between The Ages Of 20 - 39 And They Want You To Spot It","c":37,"n":2079},"l":{"h":"Ball Players Are Checking, Well, Their B***S On Tv To Help Men Out","c":11,"n":2041},"m":1,"q":1}]};
+document.body.classList.remove('nojs');
+const $ = id => document.getElementById(id);
+const pct = (x, d = 0) => (100 * x).toFixed(d) + '%';
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* Fade sections in as they arrive. */
+const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); e.target.dispatchEvent(new CustomEvent('seen')); io.unobserve(e.target); } }), { rootMargin: '0px 0px -8% 0px' });
+document.querySelectorAll('.fade').forEach(el => io.observe(el));
+function whenSeen(el, fn) { const o = new IntersectionObserver(es => { if (es.some(e => e.isIntersecting)) { fn(); o.disconnect(); } }, { rootMargin: '0px 0px -12% 0px' }); o.observe(el); }
+
+/* ---------- The game ---------- */
+(function game() {
+  const A = $('g-a'), B = $('g-b'), next = $('g-next'), verdict = $('g-verdict'), pips = $('g-pips');
+  const ROUNDS = 10;
+  let deck = [], round = 0, score = 0, mScore = 0, lScore = 0, cur = null, seen = new Set();
+  const intro = verdict.textContent;
+  function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+  function deal() {
+    let pool = DATA.game.map((g, i) => i).filter(i => !seen.has(i));
+    if (pool.length < ROUNDS) { seen.clear(); pool = DATA.game.map((g, i) => i); }
+    deck = shuffle(pool).slice(0, ROUNDS); deck.forEach(i => seen.add(i));
+    round = 0; score = 0; mScore = 0; lScore = 0;
+    pips.innerHTML = '<i></i>'.repeat(ROUNDS);
+    $('g-final').classList.remove('on'); $('g-play').hidden = false;
+    show();
+  }
+  function show() {
+    const g = DATA.game[deck[round]];
+    const flip = Math.random() < 0.5;            // the winner is stored first; put it on a random side
+    cur = { g, flip };
+    const left = flip ? g.l : g.w, right = flip ? g.w : g.l;
+    [[A, left], [B, right]].forEach(([el, h]) => {
+      el.className = 'pick'; el.disabled = false;
+      el.querySelector('.hl').textContent = h.h;
+      el.querySelector('.bar i').style.width = '0';
+    });
+    $('g-round').textContent = 'Round ' + (round + 1) + ' of ' + ROUNDS;
+    [...pips.children].forEach((p, i) => p.classList.toggle('now', i === round));
+    verdict.textContent = intro; next.hidden = true;
+  }
+  function choose(pickedLeft) {
+    const { g, flip } = cur;
+    const winnerLeft = !flip;
+    const right = pickedLeft === winnerLeft;
+    score += right; mScore += g.m; lScore += g.q;
+    const top = g.w.c / g.w.n;
+    [[A, flip ? g.l : g.w, winnerLeft], [B, flip ? g.w : g.l, !winnerLeft]].forEach(([el, h, won]) => {
+      el.disabled = true; el.classList.add('shown', won ? 'won' : 'lost');
+      el.querySelector('.rate').innerHTML = pct(h.c / h.n, 1) + ' clicked<small>' + h.c.toLocaleString() + ' clicks from ' + h.n.toLocaleString() + ' visitors</small>';
+      requestAnimationFrame(() => { el.querySelector('.bar i').style.width = (100 * (h.c / h.n) / top) + '%'; });
+    });
+    (pickedLeft ? A : B).classList.add('chosen');
+    const pip = pips.children[round]; pip.classList.add(right ? 'hit' : 'miss'); pip.classList.remove('now');
+    const side = ok => ok ? '<span class="ok">got it right</span>' : '<span class="no">got it wrong</span>';
+    verdict.innerHTML = (right ? '<b class="ok">You called it.</b> ' : '<b class="no">Not this time.</b> ') +
+      'The winner drew ' + (g.w.c / g.w.n / (g.l.c / g.l.n)).toFixed(1) + ' times the click rate of the other headline. ' +
+      'The combined model ' + side(g.m) + ', and the language model ' + side(g.q) + '.';
+    next.hidden = false; next.textContent = round === ROUNDS - 1 ? 'See how you did →' : 'Next round →';
+    next.focus({ preventScroll: true });
+  }
+  function finish() {
+    $('g-play').hidden = true; $('g-final').classList.add('on');
+    $('g-round').textContent = 'Final score';
+    const c = DATA.contest.rows;
+    const find = n => c.find(r => r.key === n);
+    $('g-final-title').textContent = 'You picked ' + score + ' of ' + ROUNDS + ' winners.';
+    const rows = [
+      ['You', score / ROUNDS, score + '/10', 'you'],
+      ['The combined model, same ten', mScore / ROUNDS, mScore + '/10', ''],
+      ['The language model, same ten', lScore / ROUNDS, lScore + '/10', ''],
+      ['A coin, on average', 0.5, '5/10', ''],
+    ];
+    $('g-board').innerHTML = rows.map(r => '<li class="' + r[3] + '"><span>' + r[0] + '</span><span class="track"><i data-w="' + (100 * r[1]) + '"></i></span><span class="v">' + r[2] + '</span></li>').join('');
+    requestAnimationFrame(() => requestAnimationFrame(() => document.querySelectorAll('#g-board i').forEach(i => i.style.width = i.dataset.w + '%')));
+    const m = find('combined'), q = find('llm');
+    const you = score > mScore ? 'You beat the combined model on these ten, which does not happen often. ' : score === mScore ? 'You tied with the combined model on these ten. ' : score > 5 ? 'You beat the coin, and the combined model beat you. ' : score === 5 ? 'That is what a coin gets. ' : 'A coin gets five on average, so these headlines fooled you. ';
+    $('g-final-text').innerHTML = you + 'Over all ' + DATA.contest.clear_pairs.toLocaleString() + ' clear pairs in the tests I set aside for scoring, the combined model picked the winner <b>' + pct(m.clear) + '</b> of the time and the language model <b>' + pct(q.clear) + '</b>. Keep your score in mind when you reach section 4.';
+  }
+  A.addEventListener('click', () => choose(true)); B.addEventListener('click', () => choose(false));
+  next.addEventListener('click', () => { round++; round < ROUNDS ? show() : finish(); });
+  $('g-again').addEventListener('click', deal);
+  deal();
+})();
+
+/* ---------- The simulator ---------- */
+(function sim() {
+  const grid = $('s-grid'), N = 400, PHI2 = DATA.phi * DATA.phi, BASE = 0.0125;
+  grid.innerHTML = '<i></i>'.repeat(N);
+  const cells = [...grid.children];
+  const nOf = v => { const x = 300 * Math.pow(200, v / 100); const step = x < 1000 ? 50 : x < 10000 ? 100 : 1000; return Math.round(x / step) * step; };
+  function gauss() { let u = 0, v = 0; while (!u) u = Math.random(); while (!v) v = Math.random(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v); }
+  function clicks(n, p) {                              // binomial, by Poisson for small counts and a bell curve for large ones
+    const lam = n * p;
+    if (lam > 60) return Math.max(0, Math.round(lam + Math.sqrt(lam * (1 - p)) * gauss()));
+    let L = Math.exp(-lam), k = 0, q = 1; do { k++; q *= Math.random(); } while (q > L); return k - 1;
+  }
+  let timer = null;
+  function run() {
+    const n = nOf(+$('s-n').value), edge = +$('s-e').value / 100;
+    $('s-n-out').textContent = n.toLocaleString(); $('s-e-out').textContent = Math.round(edge * 100) + '%';
+    const pA = BASE, pB = BASE * (1 + edge), nEff = Math.max(1, Math.round(n / PHI2));
+    $('s-truth').textContent = 'Headline A truly gets ' + (100 * pA).toFixed(2) + '% of visitors to click and headline B gets ' + (100 * pB).toFixed(2) + '%. Out of ' + n.toLocaleString() + ' visitors that is about ' + Math.round(n * pA) + ' clicks against ' + Math.round(n * pB) + '.';
+    const res = []; let wrong = 0, leadSum = 0, wins = 0;
+    for (let i = 0; i < N; i++) {
+      const a = clicks(nEff, pA), b = clicks(nEff, pB);
+      const bWon = b > a || (b === a && Math.random() < 0.5);
+      res.push(bWon); if (!bWon) wrong++; else if (a > 0) { leadSum += b / a - 1; wins++; }
+    }
+    clearInterval(timer); cells.forEach(c => c.className = '');
+    const paint = i => cells[i].className = res[i] ? 'good' : 'bad';
+    if (reduce) { for (let i = 0; i < N; i++) paint(i); } else { let i = 0; timer = setInterval(() => { for (let k = 0; k < 16 && i < N; k++, i++) paint(i); if (i >= N) clearInterval(timer); }, 16); }
+    $('s-wrong').textContent = pct(wrong / N); $('s-lead').textContent = wins ? '+' + pct(leadSum / wins) : '–'; $('s-true').textContent = '+' + pct(edge);
+  }
+  $('s-n').addEventListener('input', run); $('s-e').addEventListener('input', run); $('s-run').addEventListener('click', run);
+  whenSeen(grid, run);
+})();
+
+/* ---------- Horizontal bars ---------- */
+function bars(host, rows, max, fmt) {
+  host.innerHTML = rows.map(r => '<div class="hbar ' + (r.cls || '') + '"><div class="name">' + r.name + (r.sub ? '<small>' + r.sub + '</small>' : '') + '</div><div class="track"><div class="fill" data-w="' + Math.max(0, 100 * r.v / max) + '"></div><div class="val">' + fmt(r.v) + '</div></div></div>').join('');
+  const go = () => host.querySelectorAll('.hbar').forEach(b => { const w = b.querySelector('.fill').dataset.w; b.querySelector('.fill').style.width = 'calc(' + w + '% * 0.86)'; b.querySelector('.val').style.left = 'calc(' + w + '% * 0.86)'; });
+  if (host.dataset.live) requestAnimationFrame(() => requestAnimationFrame(go)); else whenSeen(host, () => { host.dataset.live = 1; requestAnimationFrame(go); });
+}
+bars($('rm-bars'), [
+  { name: 'All rematches', sub: DATA.rematch.all.pairs.toLocaleString() + ' pairs', v: DATA.rematch.all.held, cls: 'red' },
+  { name: 'First result was clear', sub: DATA.rematch.sig.pairs.toLocaleString() + ' pairs', v: DATA.rematch.sig.held },
+  { name: 'First result was not clear', sub: DATA.rematch.ns.pairs.toLocaleString() + ' pairs', v: DATA.rematch.ns.held },
+  { name: 'A coin', v: 0.5, cls: 'zero' },
+], 1, v => pct(v));
+
+/* ---------- Traffic ---------- */
+(function traffic() {
+  const T = DATA.traffic, svg = $('t-svg'), slider = $('t-slider');
+  slider.max = T.length - 1; slider.value = T.findIndex(t => t.m === 1);
+  let x, y;
+  const lab = m => m < 1 ? '1/' + Math.round(1 / m) : m + '×';
+  function draw() {
+    const W = Math.max(280, Math.round(svg.parentElement.clientWidth)), small = W < 520;
+    const H = small ? 270 : Math.round(W * 0.5), L = small ? 38 : 46, R = small ? 12 : 20, TOP = 26, BOT = 50, fs = small ? 12.5 : 15;
+    svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+    x = i => L + (W - L - R) * i / (T.length - 1); y = v => TOP + (H - TOP - BOT) * (1 - (v - 0.4) / 0.6);
+    const path = k => T.map((t, i) => (i ? 'L' : 'M') + x(i).toFixed(1) + ' ' + y(t[k]).toFixed(1)).join(' ');
+    let s = '';
+    [0.4, 0.6, 0.8, 1].forEach(v => { s += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + y(v) + '" y2="' + y(v) + '" stroke="#d3cab7"/><text x="' + (L - 7) + '" y="' + (y(v) + 5) + '" text-anchor="end" font-size="' + fs + '" fill="#6d6558">' + Math.round(v * 100) + '%</text>'; });
+    T.forEach((t, i) => { s += '<text x="' + x(i) + '" y="' + (H - 24) + '" text-anchor="middle" font-size="' + fs + '" font-weight="600" fill="#48423a">' + lab(t.m) + '</text>'; });
+    s += '<text x="' + L + '" y="' + (H - 3) + '" font-size="' + (fs - 2) + '" fill="#6d6558" letter-spacing="1.2">' + (small ? 'TRAFFIC, COMPARED WITH UPWORTHY’S' : 'TRAFFIC, COMPARED WITH WHAT UPWORTHY USED') + '</text>';
+    s += '<line id="t-guide" y1="' + TOP + '" y2="' + (H - BOT) + '" stroke="#1b1915" stroke-dasharray="3 4"/>';
+    s += '<path d="' + path('share') + '" fill="none" stroke="#c2321d" stroke-width="3.5" stroke-linejoin="round"/><path d="' + path('best') + '" fill="none" stroke="#1b1915" stroke-width="3.5" stroke-linejoin="round"/>';
+    T.forEach((t, i) => { s += '<circle cx="' + x(i) + '" cy="' + y(t.share) + '" r="4" fill="#fcfaf4" stroke="#c2321d" stroke-width="2"/><circle cx="' + x(i) + '" cy="' + y(t.best) + '" r="4" fill="#fcfaf4" stroke="#1b1915" stroke-width="2"/>'; });
+    s += '<circle id="t-d1" r="8" fill="#1b1915"/><circle id="t-d2" r="8" fill="#c2321d"/>';
+    const e = T.length - 1;
+    s += '<text x="' + (x(e) - 4) + '" y="' + (y(T[e].share) - 13) + '" text-anchor="end" font-size="' + fs + '" font-weight="700" fill="#c2321d">share of the possible gain</text>';
+    s += '<text x="' + (x(e) - 4) + '" y="' + (y(T[e - 3].best) + (small ? 30 : 36)) + '" text-anchor="end" font-size="' + fs + '" font-weight="700" fill="#1b1915">winner is truly the best</text>';
+    svg.innerHTML = s;
+    slider.style.marginLeft = (100 * (L - 11) / W) + '%'; slider.style.width = (100 * (W - L - R + 22) / W) + '%';
+    set();
+  }
+  function set() {
+    const i = +slider.value, t = T[i];
+    ['t-d1', 't-d2'].forEach((id, k) => { const c = $(id); c.setAttribute('cx', x(i)); c.setAttribute('cy', y(k ? t.share : t.best)); });
+    const g = $('t-guide'); g.setAttribute('x1', x(i)); g.setAttribute('x2', x(i));
+    $('t-m').textContent = t.m === 1 ? 'Upworthy’s real traffic' : t.m < 1 ? 'One ' + ['', '', 'half', '', 'quarter', '', '', '', 'eighth'][Math.round(1 / t.m)] + ' of the traffic' : t.m + ' times the traffic';
+    $('t-n').textContent = 'About ' + (+(DATA.typical.impr * t.m).toPrecision(2)).toLocaleString() + ' visitors and ' + Math.round(DATA.typical.clicks * t.m).toLocaleString() + ' clicks per headline.';
+    $('t-best').textContent = pct(t.best); $('t-share').textContent = pct(t.share);
+  }
+  slider.addEventListener('input', set);
+  let lastW = 0;
+  new ResizeObserver(() => { const w = svg.parentElement.clientWidth; if (Math.abs(w - lastW) > 4) { lastW = w; draw(); } }).observe(svg.parentElement);
+  draw();
+})();
+
+/* ---------- The contest ---------- */
+(function contest() {
+  const C = DATA.contest, host = $('c-bars');
+  function draw(mode) {
+    if (mode === 'lift') {
+      const rows = C.rows.map(r => ({ name: r.name, sub: r.sub, v: r.lift, cls: r.cls }));
+      rows.push({ name: 'Running the test', sub: 'what Upworthy did', v: C.test_lift, cls: 'red' });
+      rows.push({ name: 'Knowing the truth', sub: 'the most anyone could get', v: C.oracle_lift, cls: 'ghost' });
+      bars(host, rows, C.oracle_lift, v => v === 0 ? '0%' : (v > 0 ? '+' : '−') + pct(Math.abs(v), 1));
+      $('c-title').textContent = 'How much better than an average headline was each contestant’s pick?';
+      $('c-cap').textContent = 'The pick’s real click rate, compared with the average headline of the same test, over ' + C.scored_tests.toLocaleString() + ' later tests about stories the contestants had never seen. Picking at random scores zero by definition. The language model was scored on ' + C.llm_tests.toLocaleString() + ' of those tests. The last two rows come from the copy of Upworthy in section 3, replaying the same tests, because the truth cannot be read off the real ones.';
+    } else {
+      const rows = C.rows.filter(r => r.key !== 'coin').map(r => ({ name: r.name, sub: r.sub, v: r.clear, cls: r.cls }));
+      rows.unshift({ name: 'A coin', v: 0.5, cls: 'zero' });
+      bars(host, rows, 1, v => pct(v, 1));
+      $('c-title').textContent = 'Given two headlines, how often did each contestant name the one that won?';
+      $('c-cap').textContent = 'Counted over the ' + C.clear_pairs.toLocaleString() + ' pairs in the scored tests where the test left little doubt about the better headline, which is the kind of pair you saw in the game. Over all ' + C.scored_pairs.toLocaleString() + ' pairs, clear or not, the combined model called ' + pct(C.rows.find(r => r.key === 'combined').pairs, 1) + ', and even someone who knew the truth could only expect to match ' + pct(C.ceiling, 0) + ' of the noisy results.';
+    }
+    $('c-tab-lift').setAttribute('aria-pressed', mode === 'lift'); $('c-tab-pairs').setAttribute('aria-pressed', mode !== 'lift');
+  }
+  $('c-tab-lift').addEventListener('click', () => draw('lift')); $('c-tab-pairs').addEventListener('click', () => draw('pairs'));
+  draw('lift');
+})();
+</script>
+</body>
+</html>

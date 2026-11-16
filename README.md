@@ -6,12 +6,12 @@ The source of my personal site, live at https://rumitosu.github.io/. It is a pla
 
 | Path | What it is |
 | --- | --- |
-| `index.html` | The home page: the welcome, two featured projects, experience, about and contact. All of its wording lives in this file. |
+| `index.html` | The home page: the welcome, three featured projects, experience, about and contact. All of its wording lives in this file. |
 | `projects/index.html` | The page that lists every project as a small card. |
 | `projects/<name>/index.html` | One folder per project, each a self-contained page with its own design. |
 | `style.css` | The look of the home page and the projects page. The three colour themes are the variable blocks at the top. |
 | `backdrop.js` | The animated background. It paints koi, cranes, clouds and fireflies onto a grid of small character tiles. |
-| `app.js` | Theme switching, the pointer light on cards, the two small project animations, and the copy-email button. |
+| `app.js` | Theme switching, the pointer light on cards, the small project animations, and the copy-email button. |
 | `assets/` | The favicon, the fonts (served from here, not from a font service) and the syntax highlighter one project page uses. |
 
 ## Adding a project

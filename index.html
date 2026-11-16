@@ -10,14 +10,14 @@
   <meta property="og:type" content="website">
   <title>Timur Kherlenbayar — data and AI work</title>
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="assets/fonts/type-home.css?v=7">
-  <link rel="stylesheet" href="style.css?v=7">
+  <link rel="stylesheet" href="assets/fonts/type-home.css?v=8">
+  <link rel="stylesheet" href="style.css?v=8">
   <script>
     document.documentElement.classList.add('js');
     try { var t = localStorage.getItem('tk-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
   </script>
-  <script src="backdrop.js?v=7" defer></script>
-  <script src="app.js?v=7" defer></script>
+  <script src="backdrop.js?v=8" defer></script>
+  <script src="app.js?v=8" defer></script>
 </head>
 <body>
   <canvas id="field" aria-hidden="true"></canvas>
@@ -50,7 +50,7 @@
       <div class="term" data-spot>
         <div class="term-bar">
           <span>~/timur/portfolio</span>
-          <span class="term-meta">two projects, one person</span>
+          <span class="term-meta">three projects, one person</span>
         </div>
         <div class="term-body">
           <p class="t-cmd" style="--n:12;--d:.5s"><b aria-hidden="true">&gt;</b><span>who is this?</span></p>
@@ -68,7 +68,13 @@
             <u aria-hidden="true">→</u>
           </a>
 
-          <p class="t-cmd t-idle" style="--d:4.8s"><b aria-hidden="true">&gt;</b><span class="caret" aria-hidden="true"></span></p>
+          <a class="t-row" style="--d:4.4s" href="projects/pick-the-winner/">
+            <i aria-hidden="true">●</i>
+            <span><strong>Pick the Winner</strong><em>One winning headline in three wasn’t really the best, and the tests were still worth running.</em></span>
+            <u aria-hidden="true">→</u>
+          </a>
+
+          <p class="t-cmd t-idle" style="--d:5.3s"><b aria-hidden="true">&gt;</b><span class="caret" aria-hidden="true"></span></p>
         </div>
         <div class="term-status"><span><span class="pulse ok" aria-hidden="true"></span>open to full-time roles</span><span>open to relocation</span></div>
       </div>
@@ -78,8 +84,8 @@
     <section class="section wrap" id="work" aria-labelledby="work-title">
       <header class="section-head reveal">
         <p class="label"><span>01</span>Featured projects</p>
-        <h2 id="work-title">Two projects I’d show you first.</h2>
-        <p>Each one started as a question I couldn’t answer by reading about it, and each one ends as a page you can play with. Both of them try to be as clear about what didn’t work as about what did.</p>
+        <h2 id="work-title">Three projects I’d show you first.</h2>
+        <p>Each one started as a question I couldn’t answer by reading about it, and each one ends as a page you can play with. All three try to be as clear about what didn’t work as about what did.</p>
       </header>
 
       <article class="project reveal" data-spot>
@@ -131,6 +137,39 @@
             <div class="core-num">36%</div>
           </div>
           <p class="vis-caption">In an ordinary winter the chance is 2%.<br>When all three meet, it is 36%.</p>
+        </a>
+      </article>
+
+      <article class="project reveal" data-spot>
+        <div class="project-copy">
+          <p class="kicker"><span>03</span>Experiments · Media</p>
+          <h3><a href="projects/pick-the-winner/">Pick the Winner</a></h3>
+          <p>For two years the website Upworthy chose its headlines by trying them out on live visitors, and it later released the records of 32,487 of those tests. I used them to ask how often the winner of a test was really the best headline, and whether a person, a model or an AI could have picked it without running the test.</p>
+          <p>The page opens with a game in which you try to pick real winners yourself. After that it measures how much of a test result is luck, and it ends on the part that surprised me, which is that the tests were wrong about the best headline a third of the time and were still well worth running.</p>
+          <dl class="stats">
+            <div><dt>67%</dt><dd>of the winning headlines were truly the best one in their test</dd></div>
+            <div><dt>82%</dt><dd>of the gain from choosing well was collected by the tests anyway</dd></div>
+            <div><dt>32,487</dt><dd>real headline tests from a public research archive sit behind it</dd></div>
+          </dl>
+          <ul class="tags" aria-label="Built with"><li>Python</li><li>Experiment statistics</li><li>Simulation</li><li>scikit-learn</li><li>A local language model</li></ul>
+          <div class="actions"><a class="btn primary" href="projects/pick-the-winner/">Play the game <span aria-hidden="true">→</span></a></div>
+        </div>
+        <a class="project-vis vis-pick" href="projects/pick-the-winner/" tabindex="-1" aria-hidden="true">
+          <div class="vis-top"><span>one story, two headlines</span><span>3,000 visitors each</span></div>
+          <div class="slips">
+            <div class="slip">
+              <p class="slip-h">A Brilliant Scientist Walks Into A Toy Store. Then He Starts Changing Lives Left And Right.</p>
+              <div class="slip-bar"><i style="width:69%"></i></div>
+              <p class="slip-n"><span>38 clicks</span><span>1.25%</span></p>
+            </div>
+            <div class="slip win">
+              <span class="slip-stamp">winner</span>
+              <p class="slip-h">He Was Left Out Because He Couldn’t Keep Up. But Then He Got The Coolest Toy Ever From A Scientist.</p>
+              <div class="slip-bar"><i style="width:100%"></i></div>
+              <p class="slip-n"><span>55 clicks</span><span>1.81%</span></p>
+            </div>
+          </div>
+          <p class="vis-caption">Every test names a winner.<br>Two times in three it was truly the best.</p>
         </a>
       </article>
 
