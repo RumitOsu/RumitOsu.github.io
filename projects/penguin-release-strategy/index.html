@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="pond">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#05201f">
+  <meta name="description" content="A one-year plan to move 250 seismic workstations in about 20 offices from Unix to Linux, when a switch can never be undone. A team case for a product management class, graded 152.5 of 160.">
+  <meta property="og:title" content="Penguin release strategy — Timur Kherlenbayar">
+  <meta property="og:description" content="Moving 250 workstations in about 20 offices to Linux in a year, when a switch can't be undone. Our team recommended a canary release.">
+  <meta property="og:type" content="article">
+  <title>Penguin release strategy — Timur Kherlenbayar</title>
+  <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../../assets/fonts/type-home.css?v=10">
+  <link rel="stylesheet" href="../../style.css?v=11">
+  <link rel="stylesheet" href="../page.css?v=3">
+  <script>
+    document.documentElement.classList.add('js');
+    try { var t = localStorage.getItem('tk-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+  </script>
+  <script src="../../backdrop.js?v=10" defer></script>
+  <script src="../../app.js?v=11" defer></script>
+  <script src="../page.js?v=2" defer></script>
+  <style>
+    /* ---------- Penguin: visuals made for this page ---------- */
+    :root { --canary: #ff6f61; }
+
+    /* the squares: one per machine */
+    .sq { display: inline-block; width: var(--s, 12px); height: var(--s, 12px); border-radius: 2px; background: transparent; box-shadow: inset 0 0 0 1px var(--line-2); transition: background .35s, box-shadow .35s, transform .35s; }
+    .sq.on { background: var(--cool); box-shadow: none; }
+    .sq.on.hq { background: var(--accent); }
+    .sq.on.canary { background: var(--canary); box-shadow: 0 0 8px color-mix(in srgb, var(--canary) 70%, transparent); }
+    .sq.on.run { background: var(--ink-2); }
+    .sq.on.spare { background: transparent; box-shadow: inset 0 0 0 1.5px var(--cool); }
+    .sq.on.spare.hq-spare { box-shadow: inset 0 0 0 1.5px var(--accent); }
+    .sq.fresh { transform: scale(1.35); }
+
+    /* hero: 250 machines in a 25 by 10 grid */
+    .hero-grid { display: grid; grid-template-columns: repeat(25, 1fr); gap: 4px; margin: 14px 0 16px; --s: auto; }
+    .hero-grid .sq { width: auto; height: auto; aspect-ratio: 1; }
+    .hero-week { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+    .hero-week b { font: 400 2rem/1 var(--serif); color: var(--ink); letter-spacing: -.02em; }
+    .hero-week span { font: 400 11.5px/1.4 var(--mono); color: var(--mute); text-align: right; }
+    .hero-line { position: relative; height: 26px; margin: 4px 0 2px; }
+    .hero-line::before { content: ""; position: absolute; left: 0; right: 0; top: 12px; height: 2px; background: var(--line-2); }
+    .hero-line i { position: absolute; top: 12px; left: 0; height: 2px; background: var(--accent); width: calc(var(--p, 0) * 100%); transition: width .3s linear; }
+    .hero-line u { position: absolute; top: 7px; width: 12px; height: 12px; margin-left: -6px; border-radius: 50%; background: var(--panel-solid); box-shadow: inset 0 0 0 2px var(--line-2); text-decoration: none; }
+    .hero-line u.hit { box-shadow: inset 0 0 0 2px var(--accent); background: var(--accent); }
+    .hero-line u.canary-dot.hit { background: var(--canary); box-shadow: 0 0 10px var(--canary); }
+    .key { display: flex; flex-wrap: wrap; gap: 6px 16px; font: 400 11.5px/1.4 var(--mono); color: var(--mute); }
+    .key span { display: inline-flex; align-items: center; gap: 7px; }
+    .key .sq { --s: 10px; }
+
+    /* the board: every office, every machine, week by week */
+    .board { margin: 30px 0; border: 1px solid var(--line-2); border-radius: 18px; background: var(--panel); padding: 20px 20px 22px; }
+    .board-top { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 16px; align-items: center; }
+    .board-top button { font: 500 13px/1 var(--mono); color: var(--on-accent); background: var(--accent); border-radius: 999px; padding: 10px 14px; min-width: 76px; }
+    .board-top input { width: 100%; accent-color: var(--accent); }
+    .board-top output { font: 400 1.5rem/1 var(--serif); color: var(--ink); min-width: 5.5em; text-align: right; }
+    .board-msg { margin: 14px 0 16px; min-height: 3.2em; font: 400 1.04rem/1.55 var(--serif); color: var(--ink); }
+    .board-msg b { color: var(--accent-2); font-weight: 400; }
+    .rows { display: grid; gap: 7px; }
+    .row { display: grid; grid-template-columns: 140px minmax(0, 1fr) 54px; gap: 12px; align-items: center; }
+    .row > span { font-size: 13.5px; color: var(--ink-2); }
+    .row > b { font: 400 12px/1 var(--mono); color: var(--mute); text-align: right; }
+    .row .cells { display: flex; flex-wrap: wrap; gap: 3px; --s: 10px; }
+    .row.done > b { color: var(--ink); }
+    .board-foot { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px 20px; margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--line); }
+
+    /* constraints */
+    .facts-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 30px 0; }
+    .fact { border: 1px solid var(--line); border-radius: 14px; padding: 15px 16px 17px; background: rgba(255, 255, 255, .02); }
+    .fact b { display: block; font: 400 1.5rem/1.05 var(--serif); color: var(--accent-2); letter-spacing: -.01em; }
+    .fact span { display: block; font-size: 13.5px; line-height: 1.5; color: var(--ink-2); margin-top: 8px; }
+    .fact.key-fact { border-color: color-mix(in srgb, var(--canary) 55%, var(--line)); }
+    .fact.key-fact b { color: var(--canary); }
+
+    /* options */
+    .opts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin: 30px 0; }
+    .opt { border: 1px solid var(--line); border-radius: 14px; padding: 15px 15px 17px; background: rgba(255, 255, 255, .02); }
+    .opt h3 { margin: 0 0 4px !important; font: 600 1.02rem/1.3 var(--serif) !important; }
+    .opt small { display: block; font: 400 11.5px/1.45 var(--mono); color: var(--mute); }
+    .opt p { font-size: 13.5px !important; line-height: 1.55 !important; margin-top: 10px; }
+    .opt p i { font-style: normal; color: var(--mute); display: block; font: 400 11px/1.4 var(--mono); margin-bottom: 2px; }
+    .opt.pick { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 7%, transparent); }
+    .opt.pick small { color: var(--accent-2); }
+
+    /* three methods */
+    .methods { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 30px 0; }
+    .method { border-top: 2px solid var(--line-2); padding-top: 12px; }
+    .method small { font: 400 11.5px/1.4 var(--mono); color: var(--accent-2); text-transform: lowercase; letter-spacing: .04em; }
+    .method h3 { margin: 6px 0 6px !important; font-size: 1.08rem !important; }
+    .method p { font-size: 14px !important; line-height: 1.6 !important; }
+
+    /* Ivan */
+    .ivan { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 30px 0; }
+    .ivan > div { border: 1px solid var(--line); border-radius: 14px; padding: 16px 16px 18px; background: rgba(255, 255, 255, .02); }
+    .ivan h3 { margin: 0 0 6px !important; font-size: 1.04rem !important; }
+    .ivan p { font-size: 14px !important; line-height: 1.6 !important; }
+    .ivan .no { border-style: dashed; }
+    .ivan .no h3 { color: var(--ink-2); }
+
+    /* grade */
+    .grade { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px 26px; margin: 26px 0 8px; }
+    .grade b { font: 400 3rem/1 var(--serif); color: var(--accent-2); letter-spacing: -.03em; }
+    .grade span { font: 400 12.5px/1.5 var(--mono); color: var(--mute); }
+
+    @media (max-width: 980px) {
+      .opts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .facts-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 680px) {
+      .opts, .facts-grid, .methods, .ivan { grid-template-columns: 1fr; }
+      .row { grid-template-columns: 1fr 46px; gap: 4px 10px; }
+      .row .cells { grid-column: 1 / -1; grid-row: 2; --s: 9px; }
+      .board { padding: 16px 14px 18px; }
+      .board-top { grid-template-columns: auto minmax(0, 1fr); }
+      .board-top output { grid-column: 1 / -1; text-align: left; }
+      .hero-grid { gap: 3px; }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="field" aria-hidden="true"></canvas>
+  <a class="skip" href="#story">Skip to the story</a>
+
+  <header class="nav">
+    <a class="brand" href="../../" aria-label="Timur Kherlenbayar, home page"><span class="brand-mark" aria-hidden="true">&gt;</span>timur kherlenbayar<span class="caret" aria-hidden="true"></span></a>
+    <nav aria-label="Main">
+      <a href="../../">home</a>
+      <a href="../" aria-current="page">projects</a>
+      <a href="../../#about">about</a>
+      <a class="nav-cta" href="../../#contact">contact</a>
+    </nav>
+  </header>
+
+  <main id="top">
+    <section class="p-hero wrap split" aria-labelledby="title">
+      <div class="p-hero-copy">
+        <p class="crumb"><a href="../">~/projects</a><span>/</span><span>penguin</span><span aria-hidden="true">·</span><span>Release strategy · Product management</span></p>
+        <h1 id="title">250 machines, one year, and a switch that can’t be undone</h1>
+        <p class="standfirst">An energy company had to move its seismic work from Unix to Linux: 250 workstations, 12 applications and about 20 offices on four continents, in a year. Once a project switched it could never go back, so our team of five recommended starting with a single Houston project and widening only once it held up.</p>
+        <dl class="p-facts">
+          <div><dt>My part</dt><dd>The VIS rebuild plan, the outline, the deck</dd></div>
+          <div><dt>Team</dt><dd>Five students</dd></div>
+          <div><dt>When</dt><dd>October to November 2026</dd></div>
+          <div><dt>Grade</dt><dd>152.5 of 160</dd></div>
+        </dl>
+        <div class="actions">
+          <a class="btn primary" href="#story">Read the story <span aria-hidden="true">↓</span></a>
+          <a class="btn ghost" href="#board">Play the rollout <span aria-hidden="true">→</span></a>
+        </div>
+      </div>
+      <div class="p-vis" data-inview aria-label="The 250 machines arriving over a year, 20 at a time.">
+        <div class="vis-top"><span>250 machines, 20 every four weeks</span><span>one square each</span></div>
+        <div class="hero-week" aria-live="off"><b id="hw">Week 0</b><span id="hs">20 of 250 shipped</span></div>
+        <div class="hero-grid" id="hgrid" aria-hidden="true"></div>
+        <div class="hero-line" id="hline" aria-hidden="true"><i></i></div>
+        <div class="key" aria-hidden="true"><span><i class="sq on canary"></i>first Houston project</span><span><i class="sq on"></i>other offices</span><span><i class="sq on hq"></i>rest of Houston</span><span><i class="sq on run"></i>running the rollout</span><span><i class="sq on spare"></i>spares</span></div>
+        <p class="vis-caption" id="hcap">Every office gets its machines before most of Houston does.</p>
+      </div>
+    </section>
+
+    <div class="wrap">
+      <article class="sheet" id="story">
+        <section class="short wide reveal" aria-labelledby="short-title">
+          <div class="short-head"><h2 id="short-title">The short version</h2><span>a two-minute read</span></div>
+          <dl>
+            <div><dt>The question</dt><dd>A newly promoted IT lead with no formal authority, played by our professor, had a year to move 250 seismic workstations from Unix to Linux. Dell could ship only 20 machines every four weeks, a key in-house tool had to be rebuilt from scratch, and a project that switched could never switch back. What should he do?</dd></div>
+            <div><dt>What we recommended</dt><dd>A canary release. One Houston project switches first at about week 12, every other office prepares on copies of its data in the meantime, and other teams switch from week 16 once Houston’s project holds up. Each part of the work gets its own method: a waterfall for the Linux approval, short agile rounds for the tool rebuild, the canary for the offices.</dd></div>
+            <div><dt>What came out of it</dt><dd>A 34-slide plan: a ten-slide decision brief, the implementation behind it and an appendix. It scored 152.5 of 160, with 63.5 of 64 for how it was presented. The last office switches around week 46, leaving about six weeks of slack.</dd></div>
+            <div><dt>My part</dt><dd>I owned the plan for VIS, the tool that had to be rebuilt, and how to protect the one developer rebuilding it. I wrote the team’s outline, compared the rollout options, drafted how a switch and a recovery work, made the deck’s charts, and was its main editor.</dd></div>
+          </dl>
+          <dl class="stats">
+            <div><dt>152.5 / 160</dt><dd>the grade, with 63.5 of 64 for presentation</dd></div>
+            <div><dt>6 months → 4 weeks</dt><dd>for the Linux approval, by running three reviews at once</dd></div>
+            <div><dt>~6 weeks</dt><dd>of slack left after the last office switches</dd></div>
+          </dl>
+          <ul class="tags" aria-label="Methods"><li>Release strategy</li><li>Canary release</li><li>Waterfall and agile</li><li>Change management</li><li>Executive communication</li></ul>
+        </section>
+
+        <section class="p-section reveal" aria-labelledby="s1">
+          <p class="label"><span>01</span>The case</p>
+          <h2 id="s1">The penguin that went around the world</h2>
+          <p>The case put us in front of Jonathan, an IT lead who had just been promoted and had no authority over the offices he needed to move. Our professor played him, and the only way to learn the facts was to interview him. Each answer could change the plan, and several did.</p>
+          <div class="facts-grid wide">
+            <div class="fact key-fact"><b>Can’t go back</b><span>Once a project is converted to Linux it can’t return to Unix. Everything else in the plan follows from this.</span></div>
+            <div class="fact"><b>20 every 4 weeks</b><span>Dell’s pace. Thirteen shipments, the last leaving around week 48.</span></div>
+            <div class="fact"><b>VIS, 2–3 months</b><span>The in-house tool that passes data between the seismic apps can’t be ported. One Houston developer, Ivan, has to rebuild it.</span></div>
+            <div class="fact"><b>~6 months</b><span>for a normal Linux approval, unless the CIO fast-tracks it.</span></div>
+            <div class="fact"><b>Brazil and PNG</b><span>Customs holds and import tax in Brazil, theft in Papua New Guinea.</span></div>
+            <div class="fact"><b>$1–2 billion</b><span>The opportunity faster seismic work supports, against $7.5 million for all 250 machines.</span></div>
+          </div>
+          <p>Leatherhead also needed a new power circuit that takes four to six weeks, and works councils in Germany and Norway had to approve new equipment and overtime. The money settled the priorities early: the machines cost almost nothing next to the prize, so every choice in the plan trades money for time.</p>
+          <figure class="fig wide">
+            <img class="zoomable" src="img/03-why-now-cost.jpg" alt="Slide: Lost time would cost far more than the machines. A large square for the $1–2 billion opportunity next to a tiny one for $7.5 million of machines." loading="lazy" width="1600" height="900">
+            <figcaption><b>Slide 3 of the deck.</b> The machines are the small red square in the corner.</figcaption>
+          </figure>
+        </section>
+
+        <section class="p-section reveal" aria-labelledby="s2">
+          <p class="label"><span>02</span>The choice</p>
+          <h2 id="s2">If a switch can’t be undone, a mistake has to stay small</h2>
+          <p>All four ways of rolling out use the same 250 machines at the same pace. What differs is who goes first and how many projects one failure could reach. I researched these options for the team, and the irreversibility decided it. A big bang waits for every machine and then switches everyone in the last four weeks, so a single fault in VIS would hit every project at once with no way back.</p>
+          <div class="opts wide">
+            <div class="opt"><h3>Big bang</h3><small>wait for all 250, then switch everyone</small><p><i>for</i>One training push, one switch date.</p><p><i>against</i>The last shipment leaves around week 48, and a VIS error reaches every project at once.</p></div>
+            <div class="opt"><h3>Even spread</h3><small>split every shipment across all offices</small><p><i>for</i>Every office starts learning Linux early.</p><p><i>against</i>The riskiest shipments arrive all year, and a VIS error could reach several projects.</p></div>
+            <div class="opt"><h3>Region by region</h3><small>finish one region, then move on</small><p><i>for</i>Support and legal review focus on one region at a time.</p><p><i>against</i>Other regions sit idle, and problems like Leatherhead’s power show up late.</p></div>
+            <div class="opt pick"><h3>Canary</h3><small>one Houston project first · our pick</small><p><i>for</i>A failure stays inside one project, and the riskiest shipments go early.</p><p><i>against</i>Most Houston teams get their machines last, weeks 37 to 45.</p></div>
+          </div>
+          <p>Houston goes first because Ivan sits there, next to the engineers and geoscientists who know the data, so a fault in VIS can be found and fixed fastest. We also matched a method to each stream of work instead of picking one for everything:</p>
+          <div class="methods wide">
+            <div class="method"><small>waterfall</small><h3>The Linux approval</h3><p>Fixed steps that depend on each other. With the CIO’s backing, IT Architecture, Cybersecurity and Legal review at the same time from one shared package, which cuts about six months to four weeks.</p></div>
+            <div class="method"><small>agile</small><h3>The VIS rebuild</h3><p>It needs feedback while it is being built. Every two weeks Ivan shows an engineer and a geoscientist a working translation, so errors surface early.</p></div>
+            <div class="method"><small>canary</small><h3>The office rollout</h3><p>A switch can’t be undone, so one project goes first and the rest wait for its results. We ruled out switching features on and off, because a converted project has nothing to switch back to.</p></div>
+          </div>
+        </section>
+
+        <section class="p-section reveal" aria-labelledby="s3">
+          <p class="label"><span>03</span>The plan</p>
+          <h2 id="s3">Ship and switch separately, and send the risky shipments first</h2>
+          <p>The idea that made the schedule work is that a machine arriving and a project switching are different events. New machines are installed beside the old Unix ones as soon as they arrive, and teams practise on copies of their data, so nothing waits for the approval or for VIS. That is the first of four rules for where each shipment goes. The other three: one Houston project goes first; every other office comes before the rest of Houston, whose 50 machines arrive last as a reserve; and Brazil and Papua New Guinea ship in the first quarter, while a lost or held shipment can still be replaced.</p>
+          <p>Drag through the year below. Every square is one machine, placed in the week Dell ships it.</p>
+
+          <div class="board wide" id="board" aria-label="Interactive rollout schedule">
+            <div class="board-top">
+              <button type="button" id="bplay">play</button>
+              <input type="range" id="bweek" min="0" max="52" step="1" value="12" aria-label="Week of the rollout">
+              <output id="bout" for="bweek">Week 12</output>
+            </div>
+            <p class="board-msg" id="bmsg" aria-live="polite"></p>
+            <div class="rows" id="brows"></div>
+            <div class="board-foot">
+              <div class="key"><span><i class="sq on canary"></i>Houston’s first project</span><span><i class="sq on"></i>office machines</span><span><i class="sq on hq"></i>rest of Houston</span><span><i class="sq on run"></i>development, test, training</span><span><i class="sq on spare"></i>spares</span><span><i class="sq"></i>not shipped yet</span></div>
+              <span class="key" id="btotal"></span>
+            </div>
+            <noscript><p class="board-msg">With JavaScript on, this board plays the 13 shipments week by week. The full schedule is on slide 14 below.</p></noscript>
+          </div>
+
+          <p>Brazil and Papua New Guinea show why the plan treated each risk on its own terms. Brazil’s risk is getting machines in, so its main shipment goes early and its spares follow once the first machines are through customs, because a machine already in the country is safe. Papua New Guinea’s risk is keeping machines once they arrive, so its 12 machines and 5 spares travel together and go straight into anti-theft lockers after a serial-number check. Opposite plans for opposite risks.</p>
+          <div class="gallery wide">
+            <div class="gallery-track">
+              <figure><img class="zoomable" src="img/09-expansion-chart.jpg" alt="Slide: Every office is ready before it switches. A timeline of each office testing on copies, switching and finishing on Linux, from week 0 to 52." loading="lazy" width="1600" height="900"><figcaption>Slide 9 · when each office installs, tests and switches</figcaption></figure>
+              <figure><img class="zoomable" src="img/14-shipments.jpg" alt="Slide: Dell's 13 shipments and what each one is for, as two tables of weeks and destinations." loading="lazy" width="1600" height="900"><figcaption>Slide 14 · all 13 shipments</figcaption></figure>
+              <figure><img class="zoomable" src="img/15-brazil-png-spares.jpg" alt="Slide: Brazil and Papua New Guinea get opposite spare plans, with small machine grids for each." loading="lazy" width="1600" height="900"><figcaption>Slide 15 · opposite spare plans</figcaption></figure>
+              <figure><img class="zoomable" src="img/07-prep-timeline.jpg" alt="Slide: Offices get ready while Ivan rebuilds VIS. A timeline of shipments, approval, the VIS rebuild, office prep and training in the first 14 weeks." loading="lazy" width="1600" height="900"><figcaption>Slide 7 · everything that runs in parallel before the first switch</figcaption></figure>
+            </div>
+          </div>
+        </section>
+
+        <section class="p-section reveal" aria-labelledby="s4">
+          <p class="label"><span>04</span>My workstream</p>
+          <h2 id="s4">How do you set Ivan up to succeed?</h2>
+          <p>That was Jonathan’s own question, and it was the part of the case I took on first. VIS is small, 10 to 15 thousand lines, but the seismic apps pass their data to each other through it, so no project anywhere can switch until it works. The shop that wrote it couldn’t port it to Linux, and Ivan estimated two to three months to rebuild it.</p>
+          <p class="callout">The dangerous bug in a translator isn’t a crash. It’s a file that opens normally with the wrong units in it.</p>
+          <p>That shaped everything about the plan for Ivan. A wrong coordinate doesn’t throw an error; it quietly changes what a geoscientist sees, and that can’t be caught by looking at a demo. So the checking has to come from people who know what the data should mean. We weighed four ways to get a working VIS:</p>
+          <div class="ivan wide">
+            <div class="no"><h3>Buy the existing code</h3><p>It was never built for Linux or for the company’s systems, so it would still need rewriting, from a shop that might not survive the sale.</p></div>
+            <div class="no"><h3>Hire the two original developers</h3><p>They know VIS but not the company’s systems, and their own shop was failing.</p></div>
+            <div class="no"><h3>Give Ivan a team</h3><p>Brooks’s law: adding people to a late software project makes it later. New developers would spend Ivan’s time learning the geophysics.</p></div>
+            <div><h3>Ivan rebuilds it, with his time protected</h3><p>He knows the systems, sits next to the people who can check the science, and the company ends up owning VIS. Our recommendation.</p></div>
+          </div>
+          <p>Protecting his time meant four concrete things. Managers make VIS his only assignment. A delivery manager borrowed from IT absorbs status meetings, approvals and outside questions. Ivan picks a backup developer who reviews his code as he writes it, so the company isn’t one sick day away from losing VIS; the backup adds safety, not speed. And an engineer and a geoscientist get reserved time to check his translations every two weeks, starting with the ones Houston needs.</p>
+          <div class="gallery wide">
+            <div class="gallery-track">
+              <figure><img class="zoomable" src="img/21-protect-ivan.jpg" alt="Slide: Ivan needs time to build VIS and an engineer and a geoscientist to check it. A diagram of the delivery manager fielding requests, a backup developer, and the two checkers." loading="lazy" width="1600" height="900"><figcaption>Slide 21 · protecting Ivan instead of adding people</figcaption></figure>
+              <figure><img class="zoomable" src="img/19-vis-diagram.jpg" alt="Slide: VIS must preserve the meaning of the seismic data. A diagram of VIS passing each app's output to the next app." loading="lazy" width="1600" height="900"><figcaption>Slide 19 · what VIS does</figcaption></figure>
+              <figure><img class="zoomable" src="img/20-ivan-options.jpg" alt="Slide: Ivan's rebuild is the fastest way to a working VIS, comparing four options with pros and cons." loading="lazy" width="1600" height="900"><figcaption>Slide 20 · four ways to a working VIS</figcaption></figure>
+            </div>
+          </div>
+        </section>
+
+        <section class="p-section reveal" aria-labelledby="s5">
+          <p class="label"><span>05</span>One deck from five people</p>
+          <h2 id="s5">Keeping 34 slides true while the facts kept moving</h2>
+          <p>Each of us owned a workstream. Teammates sized the offices and planned the shipments, worked out the four-week approval, and built the change management, from change champions in every team to a weekly meeting that rotates between 08:00, 15:00 and 23:00 UTC so every region gets a turn at a sane hour. I wrote the outline those sections hung on, and the section on how a switch and a recovery work: test on a copy in the same region, freeze edits, keep the last Unix version read-only, back up Linux daily, and agree in advance what would pause the rollout.</p>
+          <p>Then I became the deck’s main editor, which turned out to be the hard part. Every time Jonathan answered a new question, numbers moved in five people’s sections at once, so I merged them into one deck, re-checked every figure against his latest answers, stripped jargon so each slide reads on its own, and made the custom charts: the timelines, the shipment chart and the machine grids. Two of the catches I remember came late. The deck said the last machines would “arrive” at week 48, when 48 is the week Dell ships them. And some wording implied that all of Houston switched at week 12, when it is only one project.</p>
+          <figure class="fig wide">
+            <img class="zoomable" src="img/02-recommendation.jpg" alt="Slide: We recommend a canary release, starting with one Houston project, in three steps with a timeline from week 0 to 52 and this week's asks." loading="lazy" width="1600" height="900">
+            <figcaption><b>Slide 2, the recommendation.</b> Every slide headline is a full sentence, so the brief can be read from the headlines alone.</figcaption>
+          </figure>
+        </section>
+
+        <section class="p-section reveal" aria-labelledby="s6">
+          <p class="label"><span>06</span>How it went</p>
+          <h2 id="s6">The grade, and the professor’s best argument against us</h2>
+          <div class="grade"><b>152.5 / 160</b><span>89 of 96 for what we recommended<br>63.5 of 64 for how we presented it</span></div>
+          <blockquote class="quote">
+            <p>Your decision brief is exactly what an executive needs: a clear recommendation, the cost of lost time against a $1-2 billion prize, the options you weighed with pros and cons, and the one thing Jonathan needs from the CIO this week.</p>
+            <footer>Professor’s feedback, IS 562 Digital Product Management</footer>
+          </blockquote>
+          <p>He also singled out matching the method to the work, protecting Ivan’s time instead of adding people, the opposite spare plans and the rotating meeting. The points he took off are the part I learn the most from:</p>
+          <ul class="list">
+            <li><strong>“Houston goes first” is risky wording.</strong> However well we defended it, it reads as headquarters putting itself first, and the company’s important customers are abroad.</li>
+            <li><strong>Houston’s other 50 machines arriving last doesn’t follow as cleanly as the rest.</strong> Houston holds the largest share of the prize and can roll out in a week or two once things work, so there may be a way to make its teams productive sooner without headquarters going first.</li>
+            <li><strong>Lead with the prize.</strong> Our strongest argument, that lost time costs far more than the machines, sat on slide 3. Opening with it would make the recommendation read as the answer to a billion-dollar question, and the title should be about that prize, not the technology.</li>
+          </ul>
+          <p>If I did it again, I would open on the money, call the first step “one pilot project” rather than naming headquarters, and test whether Houston’s later teams could switch alongside the other offices once the pilot passes.</p>
+        </section>
+
+        <details class="notes">
+          <summary><h2>Method notes</h2><span>facts, decisions and numbers</span></summary>
+          <div class="notes-body">
+            <dl>
+              <div><dt>Context</dt><dd>IS 562 Digital Product Management at BYU, team case “The Penguin That Went Around the World”, late October to early November 2026. Five students; the professor played Jonathan and answered questions as the case unfolded.</dd></div>
+              <div><dt>Sizing</dt><dd>205 machines for offices: Houston 60 (20 engineers plus 40 shared by about 50 geoscientists), Canada 30, Leatherhead 30, Brazil 20, Kuala Lumpur 20, Papua New Guinea 12, Norway 10, Germany 5, West Texas 2, 11 small offices 16. 45 to run the rollout: development and test 8, regional test 4, Houston training lab 9, spares 24 (Brazil 4, Papua New Guinea 5, general 15).</dd></div>
+              <div><dt>Schedule</dt><dd>13 shipments of 20 at weeks 0 to 48 (the last has 10). Linux approved at week 4, VIS ready and the first Houston project switching at week 12, other offices from week 16, the last office around week 46, deadline week 52. Transit adds one week to Houston and up to four to Papua New Guinea.</dd></div>
+              <div><dt>Approval</dt><dd>From about six months to four weeks: the CIO moves it to the front of the queue and IT Architecture, Cybersecurity and Legal review in parallel from one shared package (business case, technical overview, security evidence, country requirements, test results and risks, owners and deadlines).</dd></div>
+              <div><dt>VIS</dt><dd>10 to 15 thousand lines; 2 to 3 months for Ivan. Options: buy the code, hire the original two developers, add developers, or Ivan rebuilds it with protected time (chosen). Checks: an engineer and a geoscientist compare units, coordinates and interpretation on a project copy every two weeks.</dd></div>
+              <div><dt>Switch and recovery</dt><dd>Test a copy in the same region, try the usual tasks, compare with Unix, stop edits and switch, back up Linux and test a restore, then approve the next project. The final Unix copy stays read-only. Pause rules are agreed in advance.</dd></div>
+              <div><dt>Change</dt><dd>A change champion in every team, IT leads and champions trained in Houston, ADKAR mapped to concrete actions, anonymous surveys in Kuala Lumpur, a skeptical German engineer choosing a test, and a weekly meeting rotating across 08:00, 15:00 and 23:00 UTC.</dd></div>
+              <div><dt>Sources</dt><dd>The case and lecture slides; Brooks, <i>The Mythical Man-Month</i>; Cagan, <i>Inspired</i>; Google’s <i>Site Reliability Workbook</i> chapter on canarying releases; NIST SP 800-37; Prosci ADKAR.</dd></div>
+            </dl>
+          </div>
+        </details>
+      </article>
+    </div>
+
+    <section class="p-next wrap" aria-label="More projects">
+      <p class="label"><span>~/projects</span>Keep going</p>
+      <ul class="cards">
+        <li>
+          <a class="card cool reveal" data-spot href="../more-sellers-same-sales/">
+            <span class="card-top"><span>Business review · E-commerce</span><span>2026</span></span>
+            <span class="card-stat"><b>+27%</b><span>more sellers at a Brazilian marketplace by the summer of 2018, while its sales fell by 6%</span></span>
+            <span class="card-title">More Sellers, Same Sales</span>
+            <span class="card-text">A business review written for a leadership team and built from about 100,000 real orders. It has a two-minute executive summary, the evidence behind it, and four recommendations.</span>
+            <span class="card-tags"><span>SQL</span><span>Python</span><span>Business analysis</span><span>Data visualization</span></span>
+            <span class="card-go">Read the review <span aria-hidden="true">→</span></span>
+          </a>
+        </li>
+        <li>
+          <a class="card cool reveal" data-spot href="../astroquery/">
+            <span class="card-top"><span>AI agent · Astronomy</span><span>2026</span></span>
+            <span class="card-stat"><b>3 tools</b><span>chained by the agent on its own to answer one question about the nearest star</span></span>
+            <span class="card-title">AstroQuery</span>
+            <span class="card-text">An astronomy agent that decides which of five tools a question needs, from live search to a library it cites, and puts huge numbers in human terms. Built alone.</span>
+            <span class="card-tags"><span>LangChain.js</span><span>GPT-4o-mini</span><span>RAG</span><span>Agents</span></span>
+            <span class="card-go">Watch it choose <span aria-hidden="true">→</span></span>
+          </a>
+        </li>
+      </ul>
+      <div class="all-link"><a class="btn ghost" href="../">All projects <span aria-hidden="true">→</span></a></div>
+    </section>
+  </main>
+
+  <footer class="footer wrap">
+    <span>© 2026 Timur Kherlenbayar</span>
+    <span class="footer-right">
+      <button id="motion" type="button" aria-pressed="false">motion: on</button>
+      <a href="../">back to all projects</a>
+    </span>
+  </footer>
+
+  <div class="themes" role="group" aria-label="Choose the backdrop">
+    <span aria-hidden="true">backdrop</span>
+    <button type="button" data-theme-pick="pond" aria-pressed="true" aria-label="Koi pond backdrop" style="--a:#0a3a38;--b:#ff9a6c"><i></i><b>pond</b></button>
+    <button type="button" data-theme-pick="steppe" aria-pressed="false" aria-label="Steppe night backdrop" style="--a:#0f1630;--b:#f2cc7e"><i></i><b>steppe</b></button>
+    <button type="button" data-theme-pick="embers" aria-pressed="false" aria-label="Embers backdrop" style="--a:#1b1916;--b:#d97757"><i></i><b>embers</b></button>
+  </div>
+
+  <script>
+  /* Dell's 13 shipments, exactly as on slide 14 of the deck. [destination, machines, kind] */
+  (function () {
+    const SHIP = [
+      { w: 0,  items: [['Running the rollout', 8, 'run'], ['Running the rollout', 9, 'run'], ['Running the rollout', 3, 'run']] },
+      { w: 4,  items: [['Houston', 10, 'canary'], ['Canada', 8], ['Norway', 1], ['Running the rollout', 1, 'run']] },
+      { w: 8,  items: [['Brazil', 15], ['Germany', 5]] },
+      { w: 12, items: [['Papua New Guinea', 12], ['Papua New Guinea', 5, 'spare'], ['Leatherhead', 3]] },
+      { w: 16, items: [['Canada', 12], ['Leatherhead', 8]] },
+      { w: 20, items: [['Canada', 10], ['Leatherhead', 5], ['Brazil', 5]] },
+      { w: 24, items: [['Leatherhead', 8], ['Small offices', 5], ['Brazil', 4, 'spare'], ['General spares', 3, 'spare']] },
+      { w: 28, items: [['Kuala Lumpur', 11], ['Norway', 9]] },
+      { w: 32, items: [['Kuala Lumpur', 9], ['Small offices', 5], ['Leatherhead', 6]] },
+      { w: 36, items: [['Houston', 12, 'hq'], ['West Texas', 2], ['Small offices', 6]] },
+      { w: 40, items: [['Houston', 20, 'hq']] },
+      { w: 44, items: [['Houston', 18, 'hq'], ['General spares', 2, 'spare']] },
+      { w: 48, items: [['General spares', 10, 'spare']] }
+    ];
+    const ROWS = ['Houston', 'Canada', 'Leatherhead', 'Brazil', 'Kuala Lumpur', 'Papua New Guinea', 'Norway', 'Germany', 'West Texas', 'Small offices', 'Running the rollout', 'General spares'];
+    const PHASES = [
+      [0, 'Week 0. The first 20 machines go to <b>development, testing, training</b> and regional test machines. The Linux approval is under review, fast-tracked by the CIO.'],
+      [4, 'Week 4. <b>Linux is approved.</b> Offices install new machines beside Unix and practise on copies of their data while Ivan rebuilds VIS.'],
+      [8, 'Week 8. <b>Brazil ships early,</b> leaving months to replace anything held in customs.'],
+      [12, 'Week 12. <b>VIS is ready and one Houston project switches.</b> Papua New Guinea’s machines ship with their spares. Everyone else stays on Unix and watches.'],
+      [16, 'Week 16. <b>Houston’s project has held up,</b> so other offices start switching team by team as their machines arrive.'],
+      [36, 'Week 36. <b>The rest of Houston’s machines finally start to arrive.</b> Until now they were the reserve for any lost shipment.'],
+      [46, 'Week 46. <b>The last office switches.</b>'],
+      [48, 'Week 48. <b>The last shipment leaves Dell:</b> general spares only.'],
+      [52, 'Week 52. <b>Every team is on Linux,</b> with about six weeks of slack that a VIS or delivery slip could have used.']
+    ];
+    // One record per machine, in shipping order.
+    const machines = [];
+    for (const s of SHIP) for (const [dest, n, kind] of s.items) for (let i = 0; i < n; i++) machines.push({ w: s.w, dest, kind: kind || (dest === 'Houston' ? 'hq' : '') });
+    const cls = (m) => 'sq ' + (m.kind === 'spare' ? 'spare' + (m.dest === 'Houston' ? ' hq-spare' : '') : m.kind);
+    const shipped = (w) => machines.filter((m) => m.w <= w).length;
+    const still = () => document.documentElement.classList.contains('motion-off');
+
+    /* ---------- the board ---------- */
+    const rowsEl = document.getElementById('brows');
+    const cells = [];
+    for (const name of ROWS) {
+      const mine = machines.filter((m) => m.dest === name);
+      const row = document.createElement('div');
+      row.className = 'row';
+      row.innerHTML = `<span>${name}</span><div class="cells"></div><b></b>`;
+      const box = row.querySelector('.cells');
+      for (const m of mine) { const c = document.createElement('i'); c.className = cls(m); box.append(c); cells.push([c, m]); }
+      row._mine = mine; row._count = row.querySelector('b');
+      rowsEl.append(row);
+    }
+    const slider = document.getElementById('bweek'), out = document.getElementById('bout'), msg = document.getElementById('bmsg'), total = document.getElementById('btotal'), playBtn = document.getElementById('bplay');
+    function setWeek(w, flash) {
+      slider.value = w; out.textContent = 'Week ' + w;
+      for (const [c, m] of cells) { const on = m.w <= w; if (flash && on && !c.classList.contains('on')) { c.classList.add('fresh'); setTimeout(() => c.classList.remove('fresh'), 350); } c.classList.toggle('on', on); }
+      for (const row of rowsEl.children) { const n = row._mine.filter((m) => m.w <= w).length; row._count.textContent = `${n}/${row._mine.length}`; row.classList.toggle('done', n === row._mine.length); }
+      let text = PHASES[0][1]; for (const [pw, t] of PHASES) if (w >= pw) text = t;
+      msg.innerHTML = text;
+      total.textContent = `${shipped(w)} of 250 machines shipped`;
+    }
+    slider.addEventListener('input', () => { stop(); setWeek(+slider.value, false); });
+    let timer = 0;
+    function stop() { clearInterval(timer); timer = 0; playBtn.textContent = 'play'; }
+    playBtn.addEventListener('click', () => {
+      if (timer) return stop();
+      let w = +slider.value >= 52 ? 0 : +slider.value;
+      setWeek(w, false); playBtn.textContent = 'pause';
+      timer = setInterval(() => { w += 1; setWeek(w, true); if (w >= 52) stop(); }, still() ? 60 : 220);
+    });
+    setWeek(12, false);
+
+    /* ---------- the hero grid ---------- */
+    const grid = document.getElementById('hgrid'), hw = document.getElementById('hw'), hs = document.getElementById('hs'), cap = document.getElementById('hcap'), line = document.getElementById('hline');
+    const sq = machines.map((m) => { const c = document.createElement('i'); c.className = cls(m); grid.append(c); return c; });
+    for (const s of SHIP) { const u = document.createElement('u'); u.style.left = (s.w / 52 * 100) + '%'; u.dataset.w = s.w; if (s.w === 12) u.className = 'canary-dot'; line.append(u); }
+    const CAPS = [[0, 'The first 20 machines set up the rollout itself.'], [4, 'Ten go to one Houston project, the canary.'], [8, 'Every other office gets its machines next…'], [36, '…and most of Houston comes last, as the reserve.'], [48, 'The last office switches around week 46, with weeks to spare.']];
+    function heroWeek(w) {
+      sq.forEach((c, i) => c.classList.toggle('on', machines[i].w <= w));
+      hw.textContent = 'Week ' + w; hs.textContent = `${shipped(w)} of 250 shipped`;
+      line.style.setProperty('--p', Math.min(1, w / 52));
+      line.querySelectorAll('u').forEach((u) => u.classList.toggle('hit', +u.dataset.w <= w));
+      let t = CAPS[0][1]; for (const [cw, c] of CAPS) if (w >= cw) t = c; cap.textContent = t;
+    }
+    let hw8 = 0, htimer = 0;
+    function heroLoop() {
+      clearTimeout(htimer);
+      if (still()) { heroWeek(52); return; }
+      heroWeek(hw8);
+      const pause = SHIP.some((s) => s.w === hw8) ? 520 : 70;
+      hw8 = hw8 >= 52 ? 0 : hw8 + 1;
+      htimer = setTimeout(heroLoop, hw8 === 0 ? 2600 : pause);
+    }
+    heroWeek(0);
+    const vis = grid.closest('[data-inview]');
+    let running = false;
+    vis.addEventListener('inview', (e) => { if (e.detail && !running) { running = true; heroLoop(); } else if (!e.detail) { running = false; clearTimeout(htimer); } });
+    setTimeout(() => { if (!running) { running = true; heroLoop(); } }, 4000);
+  })();
+  </script>
+</body>
+</html>
