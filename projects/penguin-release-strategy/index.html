@@ -11,14 +11,14 @@
   <title>Penguin release strategy — Timur Kherlenbayar</title>
   <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="../../assets/fonts/type-home.css?v=10">
-  <link rel="stylesheet" href="../../style.css?v=11">
+  <link rel="stylesheet" href="../../style.css?v=12">
   <link rel="stylesheet" href="../page.css?v=3">
   <script>
     document.documentElement.classList.add('js');
     try { var t = localStorage.getItem('tk-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
   </script>
   <script src="../../backdrop.js?v=10" defer></script>
-  <script src="../../app.js?v=11" defer></script>
+  <script src="../../app.js?v=12" defer></script>
   <script src="../page.js?v=2" defer></script>
   <style>
     /* ---------- Penguin: visuals made for this page ---------- */
@@ -126,10 +126,11 @@
   <header class="nav">
     <a class="brand" href="../../" aria-label="Timur Kherlenbayar, home page"><span class="brand-mark" aria-hidden="true">&gt;</span>timur kherlenbayar<span class="caret" aria-hidden="true"></span></a>
     <nav aria-label="Main">
-      <a href="../../">home</a>
-      <a href="../" aria-current="page">projects</a>
-      <a href="../../#about">about</a>
-      <a class="nav-cta" href="../../#contact">contact</a>
+      <div class="tab">
+        <a class="tab-main" href="../../">home</a>
+        <span class="tab-sub"><a href="../../#work">work</a><a href="../../#experience">experience</a><a href="../../#about">about</a><a href="../../#contact">contact</a></span>
+      </div>
+      <div class="tab current"><a class="tab-main" href="../"><span class="tab-long">all </span>projects</a></div>
     </nav>
   </header>
 

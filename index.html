@@ -11,13 +11,13 @@
   <title>Timur Kherlenbayar — data and AI work</title>
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="assets/fonts/type-home.css?v=10">
-  <link rel="stylesheet" href="style.css?v=11">
+  <link rel="stylesheet" href="style.css?v=12">
   <script>
     document.documentElement.classList.add('js');
     try { var t = localStorage.getItem('tk-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
   </script>
   <script src="backdrop.js?v=10" defer></script>
-  <script src="app.js?v=11" defer></script>
+  <script src="app.js?v=12" defer></script>
 </head>
 <body>
   <canvas id="field" aria-hidden="true"></canvas>
@@ -27,10 +27,11 @@
   <header class="nav">
     <a class="brand" href="#top" aria-label="Timur Kherlenbayar, back to top"><span class="brand-mark" aria-hidden="true">&gt;</span>timur kherlenbayar<span class="caret" aria-hidden="true"></span></a>
     <nav aria-label="Main">
-      <a href="#work">work</a>
-      <a href="#experience">experience</a>
-      <a href="#about">about</a>
-      <a class="nav-cta" href="#contact">contact</a>
+      <div class="tab current">
+        <a class="tab-main" href="#top" aria-current="page">home</a>
+        <span class="tab-sub"><a href="#work">work</a><a href="#experience">experience</a><a href="#about">about</a><a href="#contact">contact</a></span>
+      </div>
+      <div class="tab"><a class="tab-main" href="projects/"><span class="tab-long">all </span>projects</a></div>
     </nav>
   </header>
 
@@ -50,7 +51,7 @@
       <div class="term" data-spot>
         <div class="term-bar">
           <span>~/timur/portfolio</span>
-          <span class="term-meta">the four I’d show first</span>
+          <span class="term-meta">the three I’d show first</span>
         </div>
         <div class="term-body">
           <p class="t-cmd" style="--n:12;--d:.5s"><b aria-hidden="true">&gt;</b><span>who is this?</span></p>
@@ -72,21 +73,15 @@
             <span><strong>Anatomy of a Dzud</strong><em>Three weather conditions take the risk of a mass livestock die-off from 2% to 36%.</em></span>
             <u aria-hidden="true">→</u>
           </a>
-          <a class="t-row" style="--d:4.9s" href="projects/who-gets-the-call/">
+
+          <p class="t-cmd" style="--n:14;--d:5.1s"><b aria-hidden="true">&gt;</b><span>anything else?</span></p>
+          <a class="t-row t-more" style="--d:6.0s" href="projects/">
             <i aria-hidden="true">●</i>
-            <span><strong>Who Gets the Call?</strong><em>A nurse has time for 20 calls. The model’s list reaches 43% of the patients who come back.</em></span>
+            <span><strong>More on the projects page</strong><em>A readmission model for nurses, two AI apps, a team plan for moving 250 machines to Linux, and more.</em></span>
             <u aria-hidden="true">→</u>
           </a>
 
-
-          <p class="t-cmd" style="--n:14;--d:5.6s"><b aria-hidden="true">&gt;</b><span>anything else?</span></p>
-          <a class="t-row t-more" style="--d:6.5s" href="projects/">
-            <i aria-hidden="true">●</i>
-            <span><strong>More on the projects page</strong><em>Two AI apps, a team plan for moving 250 machines to Linux, and the rest of my work.</em></span>
-            <u aria-hidden="true">→</u>
-          </a>
-
-          <p class="t-cmd t-idle" style="--d:7.2s"><b aria-hidden="true">&gt;</b><span class="caret" aria-hidden="true"></span></p>
+          <p class="t-cmd t-idle" style="--d:6.7s"><b aria-hidden="true">&gt;</b><span class="caret" aria-hidden="true"></span></p>
         </div>
         <div class="term-status"><span><span class="pulse ok" aria-hidden="true"></span>open to full-time roles</span><span>open to relocation</span></div>
       </div>
@@ -96,8 +91,8 @@
     <section class="section wrap" id="work" aria-labelledby="work-title">
       <header class="section-head reveal">
         <p class="label"><span>01</span>Featured projects</p>
-        <h2 id="work-title">Four projects I’d show you first.</h2>
-        <p>Each one started as a question I couldn’t answer by reading about it, and each one ends as a page you can open and use. All four try to be as clear about what didn’t work as about what did.</p>
+        <h2 id="work-title">Three projects I’d show you first.</h2>
+        <p>Each one started as a question I couldn’t answer by reading about it, and each one ends as a page you can open and use. All three try to be as clear about what didn’t work as about what did.</p>
       </header>
 
       <article class="project flip reveal" data-spot>
@@ -196,31 +191,6 @@
             <div class="core-num">36%</div>
           </div>
           <p class="vis-caption">In an ordinary winter the chance is 2%.<br>When all three meet, it is 36%.</p>
-        </a>
-      </article>
-
-      <article class="project reveal" data-spot>
-        <div class="project-copy">
-          <p class="kicker"><span>04</span>Applied machine learning · Healthcare</p>
-          <h3><a href="projects/who-gets-the-call/">Who Gets the Call?</a></h3>
-          <p>One hundred patients leave the hospital today, and about ten of them will be back within a month. The nurse who follows up has time for twenty calls. I built a tool that picks those twenty, gives a reason for every name on the list, and turns a discharge note into a short guide for the call.</p>
-          <p>The page lets you try the nurse’s job yourself before it shows you what the model would have done. It also shows the part I found most interesting, which is that an experienced nurse’s rule of thumb gets almost as far as the model does.</p>
-          <dl class="stats">
-            <div><dt>43%</dt><dd>of the patients who came back were on the model’s list of twenty</dd></div>
-            <div><dt>20%</dt><dd>is what twenty calls picked at random would have reached</dd></div>
-            <div><dt>101,766</dt><dd>hospital stays from a public research dataset sit behind it</dd></div>
-          </dl>
-          <ul class="tags" aria-label="Built with"><li>Python</li><li>SQL and DuckDB</li><li>XGBoost</li><li>FastAPI</li><li>A local language model</li></ul>
-          <div class="actions">
-            <a class="btn primary" href="projects/who-gets-the-call/">Open the project <span aria-hidden="true">→</span></a>
-            <a class="btn ghost" href="https://github.com/RumitOsu/who-gets-the-call" target="_blank" rel="noopener noreferrer">Code on GitHub <span aria-hidden="true">↗</span></a>
-          </div>
-        </div>
-        <a class="project-vis vis-call" href="projects/who-gets-the-call/" tabindex="-1" aria-hidden="true">
-          <div class="vis-top"><span>100 patients go home</span><span id="call-phase">day 0</span></div>
-          <div class="call-grid" id="call-grid"></div>
-          <p class="vis-caption" id="call-caption">A nurse has time for twenty calls.</p>
-          <div class="legend"><span><i class="k-called"></i>called</span><span><i class="k-back"></i>came back</span><span><i class="k-both"></i>came back, and got a call</span></div>
         </a>
       </article>
 
