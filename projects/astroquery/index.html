@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="pond">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#05201f">
+  <meta name="description" content="AstroQuery is an AI agent for astronomy questions. It decides on its own which of five tools a question needs, chains them, and cites its sources. Built alone in a day.">
+  <meta property="og:title" content="AstroQuery, an AI agent that picks its own tools — Timur Kherlenbayar">
+  <meta property="og:description" content="An astronomy agent that decides which of five tools a question needs and chains them. Built alone, with a proposal for where an agent would really help students.">
+  <meta property="og:type" content="article">
+  <title>AstroQuery, an AI agent that picks its own tools — Timur Kherlenbayar</title>
+  <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../../assets/fonts/type-home.css?v=10">
+  <link rel="stylesheet" href="../../style.css?v=11">
+  <link rel="stylesheet" href="../page.css?v=2">
+  <script>
+    document.documentElement.classList.add('js');
+    try { var t = localStorage.getItem('tk-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+  </script>
+  <script src="../../backdrop.js?v=10" defer></script>
+  <script src="../../app.js?v=11" defer></script>
+  <script src="../page.js?v=2" defer></script>
+  <style>
+    /* ---------- AstroQuery: visuals made for this page ---------- */
+
+    /* hero: one real question, replayed from the server log */
+    .trace { display: grid; gap: 10px; margin: 6px 0 4px; min-height: 380px; align-content: start; font-size: 14px; }
+    .tq { justify-self: end; max-width: 92%; background: color-mix(in srgb, var(--cool) 16%, var(--panel-solid)); border: 1px solid color-mix(in srgb, var(--cool) 40%, transparent); border-radius: 16px 16px 4px 16px; padding: 11px 14px; color: var(--ink); line-height: 1.5; }
+    .tstep { display: grid; grid-template-columns: 46px minmax(0, 1fr); gap: 10px; align-items: start; }
+    .tstep time { font: 400 11px/1.9 var(--mono); color: var(--mute); text-align: right; }
+    .tcall { border: 1px solid var(--line-2); border-left: 2px solid var(--cool); border-radius: 10px; padding: 9px 12px; background: rgba(0, 0, 0, .18); min-width: 0; }
+    .tcall b { display: block; font: 500 12px/1.4 var(--mono); color: var(--cool-2); letter-spacing: .02em; }
+    .tcall code { display: block; font: 400 12px/1.5 var(--mono); color: var(--ink-2); margin-top: 3px; overflow-wrap: anywhere; }
+    .tcall span { display: block; font: 400 12px/1.5 var(--mono); color: var(--accent-2); margin-top: 4px; }
+    .tpar { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    .tans { border-radius: 16px 16px 16px 4px; border: 1px solid var(--line-2); background: var(--panel-solid); padding: 12px 14px; color: var(--ink); line-height: 1.55; }
+    .tans strong { color: var(--cool-2); font-weight: 600; }
+    .trace [data-at] { transition: opacity .5s, transform .5s; }
+    html:not(.motion-off) .trace.playing [data-at]:not(.on) { opacity: 0; transform: translateY(8px); }
+    .trace-foot { display: flex; justify-content: space-between; gap: 10px; font: 400 11.5px/1.4 var(--mono); color: var(--mute); margin-top: 12px; }
+    .trace-foot button { color: var(--cool-2); font: inherit; }
+
+    /* the five tools */
+    .tools { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 12px; margin: 30px 0; }
+    .tools .tool { grid-column: span 2; }
+    .tools .tool.new { grid-column: span 3; }
+    .tool { border: 1px solid var(--line); border-radius: 14px; padding: 16px 16px 18px; background: rgba(255, 255, 255, .02); display: flex; flex-direction: column; }
+    .tool h3 { margin: 0 0 4px !important; font: 600 1.02rem/1.3 var(--serif) !important; }
+    .tool .tname { font: 400 11.5px/1.4 var(--mono); color: var(--cool); }
+    .tool p { font-size: 14px !important; line-height: 1.55 !important; margin-top: 10px; }
+    .tool .io { margin-top: auto; padding-top: 12px; display: grid; gap: 4px; font: 400 12px/1.5 var(--mono); }
+    .tool .io i { font-style: normal; color: var(--mute); }
+    .tool .io b { font-weight: 400; color: var(--accent-2); overflow-wrap: anywhere; }
+    .tool.new { border-color: color-mix(in srgb, var(--cool) 45%, var(--line)); }
+    .tool .badge { align-self: flex-start; font: 400 10.5px/1 var(--mono); color: var(--on-cool); background: var(--cool); border-radius: 999px; padding: 4px 8px; margin-bottom: 10px; }
+
+    /* routing rules */
+    .rules { margin: 30px 0; border: 1px solid var(--line-2); border-radius: 16px; overflow: hidden; }
+    .rule { display: grid; grid-template-columns: minmax(0, 1fr) 24px minmax(0, 1fr); gap: 12px; align-items: center; padding: 13px 18px; border-top: 1px solid var(--line); font-size: 14.5px; color: var(--ink-2); }
+    .rule:first-child { border-top: 0; }
+    .rule em { font-style: normal; color: var(--mute); text-align: center; font-family: var(--mono); }
+    .rule b { font: 500 12.5px/1.4 var(--mono); color: var(--cool-2); }
+    .rule.head { background: rgba(255, 255, 255, .03); font: 400 11.5px/1.4 var(--mono); color: var(--mute); text-transform: lowercase; letter-spacing: .04em; padding-top: 10px; padding-bottom: 10px; }
+
+    /* how the library is built */
+    .rag { display: grid; grid-template-columns: 1.1fr 28px 1fr 28px 1.1fr; align-items: stretch; gap: 0; margin: 34px 0; }
+    .rag-box { border: 1px solid var(--line-2); border-radius: 14px; padding: 14px 14px 16px; background: rgba(255, 255, 255, .02); }
+    .rag-box h3 { margin: 0 0 10px !important; font: 400 11.5px/1.4 var(--mono) !important; color: var(--mute) !important; letter-spacing: .04em; text-transform: lowercase; }
+    .rag-box ul { display: grid; gap: 5px; }
+    .rag-box li { font-size: 13px !important; line-height: 1.45 !important; color: var(--ink-2); }
+    .rag-big { font: 400 2.2rem/1 var(--serif); color: var(--cool-2); letter-spacing: -.02em; }
+    .rag-box p { font-size: 13px !important; line-height: 1.5 !important; color: var(--mute) !important; margin-top: 8px; }
+    .chunks { display: grid; grid-template-columns: repeat(10, 1fr); gap: 3px; margin-top: 12px; }
+    .chunks i { aspect-ratio: 1; border-radius: 2px; background: color-mix(in srgb, var(--cool) 35%, transparent); }
+    .chunks i.hit { background: var(--accent); }
+    .cite { margin-top: 10px; font: 400 12px/1.5 var(--mono); color: var(--accent-2); border-left: 2px solid var(--accent); padding-left: 10px; }
+    .rag-arrow { align-self: center; height: 2px; background: var(--line-2); position: relative; margin: 0 3px; }
+    .rag-arrow::after { content: ""; position: absolute; right: -1px; top: -4px; border: 5px solid transparent; border-left-color: var(--line-2); }
+
+    /* the bug */
+    .bug { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin: 30px 0; }
+    .bug > div { border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+    .bug h3 { margin: 0 !important; padding: 10px 14px; font: 400 11.5px/1.4 var(--mono) !important; color: var(--mute) !important; border-bottom: 1px solid var(--line); text-transform: lowercase; letter-spacing: .04em; }
+    .bug pre { margin: 0; padding: 12px 14px 14px; font: 400 11.5px/1.7 var(--mono); color: var(--ink-2); white-space: pre-wrap; overflow-wrap: anywhere; }
+    .bug pre .t { color: var(--mute); }
+    .bug pre .ok { color: var(--ok); }
+    .browser { display: grid; place-items: center; min-height: 170px; padding: 18px; text-align: center; }
+    .browser p { font-size: 14px !important; color: var(--mute) !important; }
+    .dots { display: inline-flex; gap: 5px; margin-bottom: 10px; }
+    .dots i { width: 7px; height: 7px; border-radius: 50%; background: var(--cool); opacity: .4; }
+    html:not(.motion-off) .dots i { animation: dot 1.2s ease-in-out infinite; }
+    .dots i:nth-child(2) { animation-delay: .2s; } .dots i:nth-child(3) { animation-delay: .4s; }
+    @keyframes dot { 50% { opacity: 1; transform: translateY(-3px); } }
+    .clock { font: 400 1.6rem/1 var(--serif); color: var(--ink); margin-top: 6px; }
+
+    /* the proposal */
+    .flow { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; margin: 28px 0 10px; counter-reset: fl; }
+    .flow li { counter-increment: fl; border: 1px solid var(--line-2); border-radius: 12px; padding: 12px 12px 14px; background: rgba(255, 255, 255, .02); }
+    .flow li::before { content: counter(fl); display: inline-grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: var(--cool); color: var(--on-cool); font: 600 11px/1 var(--mono); margin-bottom: 8px; }
+    .flow b { display: block; font: 500 12.5px/1.35 var(--mono); color: var(--cool-2); }
+    .flow span { display: block; font-size: 13px; line-height: 1.5; color: var(--ink-2); margin-top: 6px; }
+
+    @media (max-width: 980px) {
+      .rag { grid-template-columns: 1fr; gap: 10px; }
+      .rag-arrow { width: 2px; height: 20px; margin: 0 auto; }
+      .rag-arrow::after { right: -4px; top: auto; bottom: -1px; border: 5px solid transparent; border-top-color: var(--line-2); }
+      .flow { grid-template-columns: 1fr; }
+      .tools { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .tools .tool, .tools .tool.new { grid-column: span 1; }
+    }
+    @media (max-width: 680px) {
+      .bug, .tpar, .tools { grid-template-columns: 1fr; }
+      .rule { grid-template-columns: 1fr; gap: 4px; }
+      .rule em { display: none; }
+      .trace { min-height: 0; }
+    }
+  </style>
+</head>
+<body class="cool">
+  <canvas id="field" aria-hidden="true"></canvas>
+  <a class="skip" href="#story">Skip to the story</a>
+
+  <header class="nav">
+    <a class="brand" href="../../" aria-label="Timur Kherlenbayar, home page"><span class="brand-mark" aria-hidden="true">&gt;</span>timur kherlenbayar<span class="caret" aria-hidden="true"></span></a>
+    <nav aria-label="Main">
+      <a href="../../">home</a>
+      <a href="../" aria-current="page">projects</a>
+      <a href="../../#about">about</a>
+      <a class="nav-cta" href="../../#contact">contact</a>
+    </nav>
+  </header>
+
+  <main id="top">
+    <section class="p-hero wrap split" aria-labelledby="title">
+      <div class="p-hero-copy">
+        <p class="crumb cool"><a href="../">~/projects</a><span>/</span><span>astroquery</span><span aria-hidden="true">·</span><span>AI agent · Astronomy</span></p>
+        <h1 id="title">AstroQuery: an agent that decides which tools a question needs</h1>
+        <p class="standfirst">Ask how long it would take to reach the nearest star, and a good answer needs a fact, some arithmetic and a sense of scale. I built an astronomy agent that works out on its own which of five tools a question calls for, chains them, and says where its facts came from.</p>
+        <dl class="p-facts">
+          <div><dt>My role</dt><dd>Built it alone</dd></div>
+          <div><dt>When</dt><dd>March to April 2026</dd></div>
+          <div><dt>Built with</dt><dd>LangChain.js, LangGraph, GPT-4o-mini</dd></div>
+        </dl>
+        <div class="actions">
+          <a class="btn primary cool" href="#story">Read the story <span aria-hidden="true">↓</span></a>
+          <a class="btn ghost" href="https://github.com/RumitOsu/astroquery" target="_blank" rel="noopener noreferrer">Code on GitHub <span aria-hidden="true">↗</span></a>
+        </div>
+      </div>
+      <div class="p-vis" data-inview>
+        <div class="vis-top"><span>one real question, replayed</span><span>from the server log</span></div>
+        <div class="trace" id="trace">
+          <p class="tq" data-at="0">How far is the nearest star and how long would it take to travel there at 10% the speed of light?</p>
+          <div class="tstep" data-at="1.9"><time>+1.9 s</time>
+            <div class="tpar">
+              <div class="tcall"><b>CosmicLibrary</b><code>“How far is the nearest star?”</code><span data-at="2.4">4 passages · Stellar Classification and Life Cycles</span></div>
+              <div class="tcall"><b>AstroCalculator</b><code>(4.24 * ly) / (0.1 * c)</code><span data-at="1.94">1,338,080,359.58 s</span></div>
+            </div>
+          </div>
+          <div class="tstep" data-at="3.8"><time>+3.8 s</time>
+            <div class="tcall"><b>CosmicScale</b><code>1,338,080,359.58 · time</code><span>puts it next to familiar spans of time</span></div>
+          </div>
+          <p class="tans" data-at="4.8">At a tenth of the speed of light, the trip would take about <strong>1.34 billion seconds</strong>, or roughly <strong>42 years</strong>.</p>
+        </div>
+        <div class="trace-foot"><span>times are from the log; the last line sums up the result</span><button type="button" id="replay" hidden>replay ↺</button></div>
+      </div>
+    </section>
+
+    <div class="wrap">
+      <article class="sheet" id="story">
+        <section class="short wide reveal" aria-labelledby="short-title">
+          <div class="short-head"><h2 id="short-title">The short version</h2><span>a two-minute read</span></div>
+          <dl>
+            <div><dt>The question</dt><dd>A class asked for an agent that reasons about a question, picks tools, reads what they return and keeps going until it can answer. What topic would make that pattern earn its keep?</dd></div>
+            <div><dt>What I built</dt><dd>An astronomy chat agent with five tools: a calculator that knows astronomical constants, live web search, a searchable library of seven documents I put together, a unit converter, and a tool that turns huge numbers into human terms. It remembers the conversation and cites its sources.</dd></div>
+            <div><dt>What came out of it</dt><dd>A working app that chains tools without being told how. On the question above it looked up a fact, did the arithmetic and reached for a sense of scale, and all three tools had run within four seconds. I also wrote a proposal for where an agent would genuinely help students: planning a course schedule.</dd></div>
+            <div><dt>My part</dt><dd>All of it. A first version in March, then this one in a single day of commits in April: the tools, the retrieval, the agent and its memory, the interface and the write-up.</dd></div>
+          </dl>
+          <dl class="stats">
+            <div><dt>5 tools</dt><dd>that the agent chooses between on its own</dd></div>
+            <div><dt>73 passages</dt><dd>from seven documents, each one cited by document and section</dd></div>
+            <div><dt>3.8 s</dt><dd>from the question above to its third tool call</dd></div>
+          </dl>
+          <ul class="tags" aria-label="Built with"><li>LangChain.js</li><li>LangGraph</li><li>GPT-4o-mini</li><li>Retrieval (RAG)</li><li>Tavily search</li><li>Node and Express</li></ul>
+        </section>
+
+        <section class="p-section reveal" aria-labelledby="s1">
+          <p class="label"><span>01</span>The idea</p>
+          <h2 id="s1">I wanted questions that a single tool can’t answer</h2>
+          <p>I built this assignment twice. It asked for an agent built on the ReAct pattern, which simply means the model alternates between thinking and acting: it decides it needs something, calls a tool, reads the result, and decides again. The required tools were a calculator, a web search and a search over at least five documents of my own, plus memory and a web interface.</p>
+          <p>My first version in March used those three tools over a small library about AI and machine learning. For the second I wanted a topic where a good question usually needs more than one tool, so that the agent would have real choices to make. Astronomy is full of enormous numbers, unit conversions, recent news and settled background knowledge, often all in the same sentence.</p>
+          <p class="callout">An agent is only worth building when the path to the answer changes from one question to the next.</p>
+          <figure class="fig wide">
+            <img class="zoomable" src="img/welcome.jpg" alt="AstroQuery's welcome screen: suggested questions about the nearest star, exoplanets, JWST and solar storms, and a row showing its five tools" loading="lazy" width="1240" height="1193">
+            <figcaption><b>The welcome screen.</b> Suggested questions are chosen so that each one needs a different mix of tools.</figcaption>
+          </figure>
+        </section>
+
+        <section class="p-section reveal" aria-labelledby="s2">
+          <p class="label"><span>02</span>The tools</p>
+          <h2 id="s2">Five tools, two of them my own idea</h2>
+          <p>Three tools were required. I added a unit converter and a fifth tool I called CosmicScale, because the numbers in astronomy mean nothing to most people. Light takes 499 seconds to reach us from the Sun; the nearest star is 40 trillion kilometres away. CosmicScale takes a number and finds the everyday things it is closest to, from a football field up to the distance to Andromeda.</p>
+          <div class="tools wide">
+            <div class="tool"><h3>Calculator</h3><span class="tname">AstroCalculator</span><p>Evaluates math with 13 constants built in, such as the speed of light, the astronomical unit, the parsec and the mass of the Sun.</p><div class="io"><i>AU / c</i><b>≈ 499 s, about 8.3 minutes</b></div></div>
+            <div class="tool"><h3>Web search</h3><span class="tname">SpaceSearch</span><p>Searches the live web through Tavily for news, launches and recent discoveries, and returns titles, snippets and links.</p><div class="io"><i>latest JWST news</i><b>current articles with their sources</b></div></div>
+            <div class="tool"><h3>Library</h3><span class="tname">CosmicLibrary</span><p>Searches the seven documents I wrote for the agent and returns the four closest passages, each labelled with its document and section.</p><div class="io"><i>how are exoplanets found?</i><b>Exoplanet Discovery and Characterization › Detection Methods</b></div></div>
+            <div class="tool new"><span class="badge">added</span><h3>Unit converter</h3><span class="tname">UnitConverter</span><p>Converts distances and masses between everyday and astronomical units, from miles to megaparsecs and from pounds to solar masses.</p><div class="io"><i>4.24 light-years in km</i><b>4.0115 × 10¹³ km</b></div></div>
+            <div class="tool new"><span class="badge">added</span><h3>Sense of scale</h3><span class="tname">CosmicScale</span><p>Turns a distance, mass, time or temperature into comparisons with familiar things, so an answer lands with a person.</p><div class="io"><i>mass of the Sun</i><b>about 333,000 Earths</b></div></div>
+          </div>
+        </section>
+
+        <section class="p-section reveal" aria-labelledby="s3">
+          <p class="label"><span>03</span>How it chooses</p>
+          <h2 id="s3">The model picks the tools, and the instructions teach it when</h2>
+          <p>Nothing in the code says which tool to call for which question. The model decides, and what shapes its decisions is the description of each tool and a short set of rules I wrote into its instructions. They boil down to this:</p>
+          <div class="rules wide" role="table" aria-label="When the agent should use each tool">
+            <div class="rule head" role="row"><span role="columnheader">If the question needs</span><em aria-hidden="true"></em><span role="columnheader">Reach for</span></div>
+            <div class="rule" role="row"><span role="cell">a settled astronomy fact</span><em aria-hidden="true">→</em><span role="cell"><b>CosmicLibrary first</b>, because its answers come with a source</span></div>
+            <div class="rule" role="row"><span role="cell">anything recent: news, launches, this year’s discoveries</span><em aria-hidden="true">→</em><span role="cell"><b>SpaceSearch</b></span></div>
+            <div class="rule" role="row"><span role="cell">any arithmetic at all</span><em aria-hidden="true">→</em><span role="cell"><b>AstroCalculator</b>, and always show the expression</span></div>
+            <div class="rule" role="row"><span role="cell">a big number that was just computed</span><em aria-hidden="true">→</em><span role="cell"><b>CosmicScale</b>, to make it relatable</span></div>
+            <div class="rule" role="row"><span role="cell">more than one of these</span><em aria-hidden="true">→</em><span role="cell">chain them freely, one result feeding the next</span></div>
+          </div>
+          <p>The log of the question at the top of this page shows what that looks like in practice. In its very first step the model called two tools at once: the library, to look up how far the nearest star is, and the calculator, using the 4.24 light-years it already knew. It didn’t wait for the library to confirm the number before doing the arithmetic. Once both came back it handed the result to CosmicScale, and then wrote the answer. That is the ReAct loop doing exactly what it is for: no step of that path was written down anywhere in advance.</p>
+          <p>It also shows the pattern’s weak spot. The model trusted its own memory of the distance and only checked it in parallel, which is fine for the nearest star and riskier for a fact it might get wrong. To keep it from wandering, the agent is set to stop after ten rounds of tool calls, and it sees only the last 24 messages of a conversation, which is enough for follow-up questions to work.</p>
+          <figure class="fig wide">
+            <img class="zoomable" src="img/chain.jpg" alt="A question about travelling to Proxima Centauri at 10% of light speed, with the Calculator and Web Search tool cards marked done above the answer" loading="lazy" width="1240" height="570">
+            <figcaption><b>Two tools for one question.</b> Asked how long the trip would take and what missions might try it, the agent used the calculator for the first half and the web search for the second.</figcaption>
+          </figure>
+        </section>
+
+        <section class="p-section reveal" aria-labelledby="s4">
+          <p class="label"><span>04</span>The library</p>
+          <h2 id="s4">A small library, cut into passages that can be cited</h2>
+          <p>For the library I wrote seven short reference documents, about 7,500 words in all, covering the Solar System, stars, exoplanets, space missions, cosmology, black holes and space weather. Each one is split into passages of up to 1,000 characters that overlap by 200, so that a sentence cut in half at one boundary is whole in the next passage. Every passage remembers its document and the heading it sits under, which is what lets the agent cite “Exoplanet Discovery and Characterization › Detection Methods” instead of just “a document”.</p>
+          <div class="rag wide" role="img" aria-label="Seven documents are split into 73 passages, each turned into an embedding and saved to disk. A question is matched against them and the four closest passages come back with their document and section.">
+            <div class="rag-box">
+              <h3>7 documents</h3>
+              <ul><li>The Solar System</li><li>Stellar classification and life cycles</li><li>Exoplanets</li><li>Space missions</li><li>Cosmology</li><li>Black holes</li><li>Space weather</li></ul>
+            </div>
+            <div class="rag-arrow" aria-hidden="true"></div>
+            <div class="rag-box">
+              <h3>split and embedded</h3>
+              <span class="rag-big">73</span>
+              <p>passages of up to 1,000 characters, each turned into a vector and saved to disk with it</p>
+              <div class="chunks" id="chunks" aria-hidden="true"></div>
+            </div>
+            <div class="rag-arrow" aria-hidden="true"></div>
+            <div class="rag-box">
+              <h3>a question comes in</h3>
+              <p style="color:var(--ink-2)!important">“What methods do scientists use to detect exoplanets?”</p>
+              <p>The four closest passages come back, labelled:</p>
+              <div class="cite">Exoplanet Discovery and Characterization › Detection Methods</div>
+            </div>
+          </div>
+          <p>One detail made a real difference to running it. Turning passages into vectors costs API calls, and at first the saved store kept only the text, so every restart paid for the vectors again. I changed it to save the vectors along with the text, and from then on the server logged “Vector store loaded from cache: 73 documents (no API calls)” and was ready in a fraction of a second.</p>
+        </section>
+
+        <section class="p-section reveal" aria-labelledby="s5">
+          <p class="label"><span>05</span>The bug</p>
+          <h2 id="s5">Two minutes of “Thinking…” while the server had already answered</h2>
+          <p>The most instructive part of the project was a bug. I asked the finished app how scientists detect exoplanets, and it sat on “Thinking…” for two minutes. The server log told a different story: the agent had called its tool and had its results back within three seconds.</p>
+          <div class="bug wide">
+            <div>
+              <h3>the server log</h3>
+              <pre><span class="t">17:59:15.710</span> Chat request  What methods do scientists use to detect exoplanets?
+<span class="t">17:59:17.474</span> Tool call  CosmicLibrary
+<span class="t">17:59:18.068</span> CosmicLibrary results  <span class="ok">4 passages, top: Exoplanet Discovery and Characterization</span></pre>
+            </div>
+            <div>
+              <h3>the browser</h3>
+              <div class="browser"><div><span class="dots" aria-hidden="true"><i></i><i></i><i></i></span><p>Thinking…</p><p class="clock">2 minutes</p></div></div>
+            </div>
+          </div>
+          <p>The answer was being sent as a live stream of events, and the version of the Express web server I was using held that stream back instead of passing it on as it arrived. The browser was waiting for an answer that was sitting in a buffer. I chose the dependable fix over the elegant one: the page now makes a plain request, gets the whole answer back, and plays it out with a typewriter effect. I also switched how the server reads the agent’s progress, so tool calls and the final answer are told apart reliably.</p>
+          <p>That fix had a cost I want to be honest about. The tool cards now appear together with the answer instead of lighting up live while the agent works. Getting true streaming back is the first thing on my list below.</p>
+          <figure class="fig wide">
+            <img class="zoomable" src="img/answer.jpg" alt="A finished answer about light from Proxima Centauri: about 133.8 million seconds, or 4.2 years, followed by what is known about its two confirmed planets, under the Knowledge Base and Scale Comparator tool cards" loading="lazy" width="1240" height="1193">
+            <figcaption><b>A finished answer.</b> The library supplied the facts about Proxima Centauri’s planets and the scale tool turned 133.8 million seconds into 4.2 years.</figcaption>
+          </figure>
+        </section>
+
+        <section class="p-section reveal" aria-labelledby="s6">
+          <p class="label"><span>06</span>Beyond the code</p>
+          <h2 id="s6">Where an agent would actually help: choosing next semester’s classes</h2>
+          <p>The assignment also asked where the agent pattern would fit a real system. I picked course registration, because planning a semester means juggling the course catalogue, the degree audit, rating sites and the registration portal at the same time. “What should I take next semester?” is a chain of questions, and which links the chain needs depends on the student.</p>
+          <ol class="flow wide">
+            <li><b>DegreeAudit</b><span>Which requirements are still open?</span></li>
+            <li><b>PrereqChecker</b><span>Which of those courses can this student take?</span></li>
+            <li><b>SectionSearch</b><span>Which sections are open next semester?</span></li>
+            <li><b>ScheduleBuilder</b><span>Which ones fit around the classes already fixed?</span></li>
+            <li><b>RatingLookup</b><span>What do other students say about them?</span></li>
+          </ol>
+          <p>The proposal argues that simpler designs fall short in specific ways. A static recommendation page can’t handle follow-ups like “which of those are Monday-Wednesday-Friday mornings?”. A rule-based system would need every possible question written in advance. And a chatbot without tools has no way to check live seat counts or prerequisites, so it would make course offerings up. A simple question like “Am I eligible for this course?” needs one tool, and “build me a full schedule” needs all five, which is exactly the variety the pattern is good at.</p>
+        </section>
+
+        <section class="p-section reveal" aria-labelledby="s7">
+          <p class="label"><span>07</span>Next</p>
+          <h2 id="s7">What I would do with another week</h2>
+          <ul class="list">
+            <li><strong>Bring back live streaming,</strong> so people can watch the agent pick its tools as it happens, which is the most interesting thing about it.</li>
+            <li><strong>Render math.</strong> When the agent shows a calculation it sometimes writes it in LaTeX, which the interface prints as raw code.</li>
+            <li><strong>Test the tool choices.</strong> Write a set of questions with the tools each one should use, and score how often the agent picks right. That would turn “it seems to choose well” into a number, and show whether a change to the instructions helps or hurts.</li>
+            <li><strong>Check facts before computing with them,</strong> by making the calculator wait for the library when a number could come from either.</li>
+          </ul>
+        </section>
+
+        <details class="notes">
+          <summary><h2>Method notes</h2><span>stack, decisions and numbers</span></summary>
+          <div class="notes-body">
+            <dl>
+              <div><dt>Context</dt><dd>An individual assignment in Applied AI Projects at BYU. A first version on March 25, 2026 (calculator, web search and retrieval over six AI and machine learning documents), and this one, built on April 13 in 14 commits.</dd></div>
+              <div><dt>Agent</dt><dd>LangGraph’s prebuilt ReAct agent on LangChain.js, with GPT-4o-mini at temperature 0.3. At most ten rounds of tool calls per question. Memory is the last 24 messages of each session, kept on the server.</dd></div>
+              <div><dt>Tools</dt><dd>AstroCalculator (mathjs with 13 constants: c, AU, parsec, light-year, the masses of the Sun, Earth and Jupiter, the radii of the Sun and Earth, G, the Hubble constant, solar luminosity and the Stefan-Boltzmann constant). SpaceSearch (Tavily). CosmicLibrary (retrieval). UnitConverter (distance: m, km, mi, AU, ly, pc, kpc, Mpc; mass: kg, g, lb, solar, Earth and Jupiter masses). CosmicScale (distance, mass, time and temperature, each against about a dozen everyday references).</dd></div>
+              <div><dt>Retrieval</dt><dd>Seven markdown documents, about 7,500 words, split with a recursive splitter into 73 chunks of up to 1,000 characters with 200 characters of overlap. Each chunk carries its document title and nearest heading. Embeddings from text-embedding-3-small, kept in an in-memory vector store that is saved to disk together with its vectors. Top 4 results by similarity, returned as “[Source: title › section]”.</dd></div>
+              <div><dt>The streaming bug</dt><dd>Express 5 held back the server-sent event stream, so the browser saw nothing until the end. Fix: the browser calls a plain JSON endpoint and plays the answer with a typewriter effect; the agent is read with LangGraph’s “updates” stream mode so tool calls and final answers are distinguished reliably. Trade-off: tool cards no longer appear live.</dd></div>
+              <div><dt>Logging</dt><dd>Structured logs with Winston for every request, tool call, argument, result and the final answer, which is what made the streaming bug quick to find and what the replay at the top of this page is built from.</dd></div>
+              <div><dt>Numbers to remember</dt><dd>5 tools, 13 constants, 7 documents, 73 passages, top 4 per search, 24 messages of memory, 10 rounds at most. The traced question: first tool calls at 1.9 s, all three tools done by 3.8 s.</dd></div>
+            </dl>
+          </div>
+        </details>
+      </article>
+    </div>
+
+    <section class="p-next wrap" aria-label="More projects">
+      <p class="label"><span>~/projects</span>Keep going</p>
+      <ul class="cards">
+        <li>
+          <a class="card reveal" data-spot href="../mise/">
+            <span class="card-top"><span>AI app · Mobile</span><span>2026</span></span>
+            <span class="card-stat"><b>9 of 9</b><span>testers in the final round said they would use it regularly</span></span>
+            <span class="card-title">Mise</span>
+            <span class="card-text">A recipe scanner that testing with real cooks turned into a cooking companion. It saves recipes from anywhere, reads the steps aloud and counts the calories for you. I led the build.</span>
+            <span class="card-tags"><span>React Native</span><span>GPT-4o</span><span>SQLite</span><span>User research</span></span>
+            <span class="card-go">See how it changed <span aria-hidden="true">→</span></span>
+          </a>
+        </li>
+        <li>
+          <a class="card reveal" data-spot href="../who-gets-the-call/">
+            <span class="card-top"><span>Applied machine learning · Healthcare</span><span>2026</span></span>
+            <span class="card-stat"><b>43%</b><span>of the patients who came back to hospital were on the model’s list of twenty calls</span></span>
+            <span class="card-title">Who Gets the Call?</span>
+            <span class="card-text">A tool that chooses which twenty of a hundred discharged patients a nurse should phone, explains every choice, and writes a short guide for the call.</span>
+            <span class="card-tags"><span>Python</span><span>SQL</span><span>XGBoost</span><span>FastAPI</span></span>
+            <span class="card-go">Open the project <span aria-hidden="true">→</span></span>
+          </a>
+        </li>
+      </ul>
+      <div class="all-link"><a class="btn ghost" href="../">All projects <span aria-hidden="true">→</span></a></div>
+    </section>
+  </main>
+
+  <footer class="footer wrap">
+    <span>© 2026 Timur Kherlenbayar</span>
+    <span class="footer-right">
+      <button id="motion" type="button" aria-pressed="false">motion: on</button>
+      <a href="../">back to all projects</a>
+    </span>
+  </footer>
+
+  <div class="themes" role="group" aria-label="Choose the backdrop">
+    <span aria-hidden="true">backdrop</span>
+    <button type="button" data-theme-pick="pond" aria-pressed="true" aria-label="Koi pond backdrop" style="--a:#0a3a38;--b:#ff9a6c"><i></i><b>pond</b></button>
+    <button type="button" data-theme-pick="steppe" aria-pressed="false" aria-label="Steppe night backdrop" style="--a:#0f1630;--b:#f2cc7e"><i></i><b>steppe</b></button>
+    <button type="button" data-theme-pick="embers" aria-pressed="false" aria-label="Embers backdrop" style="--a:#1b1916;--b:#d97757"><i></i><b>embers</b></button>
+  </div>
+
+  <script>
+  /* The hero replay: each step appears at its logged time (sped up a little), once the panel is on screen. */
+  (function () {
+    const trace = document.getElementById('trace'), replay = document.getElementById('replay');
+    if (!trace) return;
+    const steps = [...trace.querySelectorAll('[data-at]')];
+    const still = () => document.documentElement.classList.contains('motion-off');
+    let timers = [], played = false;
+    // Start with the steps hidden, so the replay doesn't flash the finished trace first.
+    if (!still()) trace.classList.add('playing');
+    function play() {
+      timers.forEach(clearTimeout); timers = [];
+      if (still()) { steps.forEach((s) => s.classList.add('on')); trace.classList.remove('playing'); return; }
+      trace.classList.add('playing');
+      steps.forEach((s) => s.classList.remove('on'));
+      for (const s of steps) timers.push(setTimeout(() => s.classList.add('on'), 400 + parseFloat(s.dataset.at) * 650));
+      timers.push(setTimeout(() => { replay.hidden = false; }, 400 + 4.8 * 650 + 400));
+    }
+    const vis = trace.closest('[data-inview]');
+    const start = () => { if (!played) { played = true; play(); } };
+    vis.addEventListener('inview', (e) => { if (e.detail) start(); });
+    // If the panel never reports being on screen (an old browser, say), play anyway.
+    setTimeout(start, 4000);
+    replay.addEventListener('click', () => { replay.hidden = true; play(); });
+    // The library box: 73 passages, with the four that answer the exoplanet question lit up.
+    const chunks = document.getElementById('chunks');
+    if (chunks) for (let i = 0; i < 73; i++) {
+      const c = document.createElement('i');
+      if ([22, 24, 25, 27].includes(i)) c.className = 'hit';
+      chunks.append(c);
+    }
+  })();
+  </script>
+</body>
+</html>

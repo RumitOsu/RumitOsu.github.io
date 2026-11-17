@@ -20,6 +20,7 @@
 .crumb a { color: var(--accent); text-decoration: none; }
 .crumb a:hover { text-decoration: underline; text-underline-offset: 4px; }
 .cool .crumb a, .crumb.cool a { color: var(--cool); }
+.cool .sheet .label span { color: var(--cool); }
 .p-hero h1 { font: 400 clamp(2.4rem, 5vw, 4.1rem)/1.04 var(--serif); letter-spacing: -.03em; margin: 20px 0 22px; max-width: 15em; text-wrap: balance; }
 .p-hero.split h1 { font-size: clamp(2.3rem, 4.2vw, 3.5rem); }
 .standfirst { font: 400 clamp(1.1rem, 1.55vw, 1.3rem)/1.58 var(--serif); color: var(--ink-2); max-width: 35em; }
