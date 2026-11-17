@@ -232,6 +232,19 @@ html:not(.motion-off) .slip-stamp { animation: slipstamp 9s ease infinite; }
 @keyframes slipbar { 0%, 6% { transform: scaleX(0); } 34%, 100% { transform: none; } }
 @keyframes slipstamp { 0%, 38% { opacity: 0; transform: rotate(4deg) scale(1.5); } 44%, 94% { opacity: 1; transform: rotate(4deg); } 100% { opacity: 0; transform: rotate(4deg); } }
 
+/* More Sellers, Same Sales: two small lines, one rising and one that stops rising */
+.duo { display: grid; gap: 14px; margin: 26px 0 22px; }
+.duo-row { border: 1px solid var(--line-2); border-radius: 14px; padding: 15px 16px 8px; background: rgba(255, 255, 255, 0.03); }
+.duo-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; font: 400 11.5px/1.3 var(--mono); color: var(--mute); letter-spacing: .03em; }
+.duo-head b { font: 400 1.5rem/1 var(--serif); color: var(--cool-2); letter-spacing: -.02em; white-space: nowrap; }
+.duo-row.flat .duo-head b { color: var(--ink-2); }
+.duo svg { display: block; width: 100%; height: auto; margin-top: 4px; overflow: visible; }
+.duo polyline { fill: none; stroke: var(--cool); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.duo-row.flat polyline { stroke: var(--ink-2); }
+.duo line { stroke: var(--mute); stroke-width: 1; stroke-dasharray: 3 4; }
+html:not(.motion-off) .duo polyline { stroke-dasharray: 1; animation: duodraw 9s ease-in-out infinite; }
+@keyframes duodraw { 0% { stroke-dashoffset: 1; } 32%, 94% { stroke-dashoffset: 0; } 100% { stroke-dashoffset: 1; } }
+
 .all-link { display: flex; align-items: center; flex-wrap: wrap; gap: 14px 22px; margin-top: 34px; }
 .all-link p { color: var(--mute); font-size: 15px; text-shadow: 0 0 5px var(--bg); }
 .all-link p a, .card-text a { color: var(--ink-2); text-underline-offset: 4px; text-decoration-color: var(--line-2); transition: color .2s, text-decoration-color .2s; }

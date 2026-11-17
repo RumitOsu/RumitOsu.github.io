@@ -10,14 +10,14 @@
   <meta property="og:type" content="website">
   <title>Timur Kherlenbayar — data and AI work</title>
   <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="assets/fonts/type-home.css?v=9">
-  <link rel="stylesheet" href="style.css?v=9">
+  <link rel="stylesheet" href="assets/fonts/type-home.css?v=10">
+  <link rel="stylesheet" href="style.css?v=10">
   <script>
     document.documentElement.classList.add('js');
     try { var t = localStorage.getItem('tk-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
   </script>
-  <script src="backdrop.js?v=9" defer></script>
-  <script src="app.js?v=9" defer></script>
+  <script src="backdrop.js?v=10" defer></script>
+  <script src="app.js?v=10" defer></script>
 </head>
 <body>
   <canvas id="field" aria-hidden="true"></canvas>
@@ -50,31 +50,36 @@
       <div class="term" data-spot>
         <div class="term-bar">
           <span>~/timur/portfolio</span>
-          <span class="term-meta">three projects, one person</span>
+          <span class="term-meta">four projects, one person</span>
         </div>
         <div class="term-body">
           <p class="t-cmd" style="--n:12;--d:.5s"><b aria-hidden="true">&gt;</b><span>who is this?</span></p>
           <p class="t-out" style="--d:1.3s"><i aria-hidden="true">●</i><span>Timur Kherlenbayar, a data analyst who graduates from BYU in December 2026 and is looking for full-time work in data and AI.</span></p>
 
           <p class="t-cmd" style="--n:18;--d:2.3s"><b aria-hidden="true">&gt;</b><span>what has he built?</span></p>
-          <a class="t-row" style="--d:3.4s" href="projects/pick-the-winner/">
+          <a class="t-row" style="--d:3.4s" href="projects/more-sellers-same-sales/">
+            <i aria-hidden="true">●</i>
+            <span><strong>More Sellers, Same Sales</strong><em>A marketplace added 27% more sellers and sold less. A review written for its leadership team.</em></span>
+            <u aria-hidden="true">→</u>
+          </a>
+          <a class="t-row" style="--d:3.9s" href="projects/pick-the-winner/">
             <i aria-hidden="true">●</i>
             <span><strong>Pick the Winner</strong><em>One winning headline in three wasn’t really the best, and the tests were still worth running.</em></span>
             <u aria-hidden="true">→</u>
           </a>
-          <a class="t-row" style="--d:3.9s" href="projects/anatomy-of-a-dzud/">
+          <a class="t-row" style="--d:4.4s" href="projects/anatomy-of-a-dzud/">
             <i aria-hidden="true">●</i>
             <span><strong>Anatomy of a Dzud</strong><em>Three weather conditions take the risk of a mass livestock die-off from 2% to 36%.</em></span>
             <u aria-hidden="true">→</u>
           </a>
-          <a class="t-row" style="--d:4.4s" href="projects/who-gets-the-call/">
+          <a class="t-row" style="--d:4.9s" href="projects/who-gets-the-call/">
             <i aria-hidden="true">●</i>
             <span><strong>Who Gets the Call?</strong><em>A nurse has time for 20 calls. The model’s list reaches 43% of the patients who come back.</em></span>
             <u aria-hidden="true">→</u>
           </a>
 
 
-          <p class="t-cmd t-idle" style="--d:5.3s"><b aria-hidden="true">&gt;</b><span class="caret" aria-hidden="true"></span></p>
+          <p class="t-cmd t-idle" style="--d:5.8s"><b aria-hidden="true">&gt;</b><span class="caret" aria-hidden="true"></span></p>
         </div>
         <div class="term-status"><span><span class="pulse ok" aria-hidden="true"></span>open to full-time roles</span><span>open to relocation</span></div>
       </div>
@@ -84,13 +89,46 @@
     <section class="section wrap" id="work" aria-labelledby="work-title">
       <header class="section-head reveal">
         <p class="label"><span>01</span>Featured projects</p>
-        <h2 id="work-title">Three projects I’d show you first.</h2>
-        <p>Each one started as a question I couldn’t answer by reading about it, and each one ends as a page you can play with. All three try to be as clear about what didn’t work as about what did.</p>
+        <h2 id="work-title">Four projects I’d show you first.</h2>
+        <p>Each one started as a question I couldn’t answer by reading about it, and each one ends as a page you can open and use. All four try to be as clear about what didn’t work as about what did.</p>
       </header>
+
+      <article class="project flip reveal" data-spot>
+        <div class="project-copy">
+          <p class="kicker cool"><span>01</span>Business review · E-commerce</p>
+          <h3><a href="projects/more-sellers-same-sales/">More Sellers, Same Sales</a></h3>
+          <p>Olist is a Brazilian company that lets small merchants sell on the country’s large shopping sites, and it once published the records of about 100,000 of its orders. I used them to write the review I would want to hand to a leadership team, which says what happened to sales, why it happened, and what to do before the next Black Friday.</p>
+          <p>The page opens with an executive summary that takes two minutes to read, and the evidence for each point follows it. The main finding is that the company kept adding sellers while its sales stood still, because the sellers it already had were each selling less. It closes with four recommendations, and each one comes with a first step, what it is worth and how sure I am.</p>
+          <dl class="stats">
+            <div><dt>+27%</dt><dd>more active sellers by the summer of 2018 than at the start of the year, while sales fell by 6%</dd></div>
+            <div><dt>1 in 7</dt><dd>orders ended in a one- or two-star review, and four kinds of order produce most of them</dd></div>
+            <div><dt>99,092</dt><dd>real orders from the company’s public data sit behind it</dd></div>
+          </dl>
+          <ul class="tags" aria-label="Built with"><li>SQL and DuckDB</li><li>Python</li><li>Business analysis</li><li>Charts built by hand in JavaScript</li></ul>
+          <div class="actions">
+            <a class="btn primary cool" href="projects/more-sellers-same-sales/">Read the review <span aria-hidden="true">→</span></a>
+            <a class="btn ghost" href="https://github.com/RumitOsu/more-sellers-same-sales" target="_blank" rel="noopener noreferrer">Code on GitHub <span aria-hidden="true">↗</span></a>
+          </div>
+        </div>
+        <a class="project-vis vis-review" href="projects/more-sellers-same-sales/" tabindex="-1" aria-hidden="true">
+          <div class="vis-top"><span>one marketplace</span><span>jan 2017 to aug 2018</span></div>
+          <div class="duo">
+            <div class="duo-row">
+              <div class="duo-head"><span>sellers with a sale that month</span><b>1,266</b></div>
+              <svg viewBox="0 0 320 104" role="presentation"><polyline pathLength="1" points="8.0,81.7 24.0,69.2 40.0,65.1 56.0,64.3 72.0,59.6 88.0,62.3 104.0,58.0 120.0,51.8 136.0,50.2 152.0,47.2 168.0,35.4 184.0,41.8 200.0,34.9 216.0,37.1 232.0,33.4 248.0,25.6 264.0,26.2 280.0,22.3 296.0,17.5 312.0,16.1"/></svg>
+            </div>
+            <div class="duo-row flat">
+              <div class="duo-head"><span>sales that month</span><b>R$849K</b></div>
+              <svg viewBox="0 0 320 104" role="presentation"><line x1="168" y1="21.2" x2="312" y2="21.2"/><polyline pathLength="1" points="8.0,87.0 24.0,77.7 40.0,68.5 56.0,69.6 72.0,58.5 88.0,64.0 104.0,59.3 120.0,53.6 136.0,49.7 152.0,46.8 168.0,21.2 184.0,40.7 200.0,25.5 216.0,33.5 232.0,22.9 248.0,21.9 264.0,22.0 280.0,31.6 296.0,30.5 312.0,32.7"/></svg>
+            </div>
+          </div>
+          <p class="vis-caption">The sellers kept coming.<br>Sales have not passed their November peak.</p>
+        </a>
+      </article>
 
       <article class="project reveal" data-spot>
         <div class="project-copy">
-          <p class="kicker"><span>01</span>Experiments · Media</p>
+          <p class="kicker"><span>02</span>Experiments · Media</p>
           <h3><a href="projects/pick-the-winner/">Pick the Winner</a></h3>
           <p>For two years the website Upworthy chose its headlines by trying them out on live visitors, and it later released the records of 32,487 of those tests. I used them to ask how often the winner of a test was really the best headline, and whether a person, a model or an AI could have picked it without running the test.</p>
           <p>The page opens with a game in which you try to pick real winners yourself. After that it measures how much of a test result is luck, and it ends on the part that surprised me, which is that the tests were wrong about the best headline a third of the time and were still well worth running.</p>
@@ -126,7 +164,7 @@
 
       <article class="project flip reveal" data-spot>
         <div class="project-copy">
-          <p class="kicker cool"><span>02</span>Data story · Mongolia</p>
+          <p class="kicker cool"><span>03</span>Data story · Mongolia</p>
           <h3><a href="projects/anatomy-of-a-dzud/">Anatomy of a Dzud</a></h3>
           <p>A dzud is a Mongolian winter harsh enough to kill livestock by the million. I wanted to know why some winters take a quarter of the country’s animals while most take almost none, and how early anyone could tell which kind of winter was coming.</p>
           <p>Thirty years of records gave a simple answer. A dry summer, long snow cover and a cold winter are each close to harmless alone, and they are dangerous together. The story walks you through it with a map you can explore, and most of the warning is already there by New Year, months before the animals die.</p>
@@ -156,7 +194,7 @@
 
       <article class="project reveal" data-spot>
         <div class="project-copy">
-          <p class="kicker"><span>03</span>Applied machine learning · Healthcare</p>
+          <p class="kicker"><span>04</span>Applied machine learning · Healthcare</p>
           <h3><a href="projects/who-gets-the-call/">Who Gets the Call?</a></h3>
           <p>One hundred patients leave the hospital today, and about ten of them will be back within a month. The nurse who follows up has time for twenty calls. I built a tool that picks those twenty, gives a reason for every name on the list, and turns a discharge note into a short guide for the call.</p>
           <p>The page lets you try the nurse’s job yourself before it shows you what the model would have done. It also shows the part I found most interesting, which is that an experienced nurse’s rule of thumb gets almost as far as the model does.</p>
