@@ -273,6 +273,29 @@ a.card:hover { transform: translateY(-3px); border-color: var(--line-2); }
 a.card:hover .card-go span { transform: translateX(4px); }
 .card.ghost { border-style: dashed; background: color-mix(in srgb, var(--panel) 55%, transparent); justify-content: center; min-height: 220px; }
 .card.ghost .card-title { margin-top: 18px; font-size: 1.3rem; color: var(--ink-2); }
+/* A smaller card for work that has no page of its own: no headline number, and it may link out. */
+.card.compact { padding: 20px 20px 22px; }
+.card.compact .card-title { font-size: 1.28rem; margin-top: 16px; }
+.card.compact .card-tags { margin-bottom: 18px; }
+
+/* The projects page is split into groups. Each group is a <section class="group"> with its own
+   heading and card grid; app.js adds the filter chips once there are two groups or more. */
+.groups { padding-bottom: clamp(70px, 10vw, 130px); }
+.group + .group { margin-top: clamp(64px, 8vw, 104px); }
+.groups .cards { padding-bottom: 0; }
+.group-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: end; gap: 8px 24px; margin-bottom: 26px; padding-bottom: 18px; border-bottom: 1px solid var(--line); text-shadow: 0 0 5px var(--bg); }
+.group-head h2 { font: 400 clamp(1.5rem, 2.4vw, 1.95rem)/1.2 var(--serif); letter-spacing: -.015em; margin-top: 12px; }
+.group-head > p:not(.label):not(.group-count) { grid-column: 1 / -1; color: var(--ink-2); max-width: 44em; font-size: 15.5px; }
+.group-count { font: 400 12px/1 var(--mono); color: var(--mute); white-space: nowrap; }
+.filters { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 clamp(34px, 5vw, 52px); }
+.filters[hidden] { display: none; }
+.filters button { display: inline-flex; align-items: center; gap: 8px; font: 400 12.5px/1 var(--mono); color: var(--ink-2); border: 1px solid var(--line-2); border-radius: 999px; padding: 10px 14px; background: color-mix(in srgb, var(--bg) 80%, transparent); transition: color .2s, border-color .2s, background .2s; }
+.filters button i { font-style: normal; color: var(--mute); }
+.filters button:hover { color: var(--ink); border-color: var(--ink-2); }
+.filters button[aria-pressed="true"] { color: var(--ink); border-color: color-mix(in srgb, var(--accent) 60%, transparent); background: color-mix(in srgb, var(--accent) 16%, var(--bg)); }
+.filters button[aria-pressed="true"] i { color: var(--accent-2); }
+.group[hidden] { display: none; }
+.later { margin-top: clamp(54px, 7vw, 90px); }
 
 /* ---------- experience ---------- */
 .timeline { border-top: 1px solid var(--line); }

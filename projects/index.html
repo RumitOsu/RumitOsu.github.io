@@ -8,13 +8,13 @@
   <title>Projects — Timur Kherlenbayar</title>
   <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="../assets/fonts/type-home.css?v=10">
-  <link rel="stylesheet" href="../style.css?v=10">
+  <link rel="stylesheet" href="../style.css?v=11">
   <script>
     document.documentElement.classList.add('js');
     try { var t = localStorage.getItem('tk-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
   </script>
   <script src="../backdrop.js?v=10" defer></script>
-  <script src="../app.js?v=10" defer></script>
+  <script src="../app.js?v=11" defer></script>
 </head>
 <body>
   <canvas id="field" aria-hidden="true"></canvas>
@@ -35,62 +35,85 @@
     <section class="page-head wrap" aria-labelledby="page-title">
       <p class="label"><span>~/projects</span>All projects</p>
       <h1 id="page-title">Everything I’ve built so far.</h1>
-      <p>Each card opens a working page that you can try for yourself. I add to this list whenever I finish something new, and the newest work is at the top.</p>
+      <p>Each card says in a couple of lines what the project asked and what came out of it, so you can get the gist of everything here without opening a single page. The four at the top are the ones I’d show you first.</p>
     </section>
 
-    <!-- To add a project, copy one <li> block, change the text and the link, and put it first in the list.
-         Add class="card cool" for the blue accent. -->
-    <section class="wrap" id="list" aria-label="Projects">
-      <ul class="cards">
-        <li>
-          <a class="card cool reveal" data-spot href="more-sellers-same-sales/">
-            <span class="card-top"><span>Business review · E-commerce</span><span>2026</span></span>
-            <span class="card-stat"><b>+27%</b><span>more sellers at a Brazilian marketplace by the summer of 2018, while its sales fell by 6%</span></span>
-            <span class="card-title">More Sellers, Same Sales</span>
-            <span class="card-text">A business review written for a leadership team and built from about 100,000 real orders. It has a two-minute executive summary, the evidence behind it, and four recommendations.</span>
-            <span class="card-tags"><span>SQL</span><span>Python</span><span>Business analysis</span><span>Data visualization</span></span>
-            <span class="card-go">Read the review <span aria-hidden="true">→</span></span>
-          </a>
-        </li>
-        <li>
-          <a class="card reveal" data-spot href="pick-the-winner/">
-            <span class="card-top"><span>Experiments · Media</span><span>2026</span></span>
-            <span class="card-stat"><b>67%</b><span>of the headlines that won a test at Upworthy were truly the best one in that test</span></span>
-            <span class="card-title">Pick the Winner</span>
-            <span class="card-text">A game and an analysis built on 32,487 real headline tests. It measures how much of a test result is luck, and whether a model or an AI could have picked the winner without one.</span>
-            <span class="card-tags"><span>Python</span><span>Experiment statistics</span><span>Simulation</span><span>Local language model</span></span>
-            <span class="card-go">Play the game <span aria-hidden="true">→</span></span>
-          </a>
-        </li>
-        <li>
-          <a class="card cool reveal" data-spot href="anatomy-of-a-dzud/">
-            <span class="card-top"><span>Data story · Mongolia</span><span>2026</span></span>
-            <span class="card-stat"><b>2% → 36%</b><span>is how far the risk of a mass livestock die-off rises when three weather conditions meet</span></span>
-            <span class="card-title">Anatomy of a Dzud</span>
-            <span class="card-text">A scroll-driven story about Mongolia’s killing winters, built from thirty years of livestock and climate records, with a map you can explore.</span>
-            <span class="card-tags"><span>Python</span><span>LightGBM</span><span>Climate data</span></span>
-            <span class="card-go">Step into the story <span aria-hidden="true">→</span></span>
-          </a>
-        </li>
-        <li>
-          <a class="card reveal" data-spot href="who-gets-the-call/">
-            <span class="card-top"><span>Applied machine learning · Healthcare</span><span>2026</span></span>
-            <span class="card-stat"><b>43%</b><span>of the patients who came back to hospital were on the model’s list of twenty calls</span></span>
-            <span class="card-title">Who Gets the Call?</span>
-            <span class="card-text">A tool that chooses which twenty of a hundred discharged patients a nurse should phone, explains every choice, and writes a short guide for the call.</span>
-            <span class="card-tags"><span>Python</span><span>SQL</span><span>XGBoost</span><span>FastAPI</span></span>
-            <span class="card-go">Open the project <span aria-hidden="true">→</span></span>
-          </a>
-        </li>
+    <!-- How this page is put together
+         Each <section class="group"> is one kind of work, with its own heading and card grid. To add a
+         project, copy one <li> block inside the right group, change the text and the link, and put it
+         first in that group's list. Add "cool" to the card's class for the blue accent.
+         For work that has no page of its own, use <div class="card compact"> (no headline number),
+         or <a class="card compact"> if it links out to a repository or a PDF.
+         To add a group, copy a whole <section class="group">, give it a new id and data-name, and
+         update its number and count. The filter chips appear by themselves once there are two groups.
+         Planned groups, in this order: featured, ai-apps (AI apps), product (Product and strategy),
+         engineering (Engineering and coursework). -->
+    <div class="wrap groups" id="list">
+      <div class="filters" role="group" aria-label="Show one group of projects" hidden></div>
+
+      <section class="group" id="featured" data-name="Featured" aria-labelledby="g-featured">
+        <header class="group-head">
+          <div>
+            <p class="label"><span>01</span>Featured</p>
+            <h2 id="g-featured">The four I’d show you first</h2>
+          </div>
+          <p class="group-count">4 projects</p>
+          <p>Each one started as a question I couldn’t answer by reading about it, and each one ends as a page you can open and use.</p>
+        </header>
+        <ul class="cards">
+          <li>
+            <a class="card cool reveal" data-spot href="more-sellers-same-sales/">
+              <span class="card-top"><span>Business review · E-commerce</span><span>2026</span></span>
+              <span class="card-stat"><b>+27%</b><span>more sellers at a Brazilian marketplace by the summer of 2018, while its sales fell by 6%</span></span>
+              <span class="card-title">More Sellers, Same Sales</span>
+              <span class="card-text">A business review written for a leadership team and built from about 100,000 real orders. It has a two-minute executive summary, the evidence behind it, and four recommendations.</span>
+              <span class="card-tags"><span>SQL</span><span>Python</span><span>Business analysis</span><span>Data visualization</span></span>
+              <span class="card-go">Read the review <span aria-hidden="true">→</span></span>
+            </a>
+          </li>
+          <li>
+            <a class="card reveal" data-spot href="pick-the-winner/">
+              <span class="card-top"><span>Experiments · Media</span><span>2026</span></span>
+              <span class="card-stat"><b>67%</b><span>of the headlines that won a test at Upworthy were truly the best one in that test</span></span>
+              <span class="card-title">Pick the Winner</span>
+              <span class="card-text">A game and an analysis built on 32,487 real headline tests. It measures how much of a test result is luck, and whether a model or an AI could have picked the winner without one.</span>
+              <span class="card-tags"><span>Python</span><span>Experiment statistics</span><span>Simulation</span><span>Local language model</span></span>
+              <span class="card-go">Play the game <span aria-hidden="true">→</span></span>
+            </a>
+          </li>
+          <li>
+            <a class="card cool reveal" data-spot href="anatomy-of-a-dzud/">
+              <span class="card-top"><span>Data story · Mongolia</span><span>2026</span></span>
+              <span class="card-stat"><b>2% → 36%</b><span>is how far the risk of a mass livestock die-off rises when three weather conditions meet</span></span>
+              <span class="card-title">Anatomy of a Dzud</span>
+              <span class="card-text">A scroll-driven story about Mongolia’s killing winters, built from thirty years of livestock and climate records, with a map you can explore.</span>
+              <span class="card-tags"><span>Python</span><span>LightGBM</span><span>Climate data</span></span>
+              <span class="card-go">Step into the story <span aria-hidden="true">→</span></span>
+            </a>
+          </li>
+          <li>
+            <a class="card reveal" data-spot href="who-gets-the-call/">
+              <span class="card-top"><span>Applied machine learning · Healthcare</span><span>2026</span></span>
+              <span class="card-stat"><b>43%</b><span>of the patients who came back to hospital were on the model’s list of twenty calls</span></span>
+              <span class="card-title">Who Gets the Call?</span>
+              <span class="card-text">A tool that chooses which twenty of a hundred discharged patients a nurse should phone, explains every choice, and writes a short guide for the call.</span>
+              <span class="card-tags"><span>Python</span><span>SQL</span><span>XGBoost</span><span>FastAPI</span></span>
+              <span class="card-go">Open the project <span aria-hidden="true">→</span></span>
+            </a>
+          </li>
+        </ul>
+      </section>
+
+      <ul class="cards later">
         <li>
           <div class="card ghost reveal">
             <span class="card-top"><span>Next</span><span>in progress</span></span>
-            <span class="card-title">The next project is on its way.</span>
-            <span class="card-text">Until it is ready to show, the work I haven’t finished yet is on <a href="https://github.com/RumitOsu" target="_blank" rel="noopener noreferrer">my GitHub <span aria-hidden="true">↗</span></a>.</span>
+            <span class="card-title">More projects are on their way.</span>
+            <span class="card-text">I’m adding more of my work to this page. Until it’s ready to show, the work I haven’t finished yet is on <a href="https://github.com/RumitOsu" target="_blank" rel="noopener noreferrer">my GitHub <span aria-hidden="true">↗</span></a>.</span>
           </div>
         </li>
       </ul>
-    </section>
+    </div>
   </main>
 
   <footer class="footer wrap">

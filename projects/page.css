@@ -1,0 +1,189 @@
+/* Shared look for project pages that don't have a design of their own.
+   It loads after ../../style.css, so it uses the same three backdrops, colours, fonts, nav, buttons
+   and footer as the home page. The page opens on the backdrop, and the story itself sits on a calm
+   "sheet" so long reading never fights the moving background.
+
+   Page anatomy, top to bottom (see any page that uses it):
+     .p-hero        where it sits in the site, the kicker, the title, a standfirst, facts and buttons
+     .p-hero.split  the same, with a visual on the right (.p-vis)
+     .sheet         the story: .short (the short version), then .p-section blocks, then .notes
+     .p-next        links onward, to other projects and back to the list
+   Pieces that can go inside a section: .fig (one image or chart), .gallery (a row you can swipe),
+   .phones (phone screenshots in frames), .steps (a numbered sequence), .callout (the one line to
+   remember), .quote (someone else's words, such as a professor's feedback), .duo (two columns),
+   .stats (headline numbers, from style.css), and .todo (a placeholder that must not ship). */
+
+/* ---------- hero ---------- */
+.p-hero { padding-top: clamp(116px, 14vw, 156px); padding-bottom: clamp(40px, 6vw, 72px); text-shadow: 0 0 6px var(--bg); }
+.p-hero.split { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); gap: clamp(30px, 5vw, 70px); align-items: center; }
+.crumb { font: 400 12.5px/1.4 var(--mono); letter-spacing: .04em; color: var(--mute); display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; }
+.crumb a { color: var(--accent); text-decoration: none; }
+.crumb a:hover { text-decoration: underline; text-underline-offset: 4px; }
+.cool .crumb a, .crumb.cool a { color: var(--cool); }
+.p-hero h1 { font: 400 clamp(2.4rem, 5vw, 4.1rem)/1.04 var(--serif); letter-spacing: -.03em; margin: 20px 0 22px; max-width: 15em; text-wrap: balance; }
+.p-hero.split h1 { font-size: clamp(2.3rem, 4.2vw, 3.5rem); }
+.standfirst { font: 400 clamp(1.1rem, 1.55vw, 1.3rem)/1.58 var(--serif); color: var(--ink-2); max-width: 35em; }
+.p-facts { display: flex; flex-wrap: wrap; gap: 14px 34px; margin-top: 30px; }
+.p-facts dt { font: 400 11.5px/1.4 var(--mono); letter-spacing: .05em; color: var(--mute); text-transform: lowercase; }
+.p-facts dd { font-size: 15px; color: var(--ink); margin-top: 4px; }
+.p-hero .actions { margin-top: 32px; }
+
+/* A visual box in the style of the home page's project panels. */
+.p-vis { position: relative; display: flex; flex-direction: column; border: 1px solid var(--line-2); border-radius: 20px; background: linear-gradient(180deg, rgba(0, 0, 0, .38), rgba(0, 0, 0, .22)), var(--panel); padding: 18px 20px 20px; overflow: hidden; text-shadow: none; box-shadow: 0 30px 90px rgba(0, 0, 0, .45); }
+.p-vis .vis-top { margin-bottom: 14px; }
+
+/* ---------- the sheet ---------- */
+/* The text column is about 44em wide. Anything marked .wide takes the whole sheet, and on wide
+   screens the margins stay empty so the text keeps a calm measure. */
+.sheet {
+  --text: 700px;
+  display: grid; grid-template-columns: [full-start] minmax(0, 1fr) [text-start] minmax(0, var(--text)) [text-end] minmax(0, 1fr) [full-end];
+  column-gap: 0; align-items: start;
+  border: 1px solid var(--line); border-radius: 28px;
+  background: color-mix(in srgb, var(--bg) 95%, transparent);
+  box-shadow: 0 40px 120px rgba(0, 0, 0, .35);
+  padding: clamp(28px, 5vw, 72px) clamp(20px, 4vw, 56px) clamp(36px, 5vw, 72px);
+  margin-bottom: clamp(56px, 8vw, 96px);
+}
+.sheet > * { grid-column: text; }
+.sheet > .wide { grid-column: full; }
+
+/* a thin line under the nav that fills as you read */
+.progress { position: fixed; left: 0; top: 0; z-index: 21; height: 2px; width: 100%; transform-origin: 0 50%; transform: scaleX(var(--read, 0)); background: var(--accent); box-shadow: 0 0 10px var(--accent); pointer-events: none; }
+.cool .progress, .progress.cool { background: var(--cool); box-shadow: 0 0 10px var(--cool); }
+
+/* ---------- the short version ---------- */
+.short { position: relative; border: 1px solid var(--line-2); border-radius: 20px; background: var(--panel); padding: clamp(22px, 3.4vw, 36px); margin-bottom: clamp(48px, 7vw, 84px); overflow: hidden; }
+.short::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: 3px; background: linear-gradient(90deg, var(--accent), color-mix(in srgb, var(--accent) 0%, transparent)); }
+.cool .short::before { background: linear-gradient(90deg, var(--cool), color-mix(in srgb, var(--cool) 0%, transparent)); }
+.short-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 22px; }
+.short-head h2 { font: 400 1.5rem/1.2 var(--serif); letter-spacing: -.012em; }
+.short-head span { font: 400 12px/1 var(--mono); color: var(--mute); }
+.short dl:not(.stats) { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px 34px; }
+.short dl:not(.stats) dt { font: 400 11.5px/1.4 var(--mono); letter-spacing: .05em; color: var(--accent-2); text-transform: lowercase; }
+.cool .short dl:not(.stats) dt { color: var(--cool-2); }
+.short dl:not(.stats) dd { margin-top: 6px; font-size: 15.5px; line-height: 1.62; color: var(--ink); }
+.short .stats { margin: 28px 0 0; }
+.cool .stats dt { color: var(--cool-2); }
+.short .tags { margin: 24px 0 0; }
+
+/* ---------- sections and prose ---------- */
+.p-section { padding-top: 8px; margin-bottom: clamp(52px, 7vw, 84px); }
+.p-section:last-of-type { margin-bottom: clamp(36px, 5vw, 56px); }
+.p-section h2 { font: 400 clamp(1.7rem, 3vw, 2.4rem)/1.14 var(--serif); letter-spacing: -.02em; margin: 14px 0 22px; text-wrap: balance; scroll-margin-top: 96px; }
+.p-section h3 { font: 600 1.18rem/1.35 var(--serif); letter-spacing: -.005em; margin: 34px 0 10px; color: var(--ink); }
+.p-section p, .p-section li { color: var(--ink-2); font-size: 1.05rem; line-height: 1.78; }
+.p-section p + p { margin-top: 1.05em; }
+.p-section p strong, .p-section li strong { color: var(--ink); font-weight: 600; }
+.p-section a:not(.btn) { color: var(--ink); text-underline-offset: 4px; text-decoration-color: color-mix(in srgb, var(--accent) 60%, transparent); }
+.p-section a:not(.btn):hover { color: var(--accent-2); }
+.p-section .list { margin: 1em 0; display: grid; gap: 10px; }
+.p-section .list li { position: relative; padding-left: 22px; }
+.p-section .list li::before { content: ""; position: absolute; left: 4px; top: .78em; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+.cool .p-section .list li::before { background: var(--cool); }
+.p-section code, .notes code { font: 400 .88em/1 var(--mono); color: var(--ink); background: rgba(255, 255, 255, .06); border: 1px solid var(--line); border-radius: 5px; padding: .14em .38em; }
+
+/* the one line to remember */
+.callout { margin: 30px 0; padding: 4px 0 4px 22px; border-left: 2px solid var(--accent); font: 400 clamp(1.2rem, 2vw, 1.45rem)/1.5 var(--serif); color: var(--ink); letter-spacing: -.005em; }
+.cool .callout { border-left-color: var(--cool); }
+
+/* someone else's words */
+.quote { position: relative; margin: 34px 0; padding: 26px 28px 24px 30px; border: 1px solid var(--line); border-radius: 16px; background: rgba(255, 255, 255, .025); }
+.quote::before { content: "“"; position: absolute; left: 18px; top: -18px; font: 400 64px/1 var(--serif); color: var(--accent); }
+.cool .quote::before { color: var(--cool); }
+.quote p { font: italic 400 1.14rem/1.6 var(--serif) !important; color: var(--ink) !important; }
+.quote footer { margin-top: 14px; font: 400 12px/1.4 var(--mono); color: var(--mute); }
+
+/* one image or chart */
+.fig { margin: 34px 0; }
+.fig > img, .fig > svg, .fig > .frame { display: block; width: 100%; height: auto; border-radius: 14px; }
+.fig > img, .fig > .frame { border: 1px solid var(--line-2); background: var(--panel-solid); }
+.fig.plain > img { border: 0; background: none; }
+.fig figcaption { margin-top: 12px; font: 400 12.5px/1.55 var(--mono); color: var(--mute); max-width: 60em; }
+.fig figcaption b { color: var(--ink-2); font-weight: 400; }
+.zoomable { cursor: zoom-in; }
+
+/* a row you can swipe */
+.gallery { margin: 34px 0; }
+.gallery-track { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(260px, 46%); gap: 16px; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 14px; scrollbar-width: thin; scrollbar-color: var(--line-2) transparent; align-items: start; }
+.gallery-track > figure { scroll-snap-align: start; margin: 0; }
+.gallery-track img { display: block; width: 100%; height: auto; border-radius: 12px; border: 1px solid var(--line-2); background: var(--panel-solid); }
+.gallery-track figcaption { margin-top: 10px; font: 400 12px/1.5 var(--mono); color: var(--mute); }
+.gallery-nav { display: flex; justify-content: flex-end; gap: 8px; margin-top: 4px; }
+.gallery-nav button { width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--line-2); color: var(--ink-2); font: 400 15px/1 var(--mono); transition: color .2s, border-color .2s; }
+.gallery-nav button:hover { color: var(--ink); border-color: var(--ink-2); }
+.gallery-nav button:disabled { opacity: .35; cursor: default; }
+
+/* phone screenshots in frames */
+.phones { display: flex; justify-content: center; align-items: flex-end; gap: clamp(12px, 2.4vw, 28px); margin: 40px 0; }
+.phone { margin: 0; flex: 0 1 230px; min-width: 0; }
+.phone .screen { position: relative; border-radius: 30px; padding: 7px; background: linear-gradient(160deg, #2a2a2e, #0c0c0e); box-shadow: 0 0 0 1px rgba(255, 255, 255, .12), 0 26px 60px rgba(0, 0, 0, .5); }
+.phone .screen img { display: block; width: 100%; height: auto; border-radius: 24px; }
+.phone figcaption { margin-top: 14px; text-align: center; font: 400 12px/1.45 var(--mono); color: var(--mute); }
+.phone.lift { transform: translateY(-18px); }
+
+/* a numbered sequence */
+.steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin: 32px 0; counter-reset: step; }
+.steps > li { counter-increment: step; border: 1px solid var(--line); border-radius: 14px; padding: 18px 18px 20px; background: rgba(255, 255, 255, .02); }
+.steps > li::before { content: counter(step, decimal-leading-zero); display: block; font: 400 12px/1 var(--mono); color: var(--accent); margin-bottom: 12px; }
+.cool .steps > li::before { color: var(--cool); }
+.steps h3 { margin: 0 0 6px !important; font-size: 1.06rem !important; }
+.steps p { font-size: 14.5px !important; line-height: 1.6 !important; }
+
+/* two columns, for side-by-side comparisons */
+.duo-cols { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin: 32px 0; }
+.duo-cols > div { border: 1px solid var(--line); border-radius: 14px; padding: 20px; background: rgba(255, 255, 255, .02); }
+.duo-cols h3 { margin-top: 0 !important; }
+
+/* a placeholder that has to be filled in before the page goes live; page.js counts them */
+.todo { display: inline; font: 400 .86em/1.5 var(--mono); color: var(--accent-2); background: color-mix(in srgb, var(--accent) 12%, transparent); border: 1px dashed var(--accent); border-radius: 6px; padding: .1em .45em; }
+div.todo, p.todo { display: block; padding: 14px 16px; margin: 20px 0; }
+
+/* ---------- method notes ---------- */
+.notes { border-top: 1px solid var(--line); padding-top: 10px; }
+.notes summary { list-style: none; cursor: pointer; display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 16px; padding: 18px 50px 18px 0; position: relative; }
+.notes summary::-webkit-details-marker { display: none; }
+.notes summary h2 { font: 400 1.5rem/1.2 var(--serif); letter-spacing: -.012em; }
+.notes summary span { font: 400 12px/1 var(--mono); color: var(--mute); }
+.notes summary::after { content: "+"; position: absolute; right: 0; top: 50%; margin-top: -17px; width: 34px; height: 34px; display: grid; place-items: center; border-radius: 50%; border: 1px solid var(--line-2); font: 400 18px/1 var(--mono); color: var(--ink-2); transition: transform .25s, border-color .2s; }
+.notes[open] summary::after { transform: rotate(45deg); }
+.notes summary:hover::after { border-color: var(--ink-2); }
+.notes-body { padding: 6px 0 10px; }
+.notes dl > div { display: grid; grid-template-columns: 180px minmax(0, 1fr); gap: 18px; padding: 16px 0; border-top: 1px solid var(--line); }
+.notes dt { font: 400 12px/1.7 var(--mono); color: var(--mute); }
+.notes dd { color: var(--ink-2); font-size: 15.5px; line-height: 1.68; }
+.notes dd + dd { margin-top: .6em; }
+
+/* ---------- onward ---------- */
+.p-next { padding-bottom: clamp(70px, 10vw, 120px); }
+.p-next .label { margin-bottom: 22px; text-shadow: 0 0 5px var(--bg); }
+.p-next .cards { padding-bottom: 0; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (max-width: 680px) { .p-next .cards { grid-template-columns: 1fr; } }
+
+/* ---------- picture viewer ---------- */
+.lightbox { max-width: min(96vw, 1500px); max-height: 94vh; padding: 0; border: 1px solid var(--line-2); border-radius: 14px; background: var(--panel-solid); color: var(--ink); box-shadow: 0 30px 120px rgba(0, 0, 0, .7); }
+.lightbox::backdrop { background: rgba(0, 0, 0, .78); }
+.lightbox img { display: block; max-width: 100%; max-height: calc(94vh - 52px); width: auto; height: auto; margin: 0 auto; }
+.lightbox p { display: flex; justify-content: space-between; gap: 16px; padding: 12px 16px; font: 400 12px/1.4 var(--mono); color: var(--mute); border-top: 1px solid var(--line); }
+.lightbox button { font: inherit; color: var(--ink-2); }
+.lightbox button:hover { color: var(--ink); }
+
+/* ---------- smaller screens ---------- */
+@media (max-width: 980px) {
+  .p-hero.split { grid-template-columns: 1fr; }
+  .gallery-track { grid-auto-columns: minmax(240px, 78%); }
+}
+@media (max-width: 680px) {
+  .sheet { border-radius: 20px; padding: 26px 18px 34px; margin-left: -4px; margin-right: -4px; }
+  .short dl:not(.stats), .duo-cols { grid-template-columns: 1fr; }
+  .notes dl > div { grid-template-columns: 1fr; gap: 4px; }
+  .p-section p, .p-section li { font-size: 1rem; }
+  .phones { flex-wrap: wrap; }
+  .phone { flex-basis: calc(50% - 8px); }
+  .phone.lift { transform: none; }
+  .quote { padding: 24px 20px 20px 22px; }
+}
+@media print {
+  #field, .bd-stencil, .bd-haze, .nav, .themes, .footer, .progress { display: none !important; }
+  .sheet { box-shadow: none; }
+}

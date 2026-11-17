@@ -184,5 +184,34 @@ if (copyButton) copyButton.addEventListener('click', async () => {
   }
 });
 
+/* ---------- filter chips on the projects page ---------- */
+// One chip per group, plus "All". They only appear once the page has two groups or more, and
+// without JavaScript every group simply stays visible.
+const filters = $('.filters');
+const groups = $$('.group[data-name]');
+if (filters && groups.length > 1) {
+  const chip = (name, count, value) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.dataset.show = value;
+    b.setAttribute('aria-pressed', String(value === 'all'));
+    b.append(name + ' ', Object.assign(document.createElement('i'), { textContent: count }));
+    return b;
+  };
+  const total = groups.reduce((n, g) => n + $$('.cards > li', g).length, 0);
+  filters.append(chip('All', total, 'all'), ...groups.map((g) => chip(g.dataset.name, $$('.cards > li', g).length, g.id)));
+  filters.hidden = false;
+  filters.addEventListener('click', (e) => {
+    const b = e.target.closest('button');
+    if (!b) return;
+    for (const c of $$('button', filters)) c.setAttribute('aria-pressed', String(c === b));
+    for (const g of groups) {
+      g.hidden = b.dataset.show !== 'all' && g.id !== b.dataset.show;
+      // Cards in a group that was hidden on arrival never got their reveal, so show them now.
+      if (!g.hidden) $$('.reveal', g).forEach((el) => el.classList.add('in'));
+    }
+  });
+}
+
 applyTheme(theme);
 syncMotion();
