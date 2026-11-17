@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="pond">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#05201f">
+  <meta name="description" content="Ranking five features for a book lovers' platform by first asking what the first release has to learn. One Must, an empty Should on purpose, and no invented scores.">
+  <meta property="og:title" content="Book lovers: what the first release has to learn — Timur Kherlenbayar">
+  <meta property="og:description" content="Five features, one question, and a Should shelf left empty on purpose. A prioritization the professor called one of the best he had seen in the class.">
+  <meta property="og:type" content="article">
+  <title>Book lovers: what the first release has to learn — Timur Kherlenbayar</title>
+  <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../../assets/fonts/type-home.css?v=10">
+  <link rel="stylesheet" href="../../style.css?v=12">
+  <link rel="stylesheet" href="../page.css?v=3">
+  <script>
+    document.documentElement.classList.add('js');
+    try { var t = localStorage.getItem('tk-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+  </script>
+  <script src="../../backdrop.js?v=10" defer></script>
+  <script src="../../app.js?v=12" defer></script>
+  <script src="../page.js?v=2" defer></script>
+  <style>
+    /* ---------- Book lovers: visuals made for this page ---------- */
+
+    /* the bookshelf */
+    .shelf { display: grid; grid-template-columns: 1fr 1fr 1.25fr 1.35fr; gap: 0; margin: 10px 0 0; border-bottom: 6px solid color-mix(in srgb, var(--accent) 45%, var(--line-2)); border-radius: 0 0 4px 4px; }
+    .bay { position: relative; display: flex; align-items: flex-end; justify-content: center; gap: 6px; min-height: 230px; padding: 10px 8px 0; border-left: 1px dashed var(--line); }
+    .bay:first-child { border-left: 0; }
+    .bay-name { position: absolute; left: 0; right: 0; bottom: -34px; text-align: center; font: 400 11.5px/1.3 var(--mono); color: var(--mute); }
+    .book { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: space-between; width: 46px; border-radius: 4px 4px 2px 2px; padding: 10px 4px 12px; color: var(--on-accent); background: var(--accent); cursor: pointer; transition: transform .25s, box-shadow .25s, filter .25s; box-shadow: inset -4px 0 0 rgba(0, 0, 0, .15); }
+    .book b { display: grid; place-items: center; width: 22px; height: 22px; border-radius: 50%; background: rgba(255, 255, 255, .85); color: #1d1a16; font: 600 11px/1 var(--mono); }
+    .book span { writing-mode: vertical-rl; transform: rotate(180deg); font: 600 12.5px/1.15 var(--sans); letter-spacing: .01em; }
+    .book:hover, .book[aria-pressed="true"] { transform: translateY(-10px); box-shadow: inset -4px 0 0 rgba(0, 0, 0, .15), 0 12px 24px rgba(0, 0, 0, .35); }
+    .book[aria-pressed="true"] { outline: 2px solid var(--ink); outline-offset: 3px; }
+    .book.must { height: 190px; background: #2f7d68; color: #f1f6f2; }
+    .book.could { height: 170px; background: var(--accent); }
+    .book.could.p2 { height: 158px; background: var(--accent-2); }
+    .lying { display: grid; gap: 6px; width: 100%; align-self: flex-end; }
+    .book.wont { width: 100%; height: 40px; flex-direction: row; justify-content: flex-start; gap: 10px; padding: 0 12px; background: color-mix(in srgb, var(--cool) 35%, var(--panel-solid)); color: var(--ink); box-shadow: inset 0 -4px 0 rgba(0, 0, 0, .18); }
+    .book.wont span { writing-mode: horizontal-tb; transform: none; font-size: 12px; text-align: left; }
+    .book.wont:hover, .book.wont[aria-pressed="true"] { transform: translateX(6px); }
+    .waiting { align-self: stretch; margin: 8px 6px 0; border: 1.5px dashed var(--line-2); border-bottom: 0; border-radius: 6px 6px 0 0; display: grid; place-items: center; text-align: center; font: italic 400 13px/1.35 var(--serif); color: var(--mute); padding: 8px; }
+    .shelf-note { margin-top: 46px; min-height: 5.4em; border-left: 2px solid var(--accent); padding: 2px 0 2px 14px; }
+    .shelf-note b { display: block; font: 600 1rem/1.35 var(--serif); color: var(--ink); }
+    .shelf-note span { display: block; font-size: 14px; line-height: 1.55; color: var(--ink-2); margin-top: 4px; }
+    .order-hint { display: flex; justify-content: space-between; font: 400 11px/1.4 var(--mono); color: var(--mute); margin-bottom: 4px; }
+
+    /* three steps */
+    .flow { margin: 32px 0; display: grid; gap: 10px; }
+    .fstep { display: grid; grid-template-columns: 150px minmax(0, 1fr) minmax(0, 1fr); gap: 12px; align-items: stretch; }
+    .fstep > small { font: 400 11.5px/1.5 var(--mono); color: var(--accent-2); padding-top: 14px; }
+    .fq, .fout { border: 1px solid var(--line); border-radius: 12px; padding: 13px 15px; background: rgba(255, 255, 255, .02); }
+    .fq p { font-size: 14.5px !important; line-height: 1.55 !important; color: var(--ink) !important; }
+    .fout { display: flex; align-items: center; gap: 12px; }
+    .fout .chips { display: flex; gap: 5px; flex: none; }
+    .fout .chips i { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; font: 600 11px/1 var(--mono); font-style: normal; background: var(--line-2); color: var(--ink); }
+    .fout p { font-size: 14px !important; line-height: 1.5 !important; }
+    .fout b { color: var(--ink); font-weight: 600; }
+    .fout.empty { border-style: dashed; }
+    .p-section .fpass { grid-column: 2 / -1; font: 400 11.5px/1.4 var(--mono) !important; color: var(--mute) !important; padding-left: 4px; margin: 0 !important; }
+
+    /* the three kinds of statement */
+    .marks { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 30px 0; }
+    .mark { border: 1px solid var(--line); border-radius: 12px; padding: 14px 15px 16px; }
+    .mark small { display: block; font: 400 11.5px/1.4 var(--mono); color: var(--mute); margin-bottom: 8px; }
+    .mark p { font-size: 14.5px !important; line-height: 1.55 !important; }
+    .mark .src sup { color: var(--accent-2); font: 400 11px/1 var(--mono); }
+    .mark .judge { color: var(--cool-2) !important; font-style: italic; font-family: var(--serif); font-size: 1.02rem !important; }
+    .mark.untested { border-style: dashed; }
+
+    /* Pew dots */
+    .pew { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 22px; align-items: center; margin: 30px 0; }
+    .dots { display: grid; grid-template-columns: repeat(10, 14px); gap: 5px; }
+    .dots i { width: 14px; height: 14px; border-radius: 50%; box-shadow: inset 0 0 0 1.5px var(--line-2); }
+    .dots i.in { background: var(--accent); box-shadow: none; }
+    .pew-num { font: 400 3rem/1 var(--serif); color: var(--accent-2); letter-spacing: -.03em; }
+    .pew p { font-size: 15px !important; line-height: 1.6 !important; margin-top: 8px; }
+
+    /* the test */
+    .decide { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin: 22px 0 30px; }
+    .decide > div { border-radius: 12px; padding: 14px 16px 16px; border: 1px solid var(--line-2); }
+    .decide small { display: block; font: 400 11.5px/1.4 var(--mono); color: var(--mute); margin-bottom: 6px; }
+    .decide b { display: block; font: 600 1.02rem/1.35 var(--serif); color: var(--ink); }
+    .decide .go { border-color: color-mix(in srgb, var(--accent) 55%, var(--line-2)); }
+
+    /* what would move a book */
+    .moves { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 30px 0; }
+    .move { border: 1px solid var(--line); border-radius: 12px; padding: 14px 15px 16px; }
+    .move em { font: 400 11.5px/1 var(--mono); font-style: normal; color: var(--accent-2); }
+    .move h3 { margin: 8px 0 6px !important; font-size: 1.02rem !important; }
+    .move p { font-size: 14px !important; line-height: 1.58 !important; }
+
+    @media (max-width: 680px) {
+      .shelf { grid-template-columns: 1fr 1fr; row-gap: 52px; border-bottom: 0; }
+      .bay { border-bottom: 6px solid color-mix(in srgb, var(--accent) 45%, var(--line-2)); }
+      .bay:nth-child(3) { border-left: 0; }
+      .fstep { grid-template-columns: 1fr; gap: 6px; }
+      .fstep > small { padding-top: 0; }
+      .fpass { grid-column: 1; }
+      .marks, .moves, .decide { grid-template-columns: 1fr; }
+      .pew { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="field" aria-hidden="true"></canvas>
+  <a class="skip" href="#story">Skip to the story</a>
+
+  <header class="nav">
+    <a class="brand" href="../../" aria-label="Timur Kherlenbayar, home page"><span class="brand-mark" aria-hidden="true">&gt;</span>timur kherlenbayar<span class="caret" aria-hidden="true"></span></a>
+    <nav aria-label="Main">
+      <div class="tab">
+        <a class="tab-main" href="../../">home</a>
+        <span class="tab-sub"><a href="../../#work">work</a><a href="../../#experience">experience</a><a href="../../#about">about</a><a href="../../#contact">contact</a></span>
+      </div>
+      <div class="tab current"><a class="tab-main" href="../"><span class="tab-long">all </span>projects</a></div>
+    </nav>
+  </header>
+
+  <main id="top">
+    <section class="p-hero wrap split" aria-labelledby="title">
+      <div class="p-hero-copy">
+        <p class="crumb"><a href="../">~/projects</a><span>/</span><span>book-lovers</span><span aria-hidden="true">·</span><span>Prioritization · Product management</span></p>
+        <h1 id="title">Will discussion with other readers bring people back?</h1>
+        <p class="standfirst">Asked to rank five features for a social platform for book lovers, I first worked out what its first release would need to learn, and let that one question decide everything else. Only one feature turned out to be essential, and I left a whole category empty rather than fill it without evidence.</p>
+        <dl class="p-facts">
+          <div><dt>My role</dt><dd>Solo</dd></div>
+          <div><dt>When</dt><dd>October 2026</dd></div>
+          <div><dt>Framework</dt><dd>MoSCoW, with my own rules</dd></div>
+        </dl>
+        <div class="actions">
+          <a class="btn primary" href="#story">Read the story <span aria-hidden="true">↓</span></a>
+          <a class="btn ghost" href="book-lovers-mvp-priorities.pdf" target="_blank" rel="noopener">The deliverable (PDF) <span aria-hidden="true">↗</span></a>
+        </div>
+      </div>
+      <div class="p-vis">
+        <div class="vis-top"><span>the mvp cut</span><span>pick a book</span></div>
+        <div class="order-hint" aria-hidden="true"><span>← first</span><span>priority runs left to right</span></div>
+        <div class="shelf" id="shelf" role="group" aria-label="The five features on their shelves">
+          <div class="bay"><button type="button" class="book must" data-k="1"><b>1</b><span>Book clubs</span></button><span class="bay-name">Must</span></div>
+          <div class="bay"><div class="waiting">waiting on evidence</div><span class="bay-name">Should</span></div>
+          <div class="bay"><button type="button" class="book could" data-k="2"><b>2</b><span>Reviews</span></button><button type="button" class="book could p2" data-k="3"><b>3</b><span>Profiles</span></button><span class="bay-name">Could</span></div>
+          <div class="bay"><div class="lying"><button type="button" class="book wont" data-k="4"><b>4</b><span>Follow authors</span></button><button type="button" class="book wont" data-k="5"><b>5</b><span>Buy books</span></button></div><span class="bay-name">Won’t this time</span></div>
+        </div>
+        <div class="shelf-note" id="note" aria-live="polite"><b>Pick a book to see why it sits where it does.</b><span>The Should shelf is empty on purpose.</span></div>
+      </div>
+    </section>
+
+    <div class="wrap">
+      <article class="sheet" id="story">
+        <section class="short wide reveal" aria-labelledby="short-title">
+          <div class="short-head"><h2 id="short-title">The short version</h2><span>a two-minute read</span></div>
+          <dl>
+            <div><dt>The task</dt><dd>Use a prioritization framework to rank five features of a hypothetical social platform for book lovers: profiles with recommendations, book clubs and discussion, buying books directly, writing reviews, and following authors and influencers.</dd></div>
+            <div><dt>What I did</dt><dd>Reframed the job as “what does the first release have to learn?”, added a scope check before MoSCoW and a tiebreak after it, refused to put numbers on things nobody had measured, and planned the test that would answer the question.</dd></div>
+            <div><dt>What came out of it</dt><dd>One Must (book clubs), an empty Should, two Coulds (reviews, then profiles) and two Won’t-this-times. The professor called the deliverable one of the best he had seen in the class.</dd></div>
+            <div><dt>Why it matters</dt><dd>The common way to lose points was a framework full of scores that nothing supports. This one marks its claims as sourced, as my judgment, or as untested.</dd></div>
+          </dl>
+          <dl class="stats">
+            <div><dt>1 of 5</dt><dd>features made the cut as essential</dd></div>
+            <div><dt>0</dt><dd>made-up demand, impact or effort scores</dd></div>
+            <div><dt>7%</dt><dd>of U.S. adults were in a book club last year, read as context, not demand</dd></div>
+          </dl>
+        </section>
+
+        <section class="p-section reveal" aria-labelledby="s1">
+          <p class="label"><span>01</span>The question</p>
+          <h2 id="s1">Before ranking anything, decide what the first release has to prove</h2>
+          <p>The assignment was graded half on what we ranked and half on how we showed it, and the professor warned that the most common way to lose points was a framework full of numbers that nothing supports. MoSCoW sorts features into Must, Should, Could and Won’t, which is simple, and that simplicity is exactly the risk: it is easy to dress an opinion up as a framework.</p>
+          <p>So before putting anything in a bucket I asked what the first version is even for. The platform is meant to be social, so my starting point was readers finding people to talk about books with. That was an assumption, not research, so I turned it into the question the first release would test.</p>
+          <p class="callout">Will discussion with other readers bring people back?</p>
+          <p>Every placement on the shelf follows from that question. A feature matters for this release only as far as it helps answer it.</p>
+        </section>
+
+        <section class="p-section reveal" aria-labelledby="s2">
+          <p class="label"><span>02</span>The rules</p>
+          <h2 id="s2">How each feature found its shelf</h2>
+          <p>MoSCoW on its own asks how essential each feature is. I added a check before that and a tiebreak after it. These are my rules for this one pilot, not a standard scoring method, and the order comes out of them rather than the other way round.</p>
+          <div class="flow wide" role="list">
+            <div class="fstep" role="listitem"><small>step 1 · scope</small><div class="fq"><p>Does the feature mainly bring people back for some reason other than discussion between readers, or address something this test holds fixed?</p></div><div class="fout"><span class="chips"><i>4</i><i>5</i></span><p><b>Won’t this time.</b> Following creators is a different reason to return. Buying books doesn’t matter when everyone has already read the book.</p></div></div>
+            <p class="fpass">no · keep 1, 2 and 3</p>
+            <div class="fstep" role="listitem"><small>step 2 · necessity</small><div class="fq"><p>Can readers still discuss the book without this feature?</p></div><div class="fout"><span class="chips"><i>1</i></span><p><b>Must.</b> Without a club and a place to talk, the main goal can’t happen at all.</p></div></div>
+            <p class="fpass">yes · keep 2 and 3</p>
+            <div class="fstep" role="listitem"><small>step 3 · evidence</small><div class="fq"><p>Is there evidence that leaving it out would make discussion much harder?</p></div><div class="fout empty"><span class="chips"></span><p><b>Should: none yet.</b> I haven’t seen evidence of a major obstacle that would justify one.</p></div></div>
+            <p class="fpass">not yet · 2 and 3 are Could for now</p>
+            <div class="fstep" role="listitem"><small>then · order</small><div class="fq"><p>Within each shelf: what serves the current discussion first, then discovery, then transactions.</p></div><div class="fout"><span class="chips"><i>2</i><i>3</i></span><p><b>Could.</b> Reviews above profiles, and following above purchases.</p></div></div>
+          </div>
+          <p>Leaving following and purchases out is about what this test can learn, not about their value. If creator interest brought people back, I couldn’t tell whether they came for the creator or for each other, so following has to wait for a test of its own.</p>
+        </section>
+
+        <section class="p-section reveal" aria-labelledby="s3">
+          <p class="label"><span>03</span>The empty shelf</p>
+          <h2 id="s3">I caught myself writing a rule to fit a feature, so I dropped the rule</h2>
+          <p>My first version did have a Should. The rule was that a feature belongs there if the workaround makes it harder for readers to find shared tastes. When I tested that rule against the five features, it turned out to fit exactly one of them, profiles, which is a sign I had written it backwards: I had decided where profiles went and then built the rule around them.</p>
+          <p>So I took it out. For this pilot nothing is a Should until there is evidence of a painful workaround, and I don’t have any. An empty category looks odd on a slide, and that is the point: it shows where the evidence runs out.</p>
+          <p class="callout">An empty Should is more honest than a Should I can’t defend.</p>
+        </section>
+
+        <section class="p-section reveal" aria-labelledby="s4">
+          <p class="label"><span>04</span>Evidence and judgment</p>
+          <h2 id="s4">Every claim says what kind of claim it is</h2>
+          <p>I had no interviews, pilot data or engineering estimates for a hypothetical product, so I didn’t give any feature a demand, impact or effort score. Instead, the deliverable marks three kinds of statement differently, so a reader can see at a glance which parts rest on a source and which rest on me.</p>
+          <div class="marks wide">
+            <div class="mark"><small>shown by a source</small><p class="src">Goodreads lets readers assess books through reviews and comment on them.<sup>[4]</sup></p></div>
+            <div class="mark"><small>my judgment</small><p class="judge">A review gives readers someone’s take on the current book to respond to, which is why reviews rank above profiles.</p></div>
+            <div class="mark untested"><small>untested, or not claimed</small><p>Would a separate review feature help more than a discussion post?</p></div>
+          </div>
+          <p>Real numbers got the same care. Pew’s survey of 8,046 U.S. adults in October 2025 found that 7% had been in a book club in the past year. That number is easy to misuse.</p>
+          <div class="pew wide" role="img" aria-label="100 dots, 7 of them filled: 7% of U.S. adults were in a book club in the past year.">
+            <div class="dots" id="dots" aria-hidden="true"></div>
+            <div>
+              <div class="pew-num">7%</div>
+              <p>of U.S. adults took part in a book club in the past year. It measures participation, not unmet demand: it doesn’t mean the other 93% want a group. So I narrowed the audience to readers who want discussion but don’t have a group, and kept even that as a hypothesis to test.</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="p-section reveal" aria-labelledby="s5">
+          <p class="label"><span>05</span>The test</p>
+          <h2 id="s5">Learn before building more</h2>
+          <p>A ranking is only a guess until something tests it, so the deliverable ends with the experiment I would run. It deliberately uses no custom software.</p>
+          <ol class="steps">
+            <li><h3>Recruit</h3><p>Readers without a group, found through library notices and reading communities, who have all finished the same book.</p></li>
+            <li><h3>Set up</h3><p>An existing discussion tool, basic accounts and names, an opening question, and moderation. No full profiles.</p></li>
+            <li><h3>Observe</h3><p>Replies and returns the tool records, the reminders sent before them, and who already knows the organizer.</p></li>
+          </ol>
+          <div class="decide wide">
+            <div><small>if participation depends on repeated reminders</small><b>Revisit the need before building more.</b></div>
+            <div class="go"><small>if readers come back and reply on their own</small><b>Repeat the test with people who don’t know the organizer.</b></div>
+          </div>
+          <p>I also wrote down what could still fool me. Some people may return out of courtesy, or because they know me, which is why reminders and the organizer’s network are tracked. And a pilot like this can’t show broad demand, growth or revenue. Even a good result would be a reason to look further, not proof of product-market fit.</p>
+        </section>
+
+        <section class="p-section reveal" aria-labelledby="s6">
+          <p class="label"><span>06</span>Changing my mind</p>
+          <h2 id="s6">What would move a book to another shelf</h2>
+          <p>The order holds until new evidence or a new question gives a reason to reconsider, and the deliverable says in advance what that evidence would look like.</p>
+          <div class="moves wide">
+            <div class="move"><em>A</em><h3>Reviews could move up to Should</h3><p>If readers keep abandoning replies because they can’t find or follow someone’s take, I’d watch them try discussion posts and book-linked reviews, and move reviews up only if they remove a major obstacle.</p></div>
+            <div class="move"><em>B</em><h3>Profiles could move up to Should</h3><p>If a lack of context about other readers keeps getting in the way of useful conversations, even after introductions, I’d test whether profiles solve that first.</p></div>
+            <div class="move"><em>C</em><h3>The Won’ts return only with a new question</h3><p>If the next question is about discovering books through creators, or helping readers get a book they haven’t read, that is a different pilot with its own shelf.</p></div>
+          </div>
+        </section>
+
+        <section class="p-section reveal" aria-labelledby="s7">
+          <p class="label"><span>07</span>How it went</p>
+          <h2 id="s7">The feedback, including the one call he’d argue with</h2>
+          <blockquote class="quote">
+            <p>Also, great template. My favorite section of yours was “What would move a book to another shelf”, and you employed the visuals really well. One of the best I’ve ever seen in this class.</p>
+            <footer>Professor’s feedback, IS 562 Digital Product Management</footer>
+          </blockquote>
+          <p>He also pointed to the three-step path that shows the order coming out of the rules, and to leaving Should empty until there is evidence, which he said took discipline. The one thing he would debate is the closest call in the ranking: reviews above profiles. It rests on my judgment alone, and nothing shows that these readers would use a review more than a profile. If the pilot showed people mostly asking each other for recommendations, the order should flip.</p>
+          <p>I think that is fair. My reason for the order is that a review keeps someone’s opinion attached to the book, which gives the next reader something to answer, but it is a reason, not evidence. It is exactly the kind of call the pilot is there to settle.</p>
+          <div class="gallery wide">
+            <div class="gallery-track">
+              <figure><img class="zoomable" src="img/page-1.jpg" alt="Page 1 of the deliverable: the question, and a bookshelf graphic showing the five features on Must, Should, Could and Won't shelves." loading="lazy" width="1100" height="1424"><figcaption>Page 1 · the whole answer on one shelf</figcaption></figure>
+              <figure><img class="zoomable" src="img/page-2.jpg" alt="Page 2: a three-step decision path from scope to necessity to evidence, with each feature's outcome." loading="lazy" width="1100" height="1424"><figcaption>Page 2 · how each feature found its shelf</figcaption></figure>
+              <figure><img class="zoomable" src="img/page-3.jpg" alt="Page 3: for each feature, what a source shows, my judgment, and what is untested, plus the Pew 7% dot chart." loading="lazy" width="1100" height="1424"><figcaption>Page 3 · where evidence stops and judgment starts</figcaption></figure>
+              <figure><img class="zoomable" src="img/page-4.jpg" alt="Page 4: the proposed test, from recruiting to the decision rule." loading="lazy" width="1100" height="1424"><figcaption>Page 4 · the test</figcaption></figure>
+              <figure><img class="zoomable" src="img/page-5.jpg" alt="Page 5: what would move a book to another shelf, and the sources." loading="lazy" width="1100" height="1424"><figcaption>Page 5 · what would change the order</figcaption></figure>
+            </div>
+          </div>
+        </section>
+
+        <details class="notes">
+          <summary><h2>Method notes</h2><span>rules, sources and numbers</span></summary>
+          <div class="notes-body">
+            <dl>
+              <div><dt>Context</dt><dd>Individual assignment in IS 562 Digital Product Management at BYU, October 2026. Graded 50% on what (does the order follow from the reasoning, is the reasoning supported) and 50% on how (clear writing, visuals that make the ranking obvious, purposeful white space). Laid out by me in Canva.</dd></div>
+              <div><dt>Final order</dt><dd>1 Book clubs and discussion (Must). Should: none yet. 2 Reviews, 3 Profiles with recommendations (Could). 4 Follow authors and influencers, 5 Buy books directly (Won’t this time).</dd></div>
+              <div><dt>Rules</dt><dd>Scope first (does it bring people back for something other than reader discussion, or touch something the test holds fixed?), then necessity (can readers discuss without it?), then evidence (is there evidence that leaving it out makes discussion much harder?). Tiebreak within a shelf: current discussion, then discovery, then transactions.</dd></div>
+              <div><dt>Key decision</dt><dd>Dropped the Should rule once I saw it fit only profiles, meaning I had written it to fit a placement. Should stays empty until there is evidence of a painful workaround.</dd></div>
+              <div><dt>Sources</dt><dd>Agile Business Consortium on MoSCoW; Pew Research Center (April 2026 report on an October 6 to 16, 2025 survey of 8,046 U.S. adults: 7% in a book club in the past year); Bookclubs; Goodreads and its Author Program; Bookshop.org; Cagan on minimum viable products.</dd></div>
+              <div><dt>The test</dt><dd>Recruit readers without a group who finished the same book; run it in an existing discussion tool with moderation; record replies, returns and the reminders before them; follow up with interviews. Decision: reminders needed → revisit the need; unprompted returns → repeat with strangers.</dd></div>
+            </dl>
+          </div>
+        </details>
+      </article>
+    </div>
+
+    <section class="p-next wrap" aria-label="More projects">
+      <p class="label"><span>~/projects</span>Keep going</p>
+      <ul class="cards">
+        <li>
+          <a class="card reveal" data-spot href="../penguin-release-strategy/">
+            <span class="card-top"><span>Release strategy · Team case</span><span>2026</span></span>
+            <span class="card-stat"><b>152.5 / 160</b><span>for a one-year plan to move 250 workstations to Linux when a switch can’t be undone</span></span>
+            <span class="card-title">Penguin release strategy</span>
+            <span class="card-text">Our team of five recommended a canary release: one Houston project first, the riskiest shipments early. I owned the plan for rebuilding the tool everything depended on, and edited the deck.</span>
+            <span class="card-tags"><span>Release strategy</span><span>Canary release</span><span>Change management</span></span>
+            <span class="card-go">Play the rollout <span aria-hidden="true">→</span></span>
+          </a>
+        </li>
+        <li>
+          <a class="card cool reveal" data-spot href="../more-sellers-same-sales/">
+            <span class="card-top"><span>Business review · E-commerce</span><span>2026</span></span>
+            <span class="card-stat"><b>+27%</b><span>more sellers at a Brazilian marketplace by the summer of 2018, while its sales fell by 6%</span></span>
+            <span class="card-title">More Sellers, Same Sales</span>
+            <span class="card-text">A business review written for a leadership team and built from about 100,000 real orders. It has a two-minute executive summary, the evidence behind it, and four recommendations.</span>
+            <span class="card-tags"><span>SQL</span><span>Python</span><span>Business analysis</span><span>Data visualization</span></span>
+            <span class="card-go">Read the review <span aria-hidden="true">→</span></span>
+          </a>
+        </li>
+      </ul>
+      <div class="all-link"><a class="btn ghost" href="../">All projects <span aria-hidden="true">→</span></a></div>
+    </section>
+  </main>
+
+  <footer class="footer wrap">
+    <span>© 2026 Timur Kherlenbayar</span>
+    <span class="footer-right">
+      <button id="motion" type="button" aria-pressed="false">motion: on</button>
+      <a href="../">back to all projects</a>
+    </span>
+  </footer>
+
+  <div class="themes" role="group" aria-label="Choose the backdrop">
+    <span aria-hidden="true">backdrop</span>
+    <button type="button" data-theme-pick="pond" aria-pressed="true" aria-label="Koi pond backdrop" style="--a:#0a3a38;--b:#ff9a6c"><i></i><b>pond</b></button>
+    <button type="button" data-theme-pick="steppe" aria-pressed="false" aria-label="Steppe night backdrop" style="--a:#0f1630;--b:#f2cc7e"><i></i><b>steppe</b></button>
+    <button type="button" data-theme-pick="embers" aria-pressed="false" aria-label="Embers backdrop" style="--a:#1b1916;--b:#d97757"><i></i><b>embers</b></button>
+  </div>
+
+  <script>
+  (function () {
+    /* The shelf: each book explains its own placement. */
+    const WHY = {
+      1: ['1 · Book clubs and discussion · Must', 'The only required feature. Without a club and a place to talk, readers have nowhere to discuss the book together, so the question can’t even be asked.'],
+      2: ['2 · Writing reviews · Could', 'Readers can post their take in the discussion for now. Reviews rank above profiles because a review keeps an opinion attached to the book, which gives the next reader something to answer.'],
+      3: ['3 · Profiles with recommendations · Could', 'Introductions and shared links cover it for now. The recommendations come from members, which is the part worth testing later.'],
+      4: ['4 · Following authors and influencers · Won’t this time', 'Interest in a creator is another reason to come back, and it would muddy the answer to whether discussion does. Not worthless, just a different test.'],
+      5: ['5 · Buying books directly · Won’t this time', 'Everyone in the pilot has already read the book, so a checkout wouldn’t help learn whether discussion brings them back.']
+    };
+    const note = document.getElementById('note');
+    const books = [...document.querySelectorAll('#shelf .book')];
+    for (const b of books) {
+      b.setAttribute('aria-pressed', 'false');
+      b.addEventListener('click', () => {
+        const on = b.getAttribute('aria-pressed') !== 'true';
+        books.forEach((x) => x.setAttribute('aria-pressed', String(x === b && on)));
+        const [t, d] = on ? WHY[b.dataset.k] : ['Pick a book to see why it sits where it does.', 'The Should shelf is empty on purpose.'];
+        note.innerHTML = `<b>${t}</b><span>${d}</span>`;
+      });
+    }
+    /* Pew: 100 dots, 7 filled. */
+    const dots = document.getElementById('dots');
+    if (dots) for (let i = 0; i < 100; i++) { const d = document.createElement('i'); if (i < 7) d.className = 'in'; dots.append(d); }
+  })();
+  </script>
+</body>
+</html>
