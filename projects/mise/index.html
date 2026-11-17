@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="pond">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#05201f">
+  <meta name="description" content="Mise is a phone app that saves recipes from anywhere, reads the steps aloud while you cook and counts the calories for you. It began as a recipe scanner, and testing with real cooks turned it into a cooking companion.">
+  <meta property="og:title" content="Mise, an AI cooking companion — Timur Kherlenbayar">
+  <meta property="og:description" content="A recipe scanner that testing with real cooks turned into a cooking companion. I led the build of the final version.">
+  <meta property="og:type" content="article">
+  <title>Mise, an AI cooking companion — Timur Kherlenbayar</title>
+  <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../../assets/fonts/type-home.css?v=10">
+  <link rel="stylesheet" href="../../style.css?v=11">
+  <link rel="stylesheet" href="../page.css?v=2">
+  <script>
+    document.documentElement.classList.add('js');
+    try { var t = localStorage.getItem('tk-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+  </script>
+  <script src="../../backdrop.js?v=10" defer></script>
+  <script src="../../app.js?v=11" defer></script>
+  <script src="../page.js?v=2" defer></script>
+  <style>
+    /* ---------- Mise: visuals made for this page ---------- */
+
+    /* hero: three real screens, fanned */
+    .fan { position: relative; height: clamp(380px, 40vw, 500px); margin: 4px 0 10px; }
+    .fan .phone { position: absolute; top: 50%; left: 50%; width: clamp(130px, 13vw, 182px); transition: transform .9s cubic-bezier(.2, .7, .2, 1); }
+    .fan .phone .screen { border-radius: 26px; }
+    .fan .phone .screen img { border-radius: 20px; }
+    .fan .f1 { transform: translate(-112%, -45%) rotate(-7deg); }
+    .fan .f2 { transform: translate(-50%, -54%); z-index: 2; }
+    .fan .f3 { transform: translate(12%, -45%) rotate(7deg); }
+    .fan::after { content: ""; position: absolute; left: 10%; right: 10%; bottom: 2%; height: 30%; background: radial-gradient(closest-side, color-mix(in srgb, var(--accent) 30%, transparent), transparent); filter: blur(10px); z-index: 0; pointer-events: none; }
+    html:not(.motion-off) .p-vis:not(.inview) .fan .f1 { transform: translate(-50%, -50%) rotate(0); }
+    html:not(.motion-off) .p-vis:not(.inview) .fan .f3 { transform: translate(-50%, -50%) rotate(0); }
+
+    /* February and April side by side */
+    .then-now { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px; margin: 34px 0; }
+    .era { border: 1px solid var(--line); border-radius: 18px; padding: 20px 18px 22px; background: rgba(255, 255, 255, .02); }
+    .era-head { display: flex; justify-content: space-between; gap: 10px; font: 400 12px/1.4 var(--mono); color: var(--mute); margin-bottom: 18px; }
+    .era-head b { color: var(--ink); font-weight: 400; }
+    .era .phones { margin: 0; gap: 10px; }
+    .era .phone { flex-basis: 33%; }
+    .era .phone .screen { border-radius: 18px; padding: 4px; }
+    .era .phone .screen img { border-radius: 14px; }
+    .era p { font-size: 15px !important; line-height: 1.6 !important; margin-top: 16px; }
+
+    /* what people asked for: one bar */
+    .ratio { margin: 30px 0 8px; }
+    .ratio-row { display: grid; grid-template-columns: 150px minmax(0, 1fr) 36px; align-items: center; gap: 14px; margin-bottom: 10px; font-size: 14.5px; color: var(--ink-2); }
+    .ratio-bar { height: 26px; border-radius: 6px; background: var(--line); overflow: hidden; }
+    .ratio-bar i { display: block; height: 100%; border-radius: 6px; background: var(--accent); transform-origin: 0 50%; }
+    .ratio-row.dim .ratio-bar i { background: var(--ink-2); opacity: .55; }
+    .ratio-row b { font: 400 1.05rem/1 var(--serif); color: var(--ink); }
+    html:not(.motion-off) .ratio:not(.inview) .ratio-bar i { transform: scaleX(0); }
+    .ratio-bar i { transition: transform 1.1s cubic-bezier(.2, .7, .2, 1); }
+
+    /* the assistant: message, reply, what the app does */
+    .agent { margin: 34px 0; border: 1px solid var(--line-2); border-radius: 20px; background: var(--panel); overflow: hidden; }
+    .agent-tabs { display: flex; flex-wrap: wrap; gap: 8px; padding: 16px 18px; border-bottom: 1px solid var(--line); }
+    .agent-tabs button { font: 400 12.5px/1 var(--mono); color: var(--ink-2); border: 1px solid var(--line-2); border-radius: 999px; padding: 9px 13px; transition: color .2s, border-color .2s, background .2s; }
+    .agent-tabs button:hover { color: var(--ink); border-color: var(--ink-2); }
+    .agent-tabs button[aria-selected="true"] { color: var(--on-accent); background: var(--accent); border-color: var(--accent); }
+    .agent-body { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.25fr) minmax(0, .95fr); min-height: 360px; }
+    .agent-col { padding: 20px 18px 22px; min-width: 0; }
+    .agent-col + .agent-col { border-left: 1px solid var(--line); }
+    .agent-col h3 { margin: 0 0 14px !important; font: 400 11.5px/1.4 var(--mono) !important; letter-spacing: .05em; color: var(--mute) !important; text-transform: lowercase; }
+    .bubble { display: inline-block; max-width: 100%; background: #ff6b35; color: #fff; border-radius: 18px 18px 4px 18px; padding: 11px 14px; font-size: 15px; line-height: 1.45; }
+    .agent pre { margin: 0; white-space: pre-wrap; word-break: break-word; font: 400 12.5px/1.6 var(--mono); color: var(--ink-2); }
+    .agent pre .k { color: var(--cool); }
+    .agent pre .s { color: var(--accent-2); }
+    .agent pre .n { color: var(--ok); }
+    .agent .does p { font-size: 14.5px !important; line-height: 1.6 !important; }
+    .does-card { margin-top: 14px; border: 1px solid var(--line-2); border-radius: 14px; padding: 14px; background: #fff8f0; color: #3a2a20; font-size: 14px; }
+    .does-card strong { display: block; font-size: 15px; color: #1f150f; }
+    .does-card small { display: block; color: #8a7466; font-size: 12.5px; margin-top: 4px; }
+    .does-card ul { margin-top: 10px; display: grid; gap: 6px; }
+    .agent .does-card li { display: flex; gap: 8px; align-items: center; font-size: 13.5px; line-height: 1.4; color: #3a2a20; }
+    .does-card li i { width: 15px; height: 15px; border-radius: 50%; border: 1.5px solid #ff6b35; flex: none; }
+    .tring { width: 116px; height: 116px; margin: 4px auto 0; position: relative; }
+    .tring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+    .tring circle { fill: none; stroke-width: 8; }
+    .tring .bg { stroke: #f0e2d6; }
+    .tring .fg { stroke: #ff6b35; stroke-linecap: round; stroke-dasharray: 1; transition: stroke-dashoffset 1s linear; }
+    .tring b { position: absolute; inset: 0; display: grid; place-items: center; font: 600 22px/1 var(--sans); color: #1f150f; }
+    .agent p.agent-note, .agent .agent-note { font-size: 12px !important; line-height: 1.55 !important; padding: 12px 18px 14px; border-top: 1px solid var(--line); font: 400 12px/1.55 var(--mono); color: var(--mute); }
+
+    /* saving a recipe: instant save, then three jobs in the background */
+    .pipe { display: grid; grid-template-columns: minmax(0, .8fr) 40px minmax(0, 1.2fr); align-items: center; gap: 0; margin: 34px 0; }
+    .pipe-box { border: 1px solid var(--line-2); border-radius: 14px; padding: 14px 16px; background: rgba(255, 255, 255, .025); }
+    .pipe-box b { display: block; font: 600 1rem/1.35 var(--serif); color: var(--ink); }
+    .pipe-box span { display: block; font-size: 13.5px; line-height: 1.5; color: var(--mute); margin-top: 4px; }
+    .pipe-box.now { border-color: color-mix(in srgb, var(--accent) 60%, var(--line-2)); }
+    .pipe-box.now em { font: 400 11.5px/1 var(--mono); font-style: normal; color: var(--accent-2); display: block; margin-bottom: 8px; }
+    .pipe-arrow { height: 2px; background: var(--line-2); position: relative; }
+    .pipe-arrow::after { content: ""; position: absolute; right: -1px; top: -4px; border: 5px solid transparent; border-left-color: var(--line-2); }
+    .pipe-jobs { display: grid; gap: 10px; }
+    .pipe-jobs .pipe-box { position: relative; overflow: hidden; }
+    .pipe-jobs .pipe-box::after { content: ""; position: absolute; left: 0; bottom: 0; height: 2px; width: 100%; background: var(--accent); transform-origin: 0 50%; transform: scaleX(0); }
+    html:not(.motion-off) .pipe.inview .pipe-jobs .pipe-box::after { animation: job 3.2s cubic-bezier(.3, .6, .3, 1) infinite; }
+    .pipe-jobs .pipe-box:nth-child(2)::after { animation-delay: .5s !important; }
+    .pipe-jobs .pipe-box:nth-child(3)::after { animation-delay: .9s !important; }
+    @keyframes job { 0% { transform: scaleX(0); opacity: 1; } 70% { transform: scaleX(1); opacity: 1; } 100% { transform: scaleX(1); opacity: 0; } }
+
+    /* who wrote what */
+    .own { margin: 30px 0 8px; }
+    .own-row { display: grid; grid-template-columns: 150px minmax(0, 1fr) 46px; align-items: center; gap: 14px; padding: 6px 0; }
+    .own-row span { font-size: 14px; color: var(--ink-2); }
+    .own-row b { font: 400 13px/1 var(--mono); color: var(--ink); text-align: right; }
+    .own-bar { display: flex; height: 14px; border-radius: 4px; overflow: hidden; background: var(--line); }
+    .own-bar i { display: block; height: 100%; background: var(--accent); }
+    .own-row.total { margin-top: 8px; padding-top: 14px; border-top: 1px solid var(--line); }
+    .own-row.total span { color: var(--ink); font-weight: 600; }
+    .own-legend { display: flex; gap: 18px; margin-top: 14px; font: 400 12px/1.4 var(--mono); color: var(--mute); }
+    .own-legend span { display: inline-flex; align-items: center; gap: 8px; }
+    .own-legend i { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+
+    /* results */
+    .scores { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 30px 0; }
+    .score { border: 1px solid var(--line); border-radius: 14px; padding: 16px 16px 18px; background: rgba(255, 255, 255, .02); }
+    .score b { display: block; font: 400 1.9rem/1 var(--serif); letter-spacing: -.02em; color: var(--accent-2); }
+    .score span { display: block; font-size: 13.5px; line-height: 1.5; color: var(--mute); margin-top: 8px; }
+    .score.miss b { color: var(--ink-2); }
+    .score.miss { border-style: dashed; }
+
+    @media (max-width: 980px) {
+      .agent-body { grid-template-columns: 1fr; }
+      .agent-col + .agent-col { border-left: 0; border-top: 1px solid var(--line); }
+    }
+    @media (max-width: 680px) {
+      .then-now, .scores { grid-template-columns: 1fr; }
+      .fan { height: 360px; }
+      .fan .phone { width: 128px; }
+      .p-vis .vis-caption br { display: none; }
+      .pipe { grid-template-columns: 1fr; gap: 10px; }
+      .pipe-arrow { width: 2px; height: 22px; margin: 0 auto; }
+      .pipe-arrow::after { right: -4px; top: auto; bottom: -1px; border: 5px solid transparent; border-top-color: var(--line-2); }
+      .ratio-row, .own-row { grid-template-columns: 110px minmax(0, 1fr) 40px; gap: 10px; }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="field" aria-hidden="true"></canvas>
+  <a class="skip" href="#story">Skip to the story</a>
+
+  <header class="nav">
+    <a class="brand" href="../../" aria-label="Timur Kherlenbayar, home page"><span class="brand-mark" aria-hidden="true">&gt;</span>timur kherlenbayar<span class="caret" aria-hidden="true"></span></a>
+    <nav aria-label="Main">
+      <a href="../../">home</a>
+      <a href="../" aria-current="page">projects</a>
+      <a href="../../#about">about</a>
+      <a class="nav-cta" href="../../#contact">contact</a>
+    </nav>
+  </header>
+
+  <main id="top">
+    <section class="p-hero wrap split" aria-labelledby="title">
+      <div class="p-hero-copy">
+        <p class="crumb"><a href="../">~/projects</a><span>/</span><span>mise</span><span aria-hidden="true">·</span><span>AI app · Mobile</span></p>
+        <h1 id="title">Mise: the recipe scanner that turned into a cooking companion</h1>
+        <p class="standfirst">Our team set out to build an app that photographs a cookbook page and turns it into a shopping list. The people we tested it with kept asking for something bigger, so in the second round we built that instead: an app that saves recipes from anywhere, reads the steps aloud while you cook, and counts the calories for you.</p>
+        <dl class="p-facts">
+          <div><dt>My role</dt><dd>Led the build of the final app</dd></div>
+          <div><dt>Team</dt><dd>Three students</dd></div>
+          <div><dt>When</dt><dd>February to April 2026</dd></div>
+          <div><dt>Built with</dt><dd>React Native, GPT-4o, SQLite</dd></div>
+        </dl>
+        <div class="actions">
+          <a class="btn primary" href="#story">Read the story <span aria-hidden="true">↓</span></a>
+          <a class="btn ghost" href="https://github.com/RumitOsu/mise" target="_blank" rel="noopener noreferrer">Code on GitHub <span aria-hidden="true">↗</span></a>
+        </div>
+      </div>
+      <div class="p-vis" data-inview>
+        <div class="vis-top"><span>mise, on a real phone</span><span>april 2026</span></div>
+        <div class="fan">
+          <figure class="phone f1"><div class="screen"><img src="img/apr-recipes.jpg" alt="Mise's recipe library with three saved recipes and their photos" width="620" height="1297"></div></figure>
+          <figure class="phone f2"><div class="screen"><img src="img/apr-planner-chat.jpg" alt="The AI meal planner suggesting a balanced week from the user's own recipes" width="620" height="1297"></div></figure>
+          <figure class="phone f3"><div class="screen"><img src="img/apr-shopping.jpg" alt="The shopping list, with a button to find each item at Walmart" width="620" height="1297"></div></figure>
+        </div>
+        <p class="vis-caption">Your recipes, your week and your shopping list,<br>with an assistant that can work all three.</p>
+      </div>
+    </section>
+
+    <div class="wrap">
+      <article class="sheet" id="story">
+        <section class="short wide reveal" aria-labelledby="short-title">
+          <div class="short-head"><h2 id="short-title">The short version</h2><span>a two-minute read</span></div>
+          <dl>
+            <div><dt>The question</dt><dd>Recipes end up scattered across screenshots, bookmarks and cookbooks, and most people give up on calorie tracking because typing in every ingredient is tedious. Could one app fix both?</dd></div>
+            <div><dt>What we built</dt><dd>A phone app for iPhone and Android that saves a recipe from a link, a photo, a file or a conversation, works out its nutrition, talks you through cooking it, plans your week and sends the shopping list to Walmart.</dd></div>
+            <div><dt>What came out of it</dt><dd>Testing changed the product twice. People pasted links three times as often as they photographed pages, and they asked for calorie counts and spoken steps before we had built either. All nine people in the final round said they would use it regularly, and the judges asked to be told when it reached the App Store.</dd></div>
+            <div><dt>My part</dt><dd>I built the first version in February and led the build of the final one in April: the chat assistant, cooking mode, nutrition tracking, the meal planner and onboarding. About three quarters of the final app’s code is mine.</dd></div>
+          </dl>
+          <dl class="stats">
+            <div><dt>3 to 1</dt><dd>links pasted for every page photographed, so the link became the first option</dd></div>
+            <div><dt>9 of 9</dt><dd>testers in the final round said they would use it regularly</dd></div>
+            <div><dt>75%</dt><dd>of the final app’s code is mine, by line</dd></div>
+          </dl>
+          <ul class="tags" aria-label="Built with"><li>React Native and Expo</li><li>GPT-4o</li><li>DALL·E 3</li><li>SQLite</li><li>Walmart API</li><li>User research</li></ul>
+        </section>
+
+        <section class="p-section reveal" aria-labelledby="s1">
+          <p class="label"><span>01</span>February</p>
+          <h2 id="s1">It started as a scanner, and the first test broke our main assumption</h2>
+          <p>The class asked each team to find a real problem and build an AI product around it. Ours was the cook who keeps recipes in five places and copies ingredients onto a shopping list by hand. The first version, which I built in February, did one job. You photographed a cookbook page, GPT-4o read the ingredients and steps off it, and the app turned them into a list you could tick off at the store.</p>
+          <p>The whole idea rested on people trusting what the AI read, so before writing much code we tried to break that with a clickable mockup. Three people scanned a printed recipe card, and the result they got back had two mistakes planted in it: one ingredient was missing and one quantity was wrong. <strong>Not one of the three caught both.</strong> One accepted the list without looking, one noticed the wrong number, and one noticed the missing ingredient.</p>
+          <p class="callout">People don’t proofread a list. They check it for whatever they were already worried about.</p>
+          <p>That shaped how the app shows its work. Instead of a block of text, every ingredient gets its own row with separate boxes for the amount, the unit and the name, so that a misread stands out on its own, and the February version also showed how sure the AI was about each line. In the final round of testing, two people caught parsing mistakes this way without being told to look.</p>
+
+          <div class="then-now wide">
+            <div class="era">
+              <div class="era-head"><b>February: the scanner</b><span>web demo</span></div>
+              <div class="phones">
+                <figure class="phone"><div class="screen"><img class="zoomable" src="img/feb-scan.jpg" alt="The February scanner: a screen for photographing a recipe or a finished meal" loading="lazy" width="746" height="1658"></div></figure>
+                <figure class="phone"><div class="screen"><img class="zoomable" src="img/feb-review.jpg" alt="Reviewing the ingredients the AI read, each with a confidence score" loading="lazy" width="746" height="1576"></div></figure>
+                <figure class="phone"><div class="screen"><img class="zoomable" src="img/feb-list.jpg" alt="The shopping list made from a scanned recipe" loading="lazy" width="746" height="1658"></div></figure>
+              </div>
+              <p>Photograph a page, check what the AI read, take the list to the store.</p>
+            </div>
+            <div class="era">
+              <div class="era-head"><b>April: Mise</b><span>iPhone and Android</span></div>
+              <div class="phones">
+                <figure class="phone"><div class="screen"><img class="zoomable" src="img/apr-recipes.jpg" alt="Mise's recipe library with photos, collections and search" loading="lazy" width="620" height="1297"></div></figure>
+                <figure class="phone"><div class="screen"><img class="zoomable" src="img/apr-planner.jpg" alt="The weekly meal planner, adding a recipe from the library to Thursday's dinner" loading="lazy" width="620" height="1297"></div></figure>
+                <figure class="phone"><div class="screen"><img class="zoomable" src="img/apr-shopping.jpg" alt="The shopping list with Walmart search for every item" loading="lazy" width="620" height="1297"></div></figure>
+              </div>
+              <p>Save a recipe from anywhere, cook it with the app talking you through it, plan the week, shop.</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="p-section reveal" aria-labelledby="s2">
+          <p class="label"><span>02</span>Listening</p>
+          <h2 id="s2">The people we tested with asked for a different app</h2>
+          <p>Between February and April the team ran four rounds of testing, and each round changed what we built next. Two findings mattered more than the rest.</p>
+          <h3>The camera wasn’t the main way in</h3>
+          <p>We had built everything around photographing a cookbook. When people had every option in front of them, they pasted a link about three times as often as they took a photo, because most of their recipes were already online. So the link moved to the top of the menu. The camera stayed, because it was the moment people remembered: one tester scanned her mother’s handwritten lasagna card and couldn’t quite believe it had read the handwriting.</p>
+          <div class="ratio" data-inview role="img" aria-label="People chose a pasted link about three times as often as a photo.">
+            <div class="ratio-row"><span>Pasted a link</span><div class="ratio-bar"><i style="width:100%"></i></div><b>3</b></div>
+            <div class="ratio-row dim"><span>Took a photo</span><div class="ratio-bar"><i style="width:33.3%"></i></div><b>1</b></div>
+          </div>
+          <p class="fig-note" style="font:400 12.5px/1.5 var(--mono);color:var(--mute)">How often testers reached for each way of adding a recipe when both were available.</p>
+          <h3>They asked for features we hadn’t planned</h3>
+          <p>In the second round, two people independently asked whether the app remembered how many calories they had eaten, and another person wished it would just read the steps to them. Neither feature was in our plan. Both went in, and the calorie tracker turned into the feature people reacted to most. It works because logging stops being a chore of its own: you cook in the app, one tap logs the meal, and the tracker fills itself.</p>
+          <blockquote class="quote">
+            <p>Wait, so it counts the calories for me when I cook? I don’t have to type everything in?</p>
+            <footer>A tester in the final round, who had given up on a calorie app twice</footer>
+          </blockquote>
+          <p>One more moment stuck with us. Before we showed him the shopping tab, a tester described, in his own words, the exact feature we had built: “It’d be cool if you could just get a recipe and it would add everything to your Walmart pick-up order.” He then sent a list to his real Walmart cart, saw the items arrive, and showed his wife on the spot.</p>
+        </section>
+
+        <section class="p-section reveal" aria-labelledby="s3">
+          <p class="label"><span>03</span>What I built</p>
+          <h2 id="s3">One assistant that can work the whole app</h2>
+          <p>In April the app was rebuilt as a real phone app. A teammate set up the new base first: the ways to import a recipe, the shopping list and the Walmart search. Over the next four days I built most of what turned it into Mise, in five steps: a chat home screen that understands recipes, a new recipe page with cooking mode, a redesigned editor with collections and a warm look, then nutrition tracking with spoken steps and timers. After that came the meal planner, onboarding, and the assistant that ties it all together.</p>
+          <p>The assistant is the part I’m proudest of. The home screen is a chat, and anything you type or photograph goes to GPT-4o along with a short summary of where you are in the app: how many recipes you have, what’s on the list, what you’ve eaten today and what you’re cooking. I wrote its instructions so that every reply comes back as data in one of three shapes, and the app acts on each shape differently. Pick a message to see it.</p>
+
+          <div class="agent wide" data-agent>
+            <div class="agent-tabs" role="tablist" aria-label="Example messages"></div>
+            <div class="agent-body">
+              <div class="agent-col"><h3>You type</h3><div class="bubble" data-say></div></div>
+              <div class="agent-col"><h3>GPT-4o replies with</h3><pre data-json></pre></div>
+              <div class="agent-col does"><h3>The app</h3><div data-does></div></div>
+            </div>
+            <p class="agent-note">The three reply shapes and the action names are the ones in the app’s instructions to the model. The messages and replies are examples written for this page.</p>
+            <noscript><p class="agent-note">With JavaScript on, this box steps through four example messages. In short: a recipe comes back as structured data and is saved, a question comes back as a plain answer, and a request like “set a timer” comes back as an action the app carries out.</p></noscript>
+          </div>
+
+          <p>That design is what lets one chat do so much. A recipe is saved straight to the library. A question about technique or a substitution gets a short answer. And a request to open the planner, add eggs to the list or start an eight-minute timer is carried out by the app itself, so the model never touches the phone directly and can’t do anything the app doesn’t allow. The same assistant is available inside cooking mode, where your hands are usually full.</p>
+
+          <h3>Saving feels instant because the slow work waits</h3>
+          <p>The AI calls are slow, a few seconds each, and a recipe needs several of them. So saving only writes the recipe to the phone, which takes no time at all, and three jobs then run in the background while you carry on. By the time you open the recipe, it usually has its nutrition, a photo and pictures for its steps.</p>
+          <div class="pipe" data-inview role="img" aria-label="Tapping save stores the recipe on the phone at once. Then three background jobs run: GPT-4o estimates the nutrition, DALL·E 3 makes a cover photo, and DALL·E 3 draws a picture for each step.">
+            <div class="pipe-box now"><em>instant</em><b>You tap save</b><span>The recipe is written to the database on the phone, so it works offline.</span></div>
+            <div class="pipe-arrow" aria-hidden="true"></div>
+            <div class="pipe-jobs">
+              <div class="pipe-box"><b>Nutrition</b><span>GPT-4o estimates calories, protein, carbs, fat and fibre per serving.</span></div>
+              <div class="pipe-box"><b>A cover photo</b><span>DALL·E 3 makes a food photo from the title and ingredients.</span></div>
+              <div class="pipe-box"><b>A picture for each step</b><span>All the step illustrations are requested at the same time, not one by one.</span></div>
+            </div>
+          </div>
+
+          <div class="phones">
+            <figure class="phone"><div class="screen"><img class="zoomable" src="img/apr-chat.jpg" alt="Mise's chat home screen, where the assistant offers to scan a recipe, plan the week, check nutrition or add to the shopping list" loading="lazy" width="620" height="1283"></div><figcaption>The chat home screen</figcaption></figure>
+            <figure class="phone lift"><div class="screen"><img class="zoomable" src="img/apr-recipe.jpg" alt="A saved recipe page showing 815 calories per serving with bars for protein, carbs, fat and fibre, buttons to log the meal or make it lighter, and an illustration under the first step" loading="lazy" width="620" height="1283"></div><figcaption>A saved recipe, after the background jobs</figcaption></figure>
+          </div>
+          <p>The recipe on the right shows what those jobs leave behind: the nutrition per serving, a button that logs the meal to the tracker, another that asks GPT-4o for a lighter version of the recipe, and a drawing under each step.</p>
+
+          <h3>Cooking mode</h3>
+          <p>Cooking mode fills the screen with one step at a time and keeps the phone from going to sleep. It reads each step aloud, you swipe to move between steps, and a timer with a countdown ring tells you out loud when your dish is ready. It came straight out of that tester who wanted the steps read to them, and several testers said it felt different from any cooking app they had used.</p>
+        </section>
+
+        <section class="p-section reveal" aria-labelledby="s4">
+          <p class="label"><span>04</span>The hard parts</p>
+          <h2 id="s4">What took longer than it should have</h2>
+          <p><strong>Signing requests to Walmart.</strong> Walmart’s product search wants every request signed with a private key, and during testing the app runs inside Expo Go, which doesn’t include the crypto tools a server would use. I tried the browser’s built-in WebCrypto, which Expo Go doesn’t have either, then a different way of loading the key from the settings file. In the end a small JavaScript library, node-forge, was the approach that worked on both iPhone and Android.</p>
+          <p><strong>Pictures for every step.</strong> A recipe with ten steps needs ten illustrations, so I tried three other image models, two of them free, before settling. One added an outside service we didn’t want to depend on, one kept failing on its model name, and the third didn’t hold up either, so the app went back to DALL·E 3 for everything.</p>
+          <p><strong>The iPhone layout.</strong> Most of the testing had happened on Android. On an iPhone the tab bar disappeared entirely and content ran under the edges of the screen, so I replaced every fixed margin in the app with the phone’s real safe areas.</p>
+          <p><strong>The one target we missed.</strong> Reading a photographed page took about 14 seconds on average, against our target of 10, because GPT-4o’s image reading alone takes 12 to 18 seconds. We couldn’t make the model faster, so the app stopped making people wait for it: you keep using the app while the page is read.</p>
+        </section>
+
+        <section class="p-section reveal" aria-labelledby="s5">
+          <p class="label"><span>05</span>How it went</p>
+          <h2 id="s5">Five of our six targets met, and a clear list of what to fix</h2>
+          <p>Speed and accuracy were the floor, the things that had to be good enough not to get in anyone’s way. The app read ingredients correctly 94% of the time across five test recipes and saved a recipe from a link in about eight seconds. It didn’t crash once in any test session.</p>
+          <div class="scores wide">
+            <div class="score"><b>94%</b><span>of ingredients read correctly across five recipes, against a target of 90%</span></div>
+            <div class="score"><b>8 s</b><span>to save a recipe from a link, against a target of 10</span></div>
+            <div class="score miss"><b>14 s</b><span>to read a photographed page, against a target of 10. The one miss.</span></div>
+            <div class="score"><b>0</b><span>crashes across all of the test sessions</span></div>
+            <div class="score"><b>9 of 9</b><span>people in the final round said they would use it regularly</span></div>
+            <div class="score"><b>8 of 9</b><span>backed sending the shopping list to a Walmart cart</span></div>
+          </div>
+          <p>I also rewrote how we judged success. Our first plan measured the app by its speed and accuracy, and by the end that felt like the wrong question. What mattered was whether people did something different because of it. Did they finish the whole flow without help? Did they describe a feature before we showed it? Did they show it to someone else? Those became the measures in our final presentation.</p>
+          <p>The best measure came after the presentation itself. The first thing the judges asked, some of them from Adobe, was to be told when the app was out on the App Store. They said it had gone past what they expected and that they would use it themselves. After class our professor told the team to keep going with it, because it could become a real product.</p>
+        </section>
+
+        <section class="p-section reveal" aria-labelledby="s6">
+          <p class="label"><span>06</span>Next</p>
+          <h2 id="s6">What I would fix first</h2>
+          <p>Testing found two bugs that break trust, and trust is what a tracker runs on. Logging a meal recorded every serving of the recipe instead of the one you ate, and Walmart prices were sometimes about six dollars off. One tester put it simply: “I’d prefer no price if it’s going to change.” I would fix the logging, and label prices as estimates until they can be trusted.</p>
+          <p>The bigger lesson was that people agree on the start of the journey and split at the end. Everyone wanted the library, the cooking mode and the tracker. At the shopping step, people who order pickup wanted the Walmart cart, people who shop in person and pick their own produce wanted a plain list in Apple Notes, and people who shop at several stores wanted prices compared. So I would add the export to Notes next, since it costs almost nothing to build, and then a warning for allergens such as gluten, which one parent asked for before anything else.</p>
+        </section>
+
+        <section class="p-section reveal" aria-labelledby="s7">
+          <p class="label"><span>07</span>My part</p>
+          <h2 id="s7">Who built what</h2>
+          <p>This was a team of three, and the others did real work. One teammate built the new base the April version started from, including the import screens, the shopping list and the Walmart search, and fixed a long tail of bugs in the final days. The other ran much of the customer research and kept our documents and slides in shape. The chart below counts every line of the final app’s code by who last wrote it.</p>
+          <div class="own" role="img" aria-label="Share of each part of the final app's code that I wrote. Cooking mode, the tracker, the meal planner and onboarding are entirely mine. The shopping list is about a third mine and the Walmart service almost entirely a teammate's. Overall, 75%.">
+            <div class="own-row"><span>Cooking mode</span><div class="own-bar"><i style="width:100%"></i></div><b>100%</b></div>
+            <div class="own-row"><span>Meal planner</span><div class="own-bar"><i style="width:100%"></i></div><b>100%</b></div>
+            <div class="own-row"><span>Calorie tracker</span><div class="own-bar"><i style="width:100%"></i></div><b>100%</b></div>
+            <div class="own-row"><span>Onboarding</span><div class="own-bar"><i style="width:100%"></i></div><b>100%</b></div>
+            <div class="own-row"><span>AI service</span><div class="own-bar"><i style="width:89%"></i></div><b>89%</b></div>
+            <div class="own-row"><span>Recipe library</span><div class="own-bar"><i style="width:84%"></i></div><b>84%</b></div>
+            <div class="own-row"><span>Chat home</span><div class="own-bar"><i style="width:77%"></i></div><b>77%</b></div>
+            <div class="own-row"><span>Database code</span><div class="own-bar"><i style="width:74%"></i></div><b>74%</b></div>
+            <div class="own-row"><span>Recipe editor</span><div class="own-bar"><i style="width:68%"></i></div><b>68%</b></div>
+            <div class="own-row"><span>Recipe page</span><div class="own-bar"><i style="width:63%"></i></div><b>63%</b></div>
+            <div class="own-row"><span>Shopping list</span><div class="own-bar"><i style="width:34%"></i></div><b>34%</b></div>
+            <div class="own-row"><span>Walmart service</span><div class="own-bar"><i style="width:7%"></i></div><b>7%</b></div>
+            <div class="own-row total"><span>The whole app</span><div class="own-bar"><i style="width:75%"></i></div><b>75%</b></div>
+          </div>
+          <div class="own-legend"><span><i style="background:var(--accent)"></i>written by me</span><span><i style="background:var(--line)"></i>written by teammates</span></div>
+          <p style="margin-top:24px">I also built the February version, the slides that show how the app changed from round to round, and the rewrite of our success measures described above.</p>
+        </section>
+
+        <details class="notes">
+          <summary><h2>Method notes</h2><span>stack, decisions and numbers</span></summary>
+          <div class="notes-body">
+            <dl>
+              <div><dt>Context</dt><dd>Applied AI Projects at BYU, February to April 2026, in a team of three. The midterm version in February was a web demo of a recipe scanner; the final version in April was a React Native app for iPhone and Android.</dd></div>
+              <div><dt>Stack</dt><dd>React Native with Expo SDK 54 and Expo Router, in JavaScript. GPT-4o for reading recipes from photos and text, the chat assistant, nutrition estimates, “Make it Lighter” rewrites and the meal planner. DALL·E 3 for cover photos and step illustrations. SQLite on the phone (11 tables), so everything works offline. expo-speech for reading steps aloud, node-forge for signing Walmart requests.</dd></div>
+              <div><dt>The assistant</dt><dd>One prompt, answered as JSON in one of three shapes: a recipe (title, servings, times, ingredients with amounts and units, steps), an answer (plain text), or an action (open a tab or the planner, search the library, add items to the shopping list, start a timer). Each request carries a short summary of the app’s state: recipe count and titles, items on the list, calories eaten against the goal, the week’s plan and the recipe being cooked.</dd><dd>Why actions instead of letting the model do things: the app stays in control, every action is something the interface already supports, and a bad reply can at worst open the wrong tab.</dd></div>
+              <div><dt>Background jobs</dt><dd>Saving writes to SQLite and returns at once. Nutrition, the cover photo and all step illustrations are then requested in parallel and written back when they arrive.</dd></div>
+              <div><dt>Testing</dt><dd>Four rounds of research; the final round alone had nine sessions. The midterm test planted two errors in a scan result; none of three people caught both, which led to the per-field ingredient editor. The final round tested speed against each person’s usual method, the Walmart cart, which way people chose to add recipes, and whether automatic calorie tracking mattered.</dd></div>
+              <div><dt>Numbers to remember</dt><dd>Ingredients read correctly: 94% across five recipes (target 90%). Saving from a link: about 8 s (target 10). Reading a photo: about 14 s (target 10), because GPT-4o’s image reading takes 12 to 18 s. Zero crashes in testing. Links chosen about three times as often as photos. Nine of nine final testers would use it regularly; eight of nine backed the Walmart cart. 75% of the final code (9,576 of 12,706 lines in the app’s screens and services, counted with git blame) is mine.</dd></div>
+              <div><dt>Known problems</dt><dd>Logging a meal counted every serving instead of one. Walmart prices were sometimes about $6 off. Reading a photo misses the 10-second target.</dd></div>
+              <div><dt>Code</dt><dd>A public copy of the team’s repository is at <a href="https://github.com/RumitOsu/mise" target="_blank" rel="noopener noreferrer">github.com/RumitOsu/mise</a>, with its full commit history. The notes from customer interviews were taken out of it, and testers are numbered instead of named.</dd></div>
+            </dl>
+          </div>
+        </details>
+      </article>
+    </div>
+
+    <section class="p-next wrap" aria-label="More projects">
+      <p class="label"><span>~/projects</span>Keep going</p>
+      <ul class="cards">
+        <li>
+          <a class="card reveal" data-spot href="../who-gets-the-call/">
+            <span class="card-top"><span>Applied machine learning · Healthcare</span><span>2026</span></span>
+            <span class="card-stat"><b>43%</b><span>of the patients who came back to hospital were on the model’s list of twenty calls</span></span>
+            <span class="card-title">Who Gets the Call?</span>
+            <span class="card-text">A tool that chooses which twenty of a hundred discharged patients a nurse should phone, explains every choice, and writes a short guide for the call.</span>
+            <span class="card-tags"><span>Python</span><span>SQL</span><span>XGBoost</span><span>FastAPI</span></span>
+            <span class="card-go">Open the project <span aria-hidden="true">→</span></span>
+          </a>
+        </li>
+        <li>
+          <a class="card reveal" data-spot href="../pick-the-winner/">
+            <span class="card-top"><span>Experiments · Media</span><span>2026</span></span>
+            <span class="card-stat"><b>67%</b><span>of the headlines that won a test at Upworthy were truly the best one in that test</span></span>
+            <span class="card-title">Pick the Winner</span>
+            <span class="card-text">A game and an analysis built on 32,487 real headline tests. It measures how much of a test result is luck, and whether a model or an AI could have picked the winner without one.</span>
+            <span class="card-tags"><span>Python</span><span>Experiment statistics</span><span>Simulation</span><span>Local language model</span></span>
+            <span class="card-go">Play the game <span aria-hidden="true">→</span></span>
+          </a>
+        </li>
+      </ul>
+      <div class="all-link"><a class="btn ghost" href="../">All projects <span aria-hidden="true">→</span></a></div>
+    </section>
+  </main>
+
+  <footer class="footer wrap">
+    <span>© 2026 Timur Kherlenbayar</span>
+    <span class="footer-right">
+      <button id="motion" type="button" aria-pressed="false">motion: on</button>
+      <a href="../">back to all projects</a>
+    </span>
+  </footer>
+
+  <div class="themes" role="group" aria-label="Choose the backdrop">
+    <span aria-hidden="true">backdrop</span>
+    <button type="button" data-theme-pick="pond" aria-pressed="true" aria-label="Koi pond backdrop" style="--a:#0a3a38;--b:#ff9a6c"><i></i><b>pond</b></button>
+    <button type="button" data-theme-pick="steppe" aria-pressed="false" aria-label="Steppe night backdrop" style="--a:#0f1630;--b:#f2cc7e"><i></i><b>steppe</b></button>
+    <button type="button" data-theme-pick="embers" aria-pressed="false" aria-label="Embers backdrop" style="--a:#1b1916;--b:#d97757"><i></i><b>embers</b></button>
+  </div>
+
+  <script>
+  /* The assistant box: four example messages, the JSON shape GPT-4o answers in, and what the app does. */
+  (function () {
+    const box = document.querySelector('[data-agent]');
+    if (!box) return;
+    const tabs = box.querySelector('.agent-tabs'), say = box.querySelector('[data-say]');
+    const json = box.querySelector('[data-json]'), does = box.querySelector('[data-does]');
+    const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
+    // Objects with no nested objects go on one line, and "…" stands for the rest of a list.
+    const compact = (obj) => JSON.stringify(obj, null, 2)
+      .replace(/\{\n\s+([^{}\[\]]*?)\n\s*\}/g, (m, inner) => '{ ' + inner.replace(/\n\s+/g, ' ') + ' }')
+      .replace(/"…"/g, '…');
+    // Colours keys, strings and numbers in a JSON string.
+    const paint = (obj) => esc(compact(obj))
+      .replace(/"([^"]+)":/g, '<span class="k">"$1"</span>:')
+      .replace(/: "([^"]*)"/g, ': <span class="s">"$1"</span>')
+      .replace(/(^|[\s\[]) ?"([^"]*)"(,?)$/gm, (m, a, b, c) => m.includes('class=') ? m : `${a}<span class="s">"${b}"</span>${c}`)
+      .replace(/: (\d+)/g, ': <span class="n">$1</span>');
+    const EXAMPLES = [
+      { tab: 'a link to a recipe', say: 'Save this one: a link to a carbonara recipe',
+        reply: { type: 'recipe', message: 'Saved to your recipes!', recipe: { title: 'Creamy Pasta Carbonara', servings: 2, cookTime: '20 minutes', ingredients: [{ name: 'Spaghetti', quantity: 200, unit: 'g' }, { name: 'Eggs', quantity: 3, unit: null }, '…'], steps: [{ stepNumber: 1, instruction: 'Boil the pasta…' }, '…'] } },
+        does: '<p>Saves the recipe to the library at once, then fills in its nutrition and pictures in the background.</p><div class="does-card"><strong>Creamy Pasta Carbonara</strong><small>2 servings · 20 minutes</small><ul><li><i></i>Spaghetti, 200 g</li><li><i></i>Eggs, 3</li></ul></div>' },
+      { tab: 'a question', say: 'I don’t have rice wine. What can I use instead?',
+        reply: { type: 'answer', message: 'Dry sherry is the closest swap. Use the same amount.' },
+        does: '<p>Shows the answer as a chat message. Nothing in the app changes.</p><div class="does-card"><strong>Dry sherry is the closest swap.</strong><small>Use the same amount.</small></div>' },
+      { tab: 'a timer', say: 'Set a timer for 8 minutes',
+        reply: { type: 'action', action: 'start_timer', seconds: 480, message: 'Timer set for 8 minutes.' },
+        does: '<p>Starts a countdown, and says out loud when it is done.</p><div class="does-card"><div class="tring"><svg viewBox="0 0 120 120" aria-hidden="true"><circle class="bg" cx="60" cy="60" r="52"/><circle class="fg" cx="60" cy="60" r="52" pathLength="1"/></svg><b data-clock>8:00</b></div></div>' },
+      { tab: 'the shopping list', say: 'Add parmesan and eggs to my list',
+        reply: { type: 'action', action: 'add_shopping', items: ['parmesan', 'eggs'], message: 'Added parmesan and eggs to your shopping list.' },
+        does: '<p>Adds both items to the shopping list, where each one can be searched at Walmart.</p><div class="does-card"><strong>Shopping list</strong><ul><li><i></i>Parmesan</li><li><i></i>Eggs</li></ul></div>' }
+    ];
+    let timer = 0;
+    function show(i) {
+      clearInterval(timer);
+      const ex = EXAMPLES[i];
+      [...tabs.children].forEach((b, j) => { b.setAttribute('aria-selected', String(i === j)); b.tabIndex = i === j ? 0 : -1; });
+      say.textContent = ex.say;
+      json.innerHTML = paint(ex.reply);
+      does.innerHTML = ex.does;
+      const clock = does.querySelector('[data-clock]'), ring = does.querySelector('.fg');
+      if (clock) {
+        let left = 480;
+        ring.style.strokeDashoffset = '0';
+        const still = document.documentElement.classList.contains('motion-off');
+        if (!still) timer = setInterval(() => {
+          left = Math.max(0, left - 1);
+          clock.textContent = `${Math.floor(left / 60)}:${String(left % 60).padStart(2, '0')}`;
+          ring.style.strokeDashoffset = String(1 - left / 480);
+          if (!left) clearInterval(timer);
+        }, 1000);
+      }
+    }
+    EXAMPLES.forEach((ex, i) => {
+      const b = document.createElement('button');
+      b.type = 'button'; b.role = 'tab'; b.textContent = ex.tab;
+      b.addEventListener('click', () => show(i));
+      b.addEventListener('keydown', (e) => {
+        if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+        const n = (i + (e.key === 'ArrowRight' ? 1 : EXAMPLES.length - 1)) % EXAMPLES.length;
+        show(n); tabs.children[n].focus();
+      });
+      tabs.append(b);
+    });
+    show(0);
+  })();
+  </script>
+</body>
+</html>

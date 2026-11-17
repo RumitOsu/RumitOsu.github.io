@@ -47,6 +47,10 @@
 }
 .sheet > * { grid-column: text; }
 .sheet > .wide { grid-column: full; }
+/* Sections share the sheet's columns, so anything marked .wide inside a section can use the full width too. */
+.sheet > .p-section { grid-column: full; display: grid; grid-template-columns: subgrid; }
+.p-section > * { grid-column: text; }
+.p-section > .wide { grid-column: full; }
 
 /* a thin line under the nav that fills as you read */
 .progress { position: fixed; left: 0; top: 0; z-index: 21; height: 2px; width: 100%; transform-origin: 0 50%; transform: scaleX(var(--read, 0)); background: var(--accent); box-shadow: 0 0 10px var(--accent); pointer-events: none; }
@@ -153,6 +157,8 @@ div.todo, p.todo { display: block; padding: 14px 16px; margin: 20px 0; }
 .notes dt { font: 400 12px/1.7 var(--mono); color: var(--mute); }
 .notes dd { color: var(--ink-2); font-size: 15.5px; line-height: 1.68; }
 .notes dd + dd { margin-top: .6em; }
+.notes a { color: var(--ink); text-underline-offset: 4px; text-decoration-color: color-mix(in srgb, var(--accent) 60%, transparent); }
+.notes a:hover { color: var(--accent-2); }
 
 /* ---------- onward ---------- */
 .p-next { padding-bottom: clamp(70px, 10vw, 120px); }
